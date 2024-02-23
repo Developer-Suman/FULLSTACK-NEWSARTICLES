@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,10 +42,12 @@ namespace Master_BLL.Services.Implementation
             try
             {
                 string uploadFolderPath = Path.Combine(_webHostEnvironment.WebRootPath, "Images");
-                if(!Directory.Exists(uploadFolderPath))
+                if (!Directory.Exists(uploadFolderPath))
                 {
                     Directory.CreateDirectory(uploadFolderPath);
                 }
+
+
 
                 string uniqueFile = Guid.NewGuid().ToString();
                 string originalFileName = Path.GetFileName(file.FileName);
@@ -54,12 +57,12 @@ namespace Master_BLL.Services.Implementation
                 string filepath = Path.Combine(uploadFolderPath, uniqueFile + fileExtension);
 
                 //Copy the file to the server
-                using(var fileStream = new FileStream(filepath, FileMode.Create))
+                using (var fileStream = new FileStream(filepath, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
                 }
 
-                return Path.Combine("Images", uniqueFile + fileExtension);
+                return Path.Combine("Images/", uniqueFile + fileExtension);
 
             }catch(Exception ex)
             {

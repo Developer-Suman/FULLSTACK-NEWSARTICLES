@@ -12,7 +12,7 @@ namespace Master_BLL.Services.Interface
 {
     public interface IArticlesRepository
     {
-        Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs, IFormFile file);
+        Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs);
         Task<Result<ArticlesGetDTOs>> GetArticlesById(Guid id);
         Task<ArticlesGetDTOs> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs);
         Task<ArticlesGetDTOs> DeleteArticles(Guid ArticlesId);

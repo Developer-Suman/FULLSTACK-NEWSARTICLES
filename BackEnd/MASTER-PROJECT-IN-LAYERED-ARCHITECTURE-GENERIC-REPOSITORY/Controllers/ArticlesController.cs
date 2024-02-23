@@ -1,4 +1,5 @@
-﻿using Master_BLL.Services.Interface;
+﻿using Master_BLL.DTOs.Articles;
+using Master_BLL.Services.Interface;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -77,6 +78,13 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         {
             var commentsfromarticles = await _articlesRepository.GetCommentsWithArticlesName(page, pageSize);
             return Ok(commentsfromarticles.Data);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveArticles([FromForm] ArticlesCreateDTOs articlesCreateDTOs)
+        {
+            var artilces = await _articlesRepository.SaveArticles(articlesCreateDTOs);
+            return Ok(artilces.Data);
         }
 
     }

@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using Master_BLL.Repository.Implementation;
+using Master_BLL.Repository.Interface;
 using Master_BLL.Services.Implementation;
 using Master_BLL.Services.Interface;
 using Master_DAL.Abstraction;
 using Master_DAL.JWT;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.OpenApi.Models;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
@@ -52,12 +55,17 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             #region InjectDependency
             builder.Services.AddAuthorization();
             builder.Services.AddAuthorization();
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IJwtProvider, JwtProvider>();
             builder.Services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             builder.Services.AddScoped<IAccountServices, AccountServices>();
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
+            builder.Services.AddScoped<IUploadImageRepository, UploadImageRepository>();
             builder.Services.AddScoped<IArticlesRepository, ArticlesRepository>();
+
+       
             #endregion
 
         }

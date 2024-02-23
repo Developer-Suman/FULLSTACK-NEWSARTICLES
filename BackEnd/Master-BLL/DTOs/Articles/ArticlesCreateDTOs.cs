@@ -14,7 +14,7 @@ namespace Master_BLL.DTOs.Articles
         public string? ArticlesContent { get; set;}
 
         public IFormFile? Files { get; set; }
-        public List<Comments>? Comments { get; set;}
+        //public List<Comments>? Comments { get; set;}
         
     }
 }

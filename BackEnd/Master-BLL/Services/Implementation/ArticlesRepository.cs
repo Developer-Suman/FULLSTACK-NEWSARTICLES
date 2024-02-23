@@ -2,6 +2,7 @@
 using Master_BLL.DTOs.Articles;
 using Master_BLL.DTOs.Comment;
 using Master_BLL.DTOs.RegistrationDTOs;
+using Master_BLL.Repository.Interface;
 using Master_BLL.Services.Interface;
 using Master_BLL.Static.Cache;
 using Master_DAL.Abstraction;
@@ -23,12 +24,16 @@ namespace Master_BLL.Services.Implementation
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly IMemoryCacheRepository _memoryCacheRepository;
+        private readonly IUploadImageRepository _uploadImageRepository;
+        private readonly IUnitOfWork uow;
         
 
-        public ArticlesRepository(ApplicationDbContext applicationDbContext, IMapper mapper, IMemoryCacheRepository memoryCacheRepository)
+        public ArticlesRepository(IUnitOfWork unitOfWork,IUploadImageRepository uploadImageRepository,ApplicationDbContext applicationDbContext, IMapper mapper, IMemoryCacheRepository memoryCacheRepository)
         {
             _context = applicationDbContext;
             _mapper = mapper;
+            uow = unitOfWork;
+            _uploadImageRepository = uploadImageRepository;
             _memoryCacheRepository = memoryCacheRepository;
 
         }
@@ -192,13 +197,19 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public async Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs, IFormFile file)
+        public async Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs)
         {
             try
             {
+                var images = await _uploadImageRepository.UploadImage(articlesCreateDTOs.Files);
+
                 var articles = _mapper.Map<Articles>(articlesCreateDTOs);
-               
-                return Result<ArticlesGetDTOs>.Failure("Error");
+                articles.ImageUrl = images;
+                await uow.Repository<Articles>().AddAsync(articles);
+                var articlesGet = _mapper.Map<ArticlesGetDTOs>(articles);
+
+                return Result<ArticlesGetDTOs>.Success(articlesGet);
+                
 
             }catch(Exception ex)
             {

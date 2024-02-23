@@ -14,6 +14,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             CreateMap<RegistrationCreateDTOs, ApplicationUser>().ReverseMap();
             CreateMap<UserDTOs, ApplicationUser>().ReverseMap();
             CreateMap<ArticlesGetDTOs, Articles>().ReverseMap();
+            CreateMap<Articles, ArticlesCreateDTOs>().ReverseMap();
     
 
             CreateMap<CommentsGetDTOs, Comments>().ReverseMap();
