@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace>Master_TEST</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Master-BLL\Master-BLL.csproj" />
+    <ProjectReference Include="..\Master-DAL\Master-DAL.csproj" />
+    <ProjectReference Include="..\MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY\MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" />
+  </ItemGroup>
+
+</Project>
