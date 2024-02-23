@@ -31,7 +31,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
                 if(articles.IsException)
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, articles.Errors);
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { articles.Errors });
 
                 }
                 if (!articles.IsSuccess)
@@ -83,7 +83,16 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveArticles([FromForm] ArticlesCreateDTOs articlesCreateDTOs)
         {
+            if(articlesCreateDTOs.Files == null)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, "No Files are Added");
+            }
             var artilces = await _articlesRepository.SaveArticles(articlesCreateDTOs);
+            if(artilces.IsException)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new {artilces.Errors});
+            }
+
             return Ok(artilces.Data);
         }
 

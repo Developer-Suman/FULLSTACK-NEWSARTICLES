@@ -201,11 +201,28 @@ namespace Master_BLL.Services.Implementation
         {
             try
             {
+                await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
                 var images = await _uploadImageRepository.UploadImage(articlesCreateDTOs.Files);
+                if(images is null || !images.Any())
+                {
+                    return Result<ArticlesGetDTOs>.Exception("Image Upload Failed");
+                }
 
                 var articles = _mapper.Map<Articles>(articlesCreateDTOs);
                 articles.ImageUrl = images;
+
+                if(string.IsNullOrEmpty(articles.ImageUrl))
+                {
+                    return Result<ArticlesGetDTOs>.Exception("Images URLs are missing");
+
+                }
+
+                if(articles is null)
+                {
+                    return Result<ArticlesGetDTOs>.Exception("Mapping to articles Failed");
+                }
                 await uow.Repository<Articles>().AddAsync(articles);
+                await uow.SaveChangesAsync();
                 var articlesGet = _mapper.Map<ArticlesGetDTOs>(articles);
 
                 return Result<ArticlesGetDTOs>.Success(articlesGet);
@@ -213,7 +230,7 @@ namespace Master_BLL.Services.Implementation
 
             }catch(Exception ex)
             {
-                throw new Exception("An error occur while Adding Articles", ex);
+                return Result<ArticlesGetDTOs>.Exception("An error occur while Adding Articles");
             }
         }
 
