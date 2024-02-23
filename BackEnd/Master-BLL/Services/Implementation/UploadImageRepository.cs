@@ -1,4 +1,5 @@
-﻿using Master_BLL.Services.Interface;
+﻿using ImageMagick;
+using Master_BLL.Services.Interface;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
@@ -47,8 +48,6 @@ namespace Master_BLL.Services.Implementation
                     Directory.CreateDirectory(uploadFolderPath);
                 }
 
-
-
                 string uniqueFile = Guid.NewGuid().ToString();
                 string originalFileName = Path.GetFileName(file.FileName);
                 string fileExtension = Path.GetExtension(originalFileName);
@@ -62,7 +61,37 @@ namespace Master_BLL.Services.Implementation
                     await file.CopyToAsync(fileStream);
                 }
 
-                return Path.Combine("Images/", uniqueFile + fileExtension);
+
+                using (MagickImage image = new MagickImage(filepath))
+                {
+                    //Set the desired format like .png,.jpg
+                    if (fileExtension == ".jpg" || fileExtension == ".jpeg")
+                    {
+                        image.Format = MagickFormat.Jpg;
+
+                    }
+                    if (fileExtension == ".png")
+                    {
+                        image.Format = MagickFormat.Png;
+                    }
+
+                    //Resize the image if necessary
+                    image.Resize(1000, 1000);
+
+                    //Set the compression Quality(0-100)
+                    image.Quality = 60; //This is the compression level
+
+                    string uniqueFileAfterCompression = Guid.NewGuid().ToString();
+                    string originalfilenameAfterCompression = Path.GetFileName(file.FileName);
+                    string fileExtensionAfterCompression = Path.GetExtension(originalfilenameAfterCompression);
+                    string filepathAfterCompression = Path.Combine(uploadFolderPath, uniqueFileAfterCompression + fileExtensionAfterCompression);
+                    image.Write(filepathAfterCompression);
+
+                    System.IO.File.Delete(filepath);
+
+                    return Path.Combine("Images/", uniqueFileAfterCompression + fileExtensionAfterCompression);
+                }
+
 
             }catch(Exception ex)
             {
