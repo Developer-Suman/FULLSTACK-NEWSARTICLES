@@ -37,10 +37,26 @@ namespace Master_BLL.Services.Implementation
             _memoryCacheRepository = memoryCacheRepository;
 
         }
-        public async Task<ArticlesGetDTOs> DeleteArticles(Guid ArticlesId)
+        public async Task<Result<ArticlesGetDTOs>> DeleteArticles(Guid ArticlesId)
         {
-            //Implement IMemoryCache and remove that before delete articles
-            throw new NotImplementedException();
+            try
+            {
+                var articles = await uow.Repository<Articles>().GetByIdAsync(ArticlesId);
+                if(articles is null)
+                {
+                    return Result<ArticlesGetDTOs>.Failure("Articles Not Found");
+                }
+                uow.Repository<Articles>().Delete(articles);
+                await uow.SaveChangesAsync();
+
+                var getArticlesDTO = _mapper.Map<ArticlesGetDTOs>(articles);
+                return Result<ArticlesGetDTOs>.Success(getArticlesDTO);
+
+            }catch (Exception ex)
+            {
+                return Result<ArticlesGetDTOs>.Exception("An error occured while Deleting");
+            }
+            
 
         }
 
@@ -249,7 +265,7 @@ namespace Master_BLL.Services.Implementation
 
                 _mapper.Map(articlesUpdateDTOs, articlesTobeUpdated);
 
-    
+                articlesTobeUpdated.ImageUrl = updatedImage;
                 await uow.SaveChangesAsync();
                 var articlesGetDTOs = _mapper.Map<ArticlesGetDTOs>(articlesTobeUpdated);
 

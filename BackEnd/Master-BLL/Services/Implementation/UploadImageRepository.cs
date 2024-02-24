@@ -32,7 +32,8 @@ namespace Master_BLL.Services.Implementation
         {
             try
             {
-                var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath, "Images");
+                var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath);
+                //var webRootPathAfterTrim = webRootPath.TrimStart('\');
                 var relativeImagePath = Path.Combine(webRootPath, ImageURL);
                 if (File.Exists(relativeImagePath))
                 {
