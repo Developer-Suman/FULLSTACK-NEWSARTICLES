@@ -249,7 +249,7 @@ namespace Master_BLL.Services.Implementation
 
                 _mapper.Map(articlesUpdateDTOs, articlesTobeUpdated);
 
-    
+                articlesTobeUpdated.ImageUrl = updatedImage;
                 await uow.SaveChangesAsync();
                 var articlesGetDTOs = _mapper.Map<ArticlesGetDTOs>(articlesTobeUpdated);
 
