@@ -83,7 +83,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveArticles([FromForm] ArticlesCreateDTOs articlesCreateDTOs)
         {
-            if(articlesCreateDTOs.Files == null)
+            if(articlesCreateDTOs.Files is null)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "No Files are Added");
             }
@@ -94,6 +94,27 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             }
 
             return Ok(artilces.Data);
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> UpdateArticles([FromForm] ArticlesUpdateDTOs articlesUpdateDTOs)
+        {
+            if(articlesUpdateDTOs.Files is null)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, "No Files are Added");
+
+            }
+            var articles = await _articlesRepository.UpdateArticles(articlesUpdateDTOs);
+            if(articles.IsException)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new {articles.Errors});
+            }
+            if(!articles.IsSuccess)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, new {articles.Errors});
+            }
+
+            return Ok(articles.Data);
         }
 
     }

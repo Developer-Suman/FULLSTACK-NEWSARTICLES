@@ -12,7 +12,7 @@ namespace Master_BLL.Services.Interface
         Task<string> UploadImage(IFormFile file);
         Task<List<string>> UploadMultipleImage(List<IFormFile> files);
         void DeleteImage(string ImageUrl);
-        void UpdateImage(IFormFile file);
+        Task<string> UpdateImage(IFormFile file, string ImageURL);
         void UpdateMultipleImage(List<IFormFile> file);
     }
 }

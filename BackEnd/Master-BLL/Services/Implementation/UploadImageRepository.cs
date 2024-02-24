@@ -28,14 +28,38 @@ namespace Master_BLL.Services.Implementation
             throw new NotImplementedException();
         }
 
-        public void UpdateImage(IFormFile file)
+        public async Task<string> UpdateImage(IFormFile file, string ImageURL)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath, "Images");
+                var relativeImagePath = Path.Combine(webRootPath, ImageURL);
+                if (File.Exists(relativeImagePath))
+                {
+                    File.Delete(relativeImagePath);
+                }
+                var saveImage = await UploadImage(file);
+
+                return saveImage;
+
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("An error occured while Uploading image");
+            }
         }
 
         public void UpdateMultipleImage(List<IFormFile> file)
         {
-            throw new NotImplementedException();
+            try
+            {
+               
+
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("An error occured while Uploading Image");
+            }
         }
 
         public async Task<string> UploadImage(IFormFile file)
