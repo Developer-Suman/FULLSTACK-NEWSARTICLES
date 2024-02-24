@@ -27,9 +27,9 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             try
             {
                 var articles = await _articlesRepository.GetArticlesById(ArticlesId);
-              
 
-                if(articles.IsException)
+
+                if (articles.IsException)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, new { articles.Errors });
 
@@ -41,11 +41,11 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 else
                 {
                     return Ok(articles.Data);
-                
-                }  
+
+                }
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
 
@@ -56,12 +56,12 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         [HttpGet("all-articles")]
         public async Task<IActionResult> GetAllArticles(int page, int pageSize)
         {
-   
+
 
             var articles = await _articlesRepository.GetAllArticles(page, pageSize);
-            if(articles.Data is null)
+            if (articles.Data is null)
             {
-                return StatusCode(StatusCodes.Status400BadRequest, new {articles.Errors});
+                return StatusCode(StatusCodes.Status400BadRequest, new { articles.Errors });
             }
             return Ok(articles.Data);
         }
@@ -83,14 +83,14 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveArticles([FromForm] ArticlesCreateDTOs articlesCreateDTOs)
         {
-            if(articlesCreateDTOs.Files is null)
+            if (articlesCreateDTOs.Files is null)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "No Files are Added");
             }
             var artilces = await _articlesRepository.SaveArticles(articlesCreateDTOs);
-            if(artilces.IsException)
+            if (artilces.IsException)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new {artilces.Errors});
+                return StatusCode(StatusCodes.Status500InternalServerError, new { artilces.Errors });
             }
 
             return Ok(artilces.Data);
@@ -99,22 +99,41 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         [HttpPatch]
         public async Task<IActionResult> UpdateArticles([FromForm] ArticlesUpdateDTOs articlesUpdateDTOs)
         {
-            if(articlesUpdateDTOs.Files is null)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest, "No Files are Added");
 
-            }
             var articles = await _articlesRepository.UpdateArticles(articlesUpdateDTOs);
-            if(articles.IsException)
+            if (articles.IsException)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new {articles.Errors});
+                return StatusCode(StatusCodes.Status500InternalServerError, new { articles.Errors });
             }
-            if(!articles.IsSuccess)
+            if (!articles.IsSuccess)
             {
-                return StatusCode(StatusCodes.Status404NotFound, new {articles.Errors});
+                return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
             }
 
             return Ok(articles.Data);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteArticles(Guid id)
+        {
+            try
+            {
+                var articles = await _articlesRepository.DeleteArticles(id);
+
+                if(!articles.IsSuccess)
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new {articles.Errors});
+                }
+                if(articles.IsException)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { articles.Errors });
+                }
+
+                return Ok(articles.Data);
+            }catch(Exception)
+            {
+                throw new Exception("An error occured while Deeting");
+            }
         }
 
     }
