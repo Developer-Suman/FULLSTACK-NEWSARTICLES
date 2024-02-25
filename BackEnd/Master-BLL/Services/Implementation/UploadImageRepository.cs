@@ -25,20 +25,24 @@ namespace Master_BLL.Services.Implementation
         }
         public void DeleteImage(string ImageUrl)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath, ImageUrl);
+                if(File.Exists(webRootPath))
+                {
+                    File.Delete(webRootPath);
+                }
+            }catch(Exception ex)
+            {
+                throw new Exception("An error occured while deleting Image");
+            }
         }
 
         public async Task<string> UpdateImage(IFormFile file, string ImageURL)
         {
             try
             {
-                var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath);
-                //var webRootPathAfterTrim = webRootPath.TrimStart('\');
-                var relativeImagePath = Path.Combine(webRootPath, ImageURL);
-                if (File.Exists(relativeImagePath))
-                {
-                    File.Delete(relativeImagePath);
-                }
+                DeleteImage(ImageURL);
                 var saveImage = await UploadImage(file);
 
                 return saveImage;

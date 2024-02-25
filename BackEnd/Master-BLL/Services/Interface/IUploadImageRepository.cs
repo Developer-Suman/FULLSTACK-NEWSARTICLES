@@ -9,7 +9,7 @@ namespace Master_BLL.Services.Interface
 {
     public interface IUploadImageRepository
     {
-        Task<string> UploadImage(IFormFile file);
+        Task<string> UploadImage(IFormFile file);   
         Task<List<string>> UploadMultipleImage(List<IFormFile> files);
         void DeleteImage(string ImageUrl);
         Task<string> UpdateImage(IFormFile file, string ImageURL);
