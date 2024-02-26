@@ -38,6 +38,25 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
+        public void DeleteMultipleImage(List<string> ImageUrls)
+        {
+            try
+            {
+                foreach(var imageUrl in ImageUrls)
+                {
+                    var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath, imageUrl);
+                    if(File.Exists(webRootPath) && File.Exists(imageUrl))
+                    {
+                        File.Delete(webRootPath);
+                    }
+                }
+
+            }catch(Exception ex )
+            {
+                throw new Exception("An error occured while deleting image");
+            }
+        }
+
         public async Task<string> UpdateImage(IFormFile file, string ImageURL)
         {
             try
