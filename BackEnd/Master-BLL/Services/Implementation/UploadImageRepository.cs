@@ -54,16 +54,18 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public void UpdateMultipleImage(List<IFormFile> file)
+        public async Task<List<string>> UpdateMultipleImage(List<IFormFile> file)
         {
             try
             {
+                List<string> images = new List<string>();
+                return images;
                
 
             }
             catch(Exception ex)
             {
-                throw new Exception("An error occured while Uploading Image");
+                throw new Exception("An error occured while Uploading multiple Image");
             }
         }
 
@@ -128,9 +130,47 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public Task<List<string>> UploadMultipleImage(List<IFormFile> files)
+        public async Task<List<string>> UploadMultipleImage(List<IFormFile> files)
         {
-            throw new NotImplementedException();
+            try
+            {
+                List<string> filename = new List<string>();
+                string uploadFolderPath = Path.Combine(_webHostEnvironment.WebRootPath, "Images");
+                if(!Directory.Exists(uploadFolderPath))
+                {
+                    Directory.CreateDirectory(uploadFolderPath);
+                }
+
+                foreach(var image in files)
+                {
+                    string uniqueFile = Guid.NewGuid().ToString();
+                    string originalFileName = Path.GetFileName(image.FileName);
+                    string FileExtension = Path.GetExtension(originalFileName);
+
+                    //Combine uploadFolderPath with unique file and fileExtension 
+                    string filepath = Path.Combine(uploadFolderPath, uniqueFile + FileExtension);
+
+                    //copy file to the server
+                    using(var fileStream = new FileStream(filepath, FileMode.Create))
+                    {
+                        await image.CopyToAsync(fileStream);
+
+                    }
+
+                    filename.Add(Path.Combine("Images/", uniqueFile + FileExtension));
+
+
+                }
+
+                return filename;
+
+
+
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("An error occured while Uploading multiple image");
+            }
         }
     }
 }

@@ -16,8 +16,11 @@ namespace Master_DAL.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; }
 
+        
+
         public string ImageUrl { get; set; }
         public ICollection<Comments> Comments { get; set; }
+        public ICollection<ArticlesImage> ArticlesImages { get; set; } 
 
         #region DomainDriven
         //public Articles(Guid id, string articleTitle, string articleContent, DateTime createdAt) : base(id)

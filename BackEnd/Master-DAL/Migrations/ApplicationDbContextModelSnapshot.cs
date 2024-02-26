@@ -134,6 +134,25 @@ namespace Master_DAL.Migrations
                     b.ToTable("Articles");
                 });
 
+            modelBuilder.Entity("Master_DAL.Models.ArticlesImage", b =>
+                {
+                    b.Property<Guid>("ArticlesImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ArticlesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ArticlesImagesUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ArticlesImageId");
+
+                    b.HasIndex("ArticlesId");
+
+                    b.ToTable("ArticlesImages");
+                });
+
             modelBuilder.Entity("Master_DAL.Models.Comments", b =>
                 {
                     b.Property<Guid>("CommentsId")
@@ -287,6 +306,17 @@ namespace Master_DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Master_DAL.Models.ArticlesImage", b =>
+                {
+                    b.HasOne("Master_DAL.Models.Articles", "Articles")
+                        .WithMany("ArticlesImages")
+                        .HasForeignKey("ArticlesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Articles");
+                });
+
             modelBuilder.Entity("Master_DAL.Models.Comments", b =>
                 {
                     b.HasOne("Master_DAL.Models.Articles", "Articles")
@@ -351,6 +381,8 @@ namespace Master_DAL.Migrations
 
             modelBuilder.Entity("Master_DAL.Models.Articles", b =>
                 {
+                    b.Navigation("ArticlesImages");
+
                     b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618

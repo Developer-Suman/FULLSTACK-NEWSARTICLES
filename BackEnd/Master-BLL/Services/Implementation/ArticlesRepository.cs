@@ -213,6 +213,86 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
+        public async Task<Result<ArticlesGetDTOs>> SaveMultipleImages(ArticlesCreateDTOs articlesCreateDTOs)
+        {
+            try
+            {
+                await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
+
+                var images = await _uploadImageRepository.UploadImage(articlesCreateDTOs.Files);
+                if (images is null || !images.Any())
+                {
+                    return Result<ArticlesGetDTOs>.Exception("Image Upload Failed");
+                }
+
+                List<string> imagess = await _uploadImageRepository.UploadMultipleImage(articlesCreateDTOs.filesList);
+                if (images is null || !images.Any())
+                {
+                    return Result<ArticlesGetDTOs>.Exception("Image upload Failed");
+                }
+
+
+
+                
+
+
+
+                var articles = _mapper.Map<Articles>(articlesCreateDTOs);
+                articles.ImageUrl = images;
+                await uow.Repository<Articles>().AddAsync(articles);
+                await uow.SaveChangesAsync();
+
+
+                List<ArticlesImagesDTOs> articlesImages = articlesCreateDTOs.articlesImages.ToList();
+                IList<ArticlesImage> articlesImagesList = articlesImages.Select(article => new ArticlesImage
+                {
+                    ArticlesImagesUrl = images,
+                    ArticlesId = articles.ArticlesId
+
+
+
+                }).ToList();
+
+
+                //var articlesImageList = new List<ArticlesImage>();
+                //foreach (var image in imagess)
+                //{
+                //    articlesImageList.Add(new ArticlesImage
+                //    {
+                //        ArticlesImagesUrl = images,
+                //        ArticlesId = articles.ArticlesId
+
+                //    });
+
+                //}
+                //articles.ArticlesImages = articlesImageList;
+
+                //await uow.Repository<ArticlesImage>().AddRange(articlesImageList);
+                var Articles = new Articles()
+                {
+
+                    ArticlesImages = articlesImagesList,
+
+                };
+
+                await uow.Repository<Articles>().AddAsync(Articles);
+                await uow.SaveChangesAsync();
+
+
+
+                var articlesGet = _mapper.Map<ArticlesGetDTOs>(articles);
+                return Result<ArticlesGetDTOs>.Success(articlesGet);
+
+                
+                
+
+            }catch(Exception ex)
+            {
+                return Result<ArticlesGetDTOs>.Exception("An error occured while adding multiple Images");
+            }
+
+        }
+
         public async Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs)
         {
             try

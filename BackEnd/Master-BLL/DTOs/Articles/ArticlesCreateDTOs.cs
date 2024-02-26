@@ -14,7 +14,12 @@ namespace Master_BLL.DTOs.Articles
         public string? ArticlesContent { get; set;}
 
         public IFormFile? Files { get; set; }
+
+        public List<IFormFile>? filesList { get; set; }
+        public List<ArticlesImagesDTOs>? articlesImages { get; set; }
+
+
         //public List<Comments>? Comments { get; set;}
-        
+
     }
 }
