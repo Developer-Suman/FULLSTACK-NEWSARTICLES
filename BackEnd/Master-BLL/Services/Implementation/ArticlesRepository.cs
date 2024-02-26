@@ -26,6 +26,7 @@ namespace Master_BLL.Services.Implementation
         private readonly IMemoryCacheRepository _memoryCacheRepository;
         private readonly IUploadImageRepository _uploadImageRepository;
         private readonly IUnitOfWork uow;
+
         
 
         public ArticlesRepository(IUnitOfWork unitOfWork,IUploadImageRepository uploadImageRepository,ApplicationDbContext applicationDbContext, IMapper mapper, IMemoryCacheRepository memoryCacheRepository)
@@ -302,32 +303,38 @@ namespace Master_BLL.Services.Implementation
 
         }
 
-        //public async Task<Result<ArticlesGetDTOs>> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs)
-        //{
-        //    try
-        //    {
-        //        await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
-        //        Articles articlesTobeUpdated = await uow.Repository<Articles>().GetByIdAsync(articlesUpdateDTOs.ArticlesId);
+        public async Task<Result<ArticlesGetDTOs>> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs)
+        {
+            try
+            {
+                await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
+                Articles articlesTobeUpdated = await uow.Repository<Articles>().GetByIdAsync(articlesUpdateDTOs.ArticlesId);
 
-        //        if(articlesTobeUpdated is null)
-        //        {
-        //            return Result<ArticlesGetDTOs>.Failure("Articles Not Found");
-        //        }
-        //        var updatedImage = await _uploadImageRepository.UpdateImage(articlesUpdateDTOs.Files, articlesTobeUpdated.ImageUrl);
+                List<string> articlesImage = await _context.ArticlesImages.Where(articlesImage => articlesImage.ArticlesId == articlesUpdateDTOs.ArticlesId)
+                    .Select(articlesImages => articlesImages.ArticlesImagesUrl).AsNoTracking().ToListAsync();
 
-        //        _mapper.Map(articlesUpdateDTOs, articlesTobeUpdated);
+                if (articlesTobeUpdated is null)
+                {
+                    return Result<ArticlesGetDTOs>.Failure("Articles Not Found");
+                }
+                var updatedImage = await _uploadImageRepository.UpdateMultipleImage(articlesUpdateDTOs.filesList, articlesImage);
 
-        //        articlesTobeUpdated.ImageUrl = updatedImage;
-        //        await uow.SaveChangesAsync();
-        //        var articlesGetDTOs = _mapper.Map<ArticlesGetDTOs>(articlesTobeUpdated);
 
-        //        return Result<ArticlesGetDTOs>.Success(articlesGetDTOs);
+                _mapper.Map(articlesUpdateDTOs, articlesTobeUpdated);
 
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        return Result<ArticlesGetDTOs>.Exception("An error occured while Updating Articles");
-        //    }
-        //}
+                await uow.Repository<Articles>().AddAsync(articlesTobeUpdated);
+                await uow.SaveChangesAsync();
+                var articlesGetDTOs = _mapper.Map<ArticlesGetDTOs>(articlesTobeUpdated);
+
+
+
+                return Result<ArticlesGetDTOs>.Success(articlesGetDTOs);
+
+            }
+            catch (Exception ex)
+            {
+                return Result<ArticlesGetDTOs>.Exception("An error occured while Updating Articles");
+            }
+        }
     }
 }

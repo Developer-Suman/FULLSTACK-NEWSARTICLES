@@ -100,22 +100,22 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
 
-        //[HttpPatch]
-        //public async Task<IActionResult> UpdateArticles([FromForm] ArticlesUpdateDTOs articlesUpdateDTOs)
-        //{
+        [HttpPatch]
+        public async Task<IActionResult> UpdateArticles([FromForm] ArticlesUpdateDTOs articlesUpdateDTOs)
+        {
 
-        //    var articles = await _articlesRepository.UpdateArticles(articlesUpdateDTOs);
-        //    if (articles.IsException)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, new { articles.Errors });
-        //    }
-        //    if (!articles.IsSuccess)
-        //    {
-        //        return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
-        //    }
+            var articles = await _articlesRepository.UpdateArticles(articlesUpdateDTOs);
+            if (articles.IsException)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { articles.Errors });
+            }
+            if (!articles.IsSuccess)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
+            }
 
-        //    return Ok(articles.Data);
-        //}
+            return Ok(articles.Data);
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteArticles(Guid id)

@@ -61,6 +61,10 @@ namespace Master_BLL.Services.Implementation
         {
             try
             {
+                if(file is null || file.Length == 0)
+                {
+                    return ImageURL;
+                }
                 DeleteImage(ImageURL);
                 var saveImage = await UploadImage(file);
 
@@ -73,16 +77,78 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public async Task<List<string>> UpdateMultipleImage(List<IFormFile> file)
+        public async Task<List<string>> UpdateMultipleImage(List<IFormFile> file, List<string> ImageURLs)
         {
             try
             {
-                List<string> images = new List<string>();
-                return images;
-               
+
+                List<string> multipleImageURLs = new List<string>();
+
+                //Iterate through each file and corrosponding URL
+                if(file is not null)
+                {
+                    for (int i = 0; i < file.Count; i++)
+                    {
+                        IFormFile imgfile = file[i];
+                        string oldImageURLs = ImageURLs[i];
+
+                        if (file is not null && imgfile.Length > 0)
+                        {
+                            //If new file is provided update images
+                            var updateImage = await UploadImage(imgfile);
+                            multipleImageURLs.Add(updateImage);
+                        }
+                        else
+                        {
+                            multipleImageURLs.Add(oldImageURLs);
+                        }
+
+                    }
+                }
+                else
+                {
+                    return ImageURLs;
+                }
+         
+
+                //Keep the remaining old imageURls that were not updated
+                for (int i = file.Count; i < ImageURLs.Count; i++)
+                {
+                    multipleImageURLs.Add(ImageURLs[i]);
+                }
+
+                //Delete Old image that were Replaced
+                DeleteMultipleImage(ImageURLs);
+
+                return multipleImageURLs;
+                #region Using ForeachLoop
+                //List<string> multipleImgURL = new List<string>();
+                //foreach(var imgfile in file)
+                //{
+                //    if(imgfile is not null && imgfile.Length > 0)
+                //    {
+                //        //If a new File is provided, update the image
+                //        var saveImage = await UploadImage(imgfile);
+                //        multipleImgURL.Add(saveImage);
+                //    }
+                //    else
+                //    {
+                //        //If no new file is provided, keep the old image url
+                //        multipleImgURL.Add(ImageURLs.FirstOrDefault());
+                //    }
+
+
+                //}
+                //DeleteMultipleImage(ImageURLs);
+
+                //return multipleImgURL;
+
+                #endregion
+
+
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception("An error occured while Uploading multiple Image");
             }

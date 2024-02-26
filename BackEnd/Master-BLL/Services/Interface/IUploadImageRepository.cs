@@ -15,6 +15,6 @@ namespace Master_BLL.Services.Interface
 
         void DeleteMultipleImage(List<string> ImageUrls);
         Task<string> UpdateImage(IFormFile file, string ImageURL);
-        Task<List<string>> UpdateMultipleImage(List<IFormFile> file);
+        Task<List<string>> UpdateMultipleImage(List<IFormFile> file, List<string> ImageURLs);
     }
 }
