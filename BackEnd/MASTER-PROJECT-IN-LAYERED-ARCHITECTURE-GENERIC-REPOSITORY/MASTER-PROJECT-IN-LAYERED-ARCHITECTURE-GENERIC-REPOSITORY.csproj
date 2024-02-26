@@ -36,8 +36,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
     <Folder Include="Utils\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>
