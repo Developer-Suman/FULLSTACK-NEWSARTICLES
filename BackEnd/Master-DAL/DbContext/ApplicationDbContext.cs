@@ -16,11 +16,14 @@ namespace Master_DAL.DbContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ArticlesImage>()
+                .HasKey(ai => ai.ArticlesImageId);
             base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Articles> Articles { get; set; }
         public DbSet<Comments> Comments { get; set; }
+        public DbSet<ArticlesImage> ArticlesImages { get; set; }
     }
 }

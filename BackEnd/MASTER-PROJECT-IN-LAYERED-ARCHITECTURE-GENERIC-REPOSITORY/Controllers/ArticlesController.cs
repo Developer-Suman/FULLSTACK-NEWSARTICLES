@@ -80,6 +80,20 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             return Ok(commentsfromarticles.Data);
         }
 
+        [HttpPost("add-multiples-images")]
+        public async Task<IActionResult> SaveArticlesWithMultipleImage([FromForm] ArticlesCreateDTOs articlesCreateDTOs)
+        {
+            if(articlesCreateDTOs.filesList.Count() < 0 && articlesCreateDTOs.filesList is null)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, "No Files are Added");
+
+            }
+
+            var articles = await _articlesRepository.SaveMultipleImages(articlesCreateDTOs);
+
+            return Ok(articles.Data);
+        }
+
         [HttpPost]
         public async Task<IActionResult> SaveArticles([FromForm] ArticlesCreateDTOs articlesCreateDTOs)
         {
