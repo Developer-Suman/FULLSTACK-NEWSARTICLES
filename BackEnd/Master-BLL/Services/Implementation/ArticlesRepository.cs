@@ -228,7 +228,7 @@ namespace Master_BLL.Services.Implementation
 
                 var articles = _mapper.Map<Articles>(articlesCreateDTOs);
 
-                if (articles.ArticlesImages is null && articles.ArticlesImages.Count() <= 0)
+                if (images is null && images.Count() <=0 )
                 {
                     return Result<ArticlesGetDTOs>.Exception("Images URLs are missing");
 
