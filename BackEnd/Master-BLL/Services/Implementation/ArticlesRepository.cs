@@ -213,69 +213,77 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public async Task<Result<ArticlesGetDTOs>> SaveMultipleImages(ArticlesCreateDTOs articlesCreateDTOs)
+        public async Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs)
         {
             try
             {
                 await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
-
-                var images = await _uploadImageRepository.UploadImage(articlesCreateDTOs.Files);
-                if (images is null || !images.Any())
-                {
-                    return Result<ArticlesGetDTOs>.Exception("Image Upload Failed");
-                }
-
-                List<string> imagess = await _uploadImageRepository.UploadMultipleImage(articlesCreateDTOs.filesList);
+                List<string> images = await _uploadImageRepository.UploadMultipleImage(articlesCreateDTOs.filesList);
                 if (images is null || !images.Any())
                 {
                     return Result<ArticlesGetDTOs>.Exception("Image upload Failed");
                 }
 
 
-
-                
-
-
-
                 var articles = _mapper.Map<Articles>(articlesCreateDTOs);
-                articles.ImageUrl = images;
+
+                if (articles.ArticlesImages is null && articles.ArticlesImages.Count() <= 0)
+                {
+                    return Result<ArticlesGetDTOs>.Exception("Images URLs are missing");
+
+                }
+                if (articles is null)
+                {
+                    return Result<ArticlesGetDTOs>.Exception("Mapping To articles Failed");
+                }
+
                 await uow.Repository<Articles>().AddAsync(articles);
                 await uow.SaveChangesAsync();
 
-
-                List<ArticlesImagesDTOs> articlesImages = articlesCreateDTOs.articlesImages.ToList();
-                IList<ArticlesImage> articlesImagesList = articlesImages.Select(article => new ArticlesImage
-                {
-                    ArticlesImagesUrl = images,
-                    ArticlesId = articles.ArticlesId
-
-
-
-                }).ToList();
-
-
-                //var articlesImageList = new List<ArticlesImage>();
-                //foreach (var image in imagess)
+                #region UseSelectToSaveMultipleImage
+                //List<string> imagess = await _uploadImageRepository.UploadMultipleImage(articlesCreateDTOs.filesList);
+                //if (images is null || !images.Any())
                 //{
-                //    articlesImageList.Add(new ArticlesImage
-                //    {
-                //        ArticlesImagesUrl = images,
-                //        ArticlesId = articles.ArticlesId
-
-                //    });
-
+                //    return Result<ArticlesGetDTOs>.Exception("Image upload Failed");
                 //}
+
+
+                //List<ArticlesImagesDTOs> articlesImages = articlesCreateDTOs.articlesImages.ToList();
+                //IList<ArticlesImage> articlesImagesList = articlesImages.Select(article => new ArticlesImage
+                //{
+                //    ArticlesImagesUrl = images,
+                //    ArticlesId = articles.ArticlesId
+
+                //}).ToList();
+
+                //var Articles = new Articles()
+                //{
+
+                //    ArticlesImages = articlesImagesList,
+
+                //};
+
+                //await uow.Repository<Articles>().AddAsync(Articles);
+                #endregion
+
+
+                var articlesImageList = new List<ArticlesImage>();
+                foreach (var image in images)
+                {
+                    articlesImageList.Add(new ArticlesImage
+                    {
+                        ArticlesImagesUrl = image,
+                        ArticlesId = articles.ArticlesId
+
+                    });
+
+                }
                 //articles.ArticlesImages = articlesImageList;
 
-                //await uow.Repository<ArticlesImage>().AddRange(articlesImageList);
-                var Articles = new Articles()
-                {
+                await uow.Repository<ArticlesImage>().AddRange(articlesImageList);
 
-                    ArticlesImages = articlesImagesList,
 
-                };
 
-                await uow.Repository<Articles>().AddAsync(Articles);
                 await uow.SaveChangesAsync();
 
 
@@ -283,79 +291,43 @@ namespace Master_BLL.Services.Implementation
                 var articlesGet = _mapper.Map<ArticlesGetDTOs>(articles);
                 return Result<ArticlesGetDTOs>.Success(articlesGet);
 
-                
-                
 
-            }catch(Exception ex)
+
+
+            }
+            catch (Exception ex)
             {
                 return Result<ArticlesGetDTOs>.Exception("An error occured while adding multiple Images");
             }
 
         }
 
-        public async Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs)
-        {
-            try
-            {
-                await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
-                var images = await _uploadImageRepository.UploadImage(articlesCreateDTOs.Files);
-                if(images is null || !images.Any())
-                {
-                    return Result<ArticlesGetDTOs>.Exception("Image Upload Failed");
-                }
+        //public async Task<Result<ArticlesGetDTOs>> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs)
+        //{
+        //    try
+        //    {
+        //        await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
+        //        Articles articlesTobeUpdated = await uow.Repository<Articles>().GetByIdAsync(articlesUpdateDTOs.ArticlesId);
 
-                var articles = _mapper.Map<Articles>(articlesCreateDTOs);
-                articles.ImageUrl = images;
+        //        if(articlesTobeUpdated is null)
+        //        {
+        //            return Result<ArticlesGetDTOs>.Failure("Articles Not Found");
+        //        }
+        //        var updatedImage = await _uploadImageRepository.UpdateImage(articlesUpdateDTOs.Files, articlesTobeUpdated.ImageUrl);
 
-                if(string.IsNullOrEmpty(articles.ImageUrl))
-                {
-                    return Result<ArticlesGetDTOs>.Exception("Images URLs are missing");
+        //        _mapper.Map(articlesUpdateDTOs, articlesTobeUpdated);
 
-                }
+        //        articlesTobeUpdated.ImageUrl = updatedImage;
+        //        await uow.SaveChangesAsync();
+        //        var articlesGetDTOs = _mapper.Map<ArticlesGetDTOs>(articlesTobeUpdated);
 
-                if(articles is null)
-                {
-                    return Result<ArticlesGetDTOs>.Exception("Mapping to articles Failed");
-                }
-                await uow.Repository<Articles>().AddAsync(articles);
-                await uow.SaveChangesAsync();
-                var articlesGet = _mapper.Map<ArticlesGetDTOs>(articles);
+        //        return Result<ArticlesGetDTOs>.Success(articlesGetDTOs);
 
-                return Result<ArticlesGetDTOs>.Success(articlesGet);
-                
-
-            }catch(Exception ex)
-            {
-                return Result<ArticlesGetDTOs>.Exception("An error occur while Adding Articles");
-            }
-        }
-
-        public async Task<Result<ArticlesGetDTOs>> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs)
-        {
-            try
-            {
-                await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
-                Articles articlesTobeUpdated = await uow.Repository<Articles>().GetByIdAsync(articlesUpdateDTOs.ArticlesId);
-
-                if(articlesTobeUpdated is null)
-                {
-                    return Result<ArticlesGetDTOs>.Failure("Articles Not Found");
-                }
-                var updatedImage = await _uploadImageRepository.UpdateImage(articlesUpdateDTOs.Files, articlesTobeUpdated.ImageUrl);
-
-                _mapper.Map(articlesUpdateDTOs, articlesTobeUpdated);
-
-                articlesTobeUpdated.ImageUrl = updatedImage;
-                await uow.SaveChangesAsync();
-                var articlesGetDTOs = _mapper.Map<ArticlesGetDTOs>(articlesTobeUpdated);
-
-                return Result<ArticlesGetDTOs>.Success(articlesGetDTOs);
-
-            }
-            catch(Exception ex)
-            {
-                return Result<ArticlesGetDTOs>.Exception("An error occured while Updating Articles");
-            }
-        }
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        return Result<ArticlesGetDTOs>.Exception("An error occured while Updating Articles");
+        //    }
+        //}
     }
 }

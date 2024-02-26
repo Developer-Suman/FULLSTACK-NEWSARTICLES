@@ -15,10 +15,6 @@ namespace Master_DAL.Models
         public string ArticlesContent { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsActive { get; set; }
-
-        
-
-        public string ImageUrl { get; set; }
         public ICollection<Comments> Comments { get; set; }
         public ICollection<ArticlesImage> ArticlesImages { get; set; } 
 

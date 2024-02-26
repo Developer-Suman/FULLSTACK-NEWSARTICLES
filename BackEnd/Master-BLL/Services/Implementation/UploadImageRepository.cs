@@ -157,8 +157,33 @@ namespace Master_BLL.Services.Implementation
 
                     }
 
-                    filename.Add(Path.Combine("Images/", uniqueFile + FileExtension));
+                    using(MagickImage img = new MagickImage(filepath))
+                    {
+                        if(FileExtension == ".jpg" ||  FileExtension ==".jpeg")
+                        {
+                            img.Format = MagickFormat.Jpg;
 
+                        }
+                        if(FileExtension == ".png")
+                        {
+                            img.Format = MagickFormat.Png;
+                        }
+
+                        img.Resize(1000, 1000);
+
+                        img.Quality = 60;
+
+                        string uniqueFileAfterCompression = Guid.NewGuid().ToString();
+                        string FileNameAfterCompression = Path.GetFileName(image.FileName);
+                        string ExtensionAfterCompression = Path.GetExtension(FileNameAfterCompression);
+
+                        string FilePathAfterCompression = Path.Combine(uploadFolderPath, uniqueFileAfterCompression + ExtensionAfterCompression);
+                        img.Write(FilePathAfterCompression);
+
+                        System.IO.File.Delete(filepath);
+
+                        filename.Add(Path.Combine("Images/", uniqueFileAfterCompression+ ExtensionAfterCompression));
+                    }
 
                 }
 
