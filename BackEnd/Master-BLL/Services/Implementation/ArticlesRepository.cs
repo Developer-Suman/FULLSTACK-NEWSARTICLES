@@ -317,12 +317,21 @@ namespace Master_BLL.Services.Implementation
                 {
                     return Result<ArticlesGetDTOs>.Failure("Articles Not Found");
                 }
-                var updatedImage = await _uploadImageRepository.UpdateMultipleImage(articlesUpdateDTOs.filesList, articlesImage);
+                List<string> updatedImage = await _uploadImageRepository.UpdateMultipleImage(articlesUpdateDTOs.filesList, articlesImage);
 
+                foreach(var image in updatedImage)
+                {
+                    var articleImage = new ArticlesImage()
+                    {
+                        ArticlesId = articlesTobeUpdated.ArticlesId,
+                        ArticlesImagesUrl = image
+                    };
 
+                    uow.Repository<ArticlesImage>().Update(articleImage);
+                    
+                }
+              
                 _mapper.Map(articlesUpdateDTOs, articlesTobeUpdated);
-
-                await uow.Repository<Articles>().AddAsync(articlesTobeUpdated);
                 await uow.SaveChangesAsync();
                 var articlesGetDTOs = _mapper.Map<ArticlesGetDTOs>(articlesTobeUpdated);
 
