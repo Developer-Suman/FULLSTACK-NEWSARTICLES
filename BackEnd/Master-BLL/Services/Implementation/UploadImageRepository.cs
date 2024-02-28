@@ -92,11 +92,10 @@ namespace Master_BLL.Services.Implementation
                 //}
 
 
-
                 List<string> multipleImageURLs = new List<string>();
 
                 //Iterate through each file and corrosponding URL
-                if(file is not null)
+                if(file is not null && file.Count()<0)
                 {
                     for (int i = 0; i < file.Count; i++)
                     {
