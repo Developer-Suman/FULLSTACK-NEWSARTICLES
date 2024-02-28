@@ -108,22 +108,29 @@ namespace Master_BLL.Services.Implementation
                         //Get the filename from the path
                         var filename = Path.GetFileName(webRootPath);
 
+                        var imegeName = filename.Split('~');
+
                         //Get the filename from the uploaded file
                         var filenameFromUploadedFile = Path.GetFileName(imgfile.FileName);
 
 
+
                         string filenameFromUploadedFiles = Path.GetFileNameWithoutExtension(imgfile.FileName);
 
-                        if (file is not null && imgfile.Length > 0)
+
+                        if (imegeName[0] == filenameFromUploadedFile)
+                        {
+                            multipleImageURLs.Add(oldImageURLs);
+                        }
+                        else
                         {
                             //If new file is provided update images
                             var updateImage = await UploadImage(imgfile);
                             multipleImageURLs.Add(updateImage);
+
                         }
-                        else
-                        {
-                            multipleImageURLs.Add(oldImageURLs);
-                        }
+
+
 
                     }
                 }
