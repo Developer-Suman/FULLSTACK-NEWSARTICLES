@@ -1,6 +1,7 @@
 ﻿using Master_BLL.DTOs.Articles;
 using Master_BLL.Services.Interface;
 using Master_DAL.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,7 @@ using System.Text;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
     [ApiController]
     public class ArticlesController : ControllerBase
     {
