@@ -65,7 +65,13 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             builder.Services.AddScoped<IUploadImageRepository, UploadImageRepository>();
             builder.Services.AddScoped<IArticlesRepository, ArticlesRepository>();
 
-       
+            builder.Services.Add(new ServiceDescriptor(
+                typeof(IArticlesRepository),
+                typeof(ArticlesRepository),
+                ServiceLifetime.Transient
+                ));
+
+
             #endregion
 
         }

@@ -45,7 +45,7 @@ namespace Master_BLL.Services.Implementation
                 foreach(var imageUrl in ImageUrls)
                 {
                     var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath, imageUrl);
-                    if(File.Exists(webRootPath) && File.Exists(imageUrl))
+                    if(File.Exists(webRootPath))
                     {
                         File.Delete(webRootPath);
                     }
@@ -81,101 +81,67 @@ namespace Master_BLL.Services.Implementation
         {
             try
             {
-
-                //foreach(var imageUrl in ImageURLs)
-                //{
-                //    var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath,imageUrl);
-                //    if(File.Exists(webRootPath) =file)
-                //    {
-
-                //    }
-                //}
-
-
                 List<string> multipleImageURLs = new List<string>();
+                List<string> deleteImageFile = new List<string>();
 
-                //Iterate through each file and corrosponding URL
-                if(file is not null && file.Count()<0)
+                // Loop through each file provided for update
+                foreach (var uploadedFile in file)
                 {
-                    for (int i = 0; i < file.Count; i++)
+                    // Get the filename from the uploaded file
+                    var filenameFromUploadedFile = Path.GetFileName(uploadedFile.FileName);
+                    string filenameFromUploadedFiles = Path.GetFileNameWithoutExtension(uploadedFile.FileName);
+
+                    // Check if the filename matches any existing image
+                    bool foundMatch = false;
+                    foreach (var existingImageURL in ImageURLs)
                     {
-                        IFormFile imgfile = file[i];
-                        string oldImageURLs = ImageURLs[i];
-                        var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath, oldImageURLs);
+                        var webRootPath = Path.Combine(_webHostEnvironment.WebRootPath, existingImageURL);
                         var fileName = Path.GetFileName(webRootPath);
 
-                        //Get the filename from the path
+                        // Get the filename from the path
                         var filename = Path.GetFileName(webRootPath);
+                        var imageName = filename.Split('~');
 
-                        var imegeName = filename.Split('~');
-
-                        //Get the filename from the uploaded file
-                        var filenameFromUploadedFile = Path.GetFileName(imgfile.FileName);
-
-
-
-                        string filenameFromUploadedFiles = Path.GetFileNameWithoutExtension(imgfile.FileName);
-
-
-                        if (imegeName[0] == filenameFromUploadedFile)
+                        // If a match is found, add the existing URL and skip to the next file
+                        if (imageName[0] == filenameFromUploadedFiles)
                         {
-                            multipleImageURLs.Add(oldImageURLs);
+                            multipleImageURLs.Add(existingImageURL);
+                            foundMatch = true;
+                            break;
                         }
-                        else
-                        {
-                            //If new file is provided update images
-                            var updateImage = await UploadImage(imgfile);
-                            multipleImageURLs.Add(updateImage);
+                    }
 
-                        }
-
-
-
+                    // If no match is found, upload the new image
+                    if (!foundMatch)
+                    {
+                        var updateImage = await UploadImage(uploadedFile);
+                        multipleImageURLs.Add(updateImage);
                     }
                 }
-                else
+
+                // Now we have the updated list of image URLs
+                // Let's find images to delete (if any)
+                foreach (var existingImageURL in ImageURLs)
                 {
-                    return ImageURLs;
+                    // If the existing image URL is not in the list of updated URLs, add it to delete
+                    if (!multipleImageURLs.Contains(existingImageURL))
+                    {
+                        deleteImageFile.Add(existingImageURL);
+                    }
                 }
-         
 
-                //Keep the remaining old imageURls that were not updated
-                for (int i = file.Count; i < ImageURLs.Count; i++)
+                // Delete the images that are no longer in the updated list
+                if (deleteImageFile.Count > 0)
                 {
-                    multipleImageURLs.Add(ImageURLs[i]);
+                    DeleteMultipleImage(deleteImageFile);
                 }
 
-                //Delete Old image that were Replaced
-                DeleteMultipleImage(ImageURLs);
-
+                // Return the updated list of image URLs
                 return multipleImageURLs;
-                #region Using ForeachLoop
-                //List<string> multipleImgURL = new List<string>();
-                //foreach(var imgfile in file)
-                //{
-                //    if(imgfile is not null && imgfile.Length > 0)
-                //    {
-                //        //If a new File is provided, update the image
-                //        var saveImage = await UploadImage(imgfile);
-                //        multipleImgURL.Add(saveImage);
-                //    }
-                //    else
-                //    {
-                //        //If no new file is provided, keep the old image url
-                //        multipleImgURL.Add(ImageURLs.FirstOrDefault());
-                //    }
-
-
-                //}
-                //DeleteMultipleImage(ImageURLs);
-
-                //return multipleImgURL;
-
-                #endregion
-
-
-
             }
+
+
+
             catch (Exception ex)
             {
                 throw new Exception("An error occured while Uploading multiple Image");
@@ -194,10 +160,11 @@ namespace Master_BLL.Services.Implementation
 
                 string uniqueFile = Guid.NewGuid().ToString();
                 string originalFileName = Path.GetFileName(file.FileName);
+                string filenameWithoutExtension = Path.GetFileNameWithoutExtension(originalFileName);
                 string fileExtension = Path.GetExtension(originalFileName);
 
                 //Combine the uploadfolder path with the uniquefile name
-                string filepath = Path.Combine(uploadFolderPath, uniqueFile + fileExtension);
+                string filepath = Path.Combine(uploadFolderPath, filenameWithoutExtension+'~'+uniqueFile + fileExtension);
 
                 //Copy the file to the server
                 using (var fileStream = new FileStream(filepath, FileMode.Create))
@@ -227,13 +194,14 @@ namespace Master_BLL.Services.Implementation
 
                     string uniqueFileAfterCompression = Guid.NewGuid().ToString();
                     string originalfilenameAfterCompression = Path.GetFileName(file.FileName);
+                    string getFileNameWithoutExtension = Path.GetFileNameWithoutExtension(originalfilenameAfterCompression);
                     string fileExtensionAfterCompression = Path.GetExtension(originalfilenameAfterCompression);
-                    string filepathAfterCompression = Path.Combine(uploadFolderPath, uniqueFileAfterCompression + fileExtensionAfterCompression);
+                    string filepathAfterCompression = Path.Combine(uploadFolderPath, getFileNameWithoutExtension+'~'+uniqueFileAfterCompression + fileExtensionAfterCompression);
                     image.Write(filepathAfterCompression);
 
                     System.IO.File.Delete(filepath);
 
-                    return Path.Combine("Images/", uniqueFileAfterCompression + fileExtensionAfterCompression);
+                    return Path.Combine("Images/", getFileNameWithoutExtension+'~'+uniqueFileAfterCompression + fileExtensionAfterCompression);
                 }
 
 

@@ -312,13 +312,16 @@ namespace Master_BLL.Services.Implementation
 
                 List<string> articlesImage = await _context.ArticlesImages.Where(articlesImage => articlesImage.ArticlesId == articlesUpdateDTOs.ArticlesId)
                     .Select(articlesImages => articlesImages.ArticlesImagesUrl).AsNoTracking().ToListAsync();
-
+           
                 if (articlesTobeUpdated is null)
                 {
                     return Result<ArticlesGetDTOs>.Failure("Articles Not Found");
                 }
                 List<string> updatedImage = await _uploadImageRepository.UpdateMultipleImage(articlesUpdateDTOs.filesList, articlesImage);
 
+                List<ArticlesImage> articlesImage1 = await _context.ArticlesImages.Where(x => x.ArticlesId == articlesTobeUpdated.ArticlesId).ToListAsync();
+                uow.Repository<ArticlesImage>().DeleteRange(articlesImage1);
+             
                 foreach(var image in updatedImage)
                 {
                     var articleImage = new ArticlesImage()
