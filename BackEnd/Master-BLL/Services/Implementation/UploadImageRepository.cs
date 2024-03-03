@@ -103,6 +103,8 @@ namespace Master_BLL.Services.Implementation
                         var filename = Path.GetFileName(webRootPath);
                         var imageName = filename.Split('~');
 
+                        bool checkImage = _helpherMethods.CompareImage(uploadedFile, webRootPath);
+
                         // If a match is found, add the existing URL and skip to the next file
                         if (imageName[0] == filenameFromUploadedFiles)
                         {
