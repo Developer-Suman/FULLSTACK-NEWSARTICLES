@@ -14,8 +14,7 @@ namespace Master_DAL.Models
         public string? Address { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public string? RefreshToken { get; set; }
-        public DateTime? RefreshTokenExpiryTime { get; set; } 
-
+        public DateTime? RefreshTokenExpiryTime { get; set; }
         public ICollection<Articles> Articles { get; set; }
     }
 }
