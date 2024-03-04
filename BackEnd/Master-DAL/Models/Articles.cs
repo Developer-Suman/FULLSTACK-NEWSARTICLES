@@ -17,7 +17,7 @@ namespace Master_DAL.Models
         public bool IsActive { get; set; }
         public ICollection<Comments> Comments { get; set; }
         public ICollection<ArticlesImage> ArticlesImages { get; set; } 
-        public string UserId { get; set; }
+        public string? ApplicationUserId { get; set; }
         public ApplicationUser User { get; set; }
 
 
