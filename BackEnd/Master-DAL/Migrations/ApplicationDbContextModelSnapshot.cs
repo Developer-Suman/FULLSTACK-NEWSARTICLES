@@ -111,6 +111,9 @@ namespace Master_DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("ArticlesContent")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -126,6 +129,8 @@ namespace Master_DAL.Migrations
                         .HasColumnType("bit");
 
                     b.HasKey("ArticlesId");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Articles");
                 });
@@ -302,6 +307,15 @@ namespace Master_DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Master_DAL.Models.Articles", b =>
+                {
+                    b.HasOne("Master_DAL.Models.ApplicationUser", "User")
+                        .WithMany("Articles")
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Master_DAL.Models.ArticlesImage", b =>
                 {
                     b.HasOne("Master_DAL.Models.Articles", "Articles")
@@ -373,6 +387,11 @@ namespace Master_DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Master_DAL.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Articles");
                 });
 
             modelBuilder.Entity("Master_DAL.Models.Articles", b =>

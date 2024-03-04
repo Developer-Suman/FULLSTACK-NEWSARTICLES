@@ -12,21 +12,6 @@ namespace Master_DAL.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Articles",
-                columns: table => new
-                {
-                    ArticlesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ArticlesTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ArticlesContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Articles", x => x.ArticlesId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -72,25 +57,6 @@ namespace Master_DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Comments",
-                columns: table => new
-                {
-                    CommentsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CommentDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ArticlesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Comments", x => x.CommentsId);
-                    table.ForeignKey(
-                        name: "FK_Comments_Articles_ArticlesId",
-                        column: x => x.ArticlesId,
-                        principalTable: "Articles",
-                        principalColumn: "ArticlesId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -109,6 +75,27 @@ namespace Master_DAL.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Articles",
+                columns: table => new
+                {
+                    ArticlesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ArticlesTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ArticlesContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Articles", x => x.ArticlesId);
+                    table.ForeignKey(
+                        name: "FK_Articles_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -196,6 +183,54 @@ namespace Master_DAL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "ArticlesImages",
+                columns: table => new
+                {
+                    ArticlesImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ArticlesImagesUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ArticlesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArticlesImages", x => x.ArticlesImageId);
+                    table.ForeignKey(
+                        name: "FK_ArticlesImages_Articles_ArticlesId",
+                        column: x => x.ArticlesId,
+                        principalTable: "Articles",
+                        principalColumn: "ArticlesId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    CommentsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CommentDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ArticlesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.CommentsId);
+                    table.ForeignKey(
+                        name: "FK_Comments_Articles_ArticlesId",
+                        column: x => x.ArticlesId,
+                        principalTable: "Articles",
+                        principalColumn: "ArticlesId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Articles_ApplicationUserId",
+                table: "Articles",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArticlesImages_ArticlesId",
+                table: "ArticlesImages",
+                column: "ArticlesId");
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -245,6 +280,9 @@ namespace Master_DAL.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ArticlesImages");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -266,10 +304,10 @@ namespace Master_DAL.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Articles");
 
             migrationBuilder.DropTable(
-                name: "Articles");
+                name: "AspNetUsers");
         }
     }
 }
