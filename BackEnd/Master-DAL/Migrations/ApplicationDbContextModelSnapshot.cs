@@ -309,9 +309,11 @@ namespace Master_DAL.Migrations
 
             modelBuilder.Entity("Master_DAL.Models.Articles", b =>
                 {
+
                     b.HasOne("Master_DAL.Models.ApplicationUser", null)
                         .WithMany("Articles")
                         .HasForeignKey("ApplicationUserId");
+
                 });
 
             modelBuilder.Entity("Master_DAL.Models.ArticlesImage", b =>

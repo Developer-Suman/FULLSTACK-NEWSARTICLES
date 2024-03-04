@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Master_DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240220170948_Initial Migration")]
+    [Migration("20240304174845_Initial Migration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -114,6 +114,9 @@ namespace Master_DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("ArticlesContent")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -130,7 +133,28 @@ namespace Master_DAL.Migrations
 
                     b.HasKey("ArticlesId");
 
+                    b.HasIndex("ApplicationUserId");
+
                     b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("Master_DAL.Models.ArticlesImage", b =>
+                {
+                    b.Property<Guid>("ArticlesImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ArticlesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ArticlesImagesUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ArticlesImageId");
+
+                    b.HasIndex("ArticlesId");
+
+                    b.ToTable("ArticlesImages");
                 });
 
             modelBuilder.Entity("Master_DAL.Models.Comments", b =>
@@ -286,6 +310,24 @@ namespace Master_DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Master_DAL.Models.Articles", b =>
+                {
+                    b.HasOne("Master_DAL.Models.ApplicationUser", null)
+                        .WithMany("Articles")
+                        .HasForeignKey("ApplicationUserId");
+                });
+
+            modelBuilder.Entity("Master_DAL.Models.ArticlesImage", b =>
+                {
+                    b.HasOne("Master_DAL.Models.Articles", "Articles")
+                        .WithMany("ArticlesImages")
+                        .HasForeignKey("ArticlesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Articles");
+                });
+
             modelBuilder.Entity("Master_DAL.Models.Comments", b =>
                 {
                     b.HasOne("Master_DAL.Models.Articles", "Articles")
@@ -348,8 +390,15 @@ namespace Master_DAL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Master_DAL.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Articles");
+                });
+
             modelBuilder.Entity("Master_DAL.Models.Articles", b =>
                 {
+                    b.Navigation("ArticlesImages");
+
                     b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
