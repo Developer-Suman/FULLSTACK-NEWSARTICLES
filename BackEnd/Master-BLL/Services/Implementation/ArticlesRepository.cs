@@ -134,17 +134,21 @@ namespace Master_BLL.Services.Implementation
         {
             try
             {
-                IQueryable <ArticlesWithCommentsDTOs> articleswithComments = _context.Articles
-                    .Include(x => x.Comments)
-                    .Select(articles => new ArticlesWithCommentsDTOs
-                    {
-                        ArticlesId = articles.ArticlesId,
-                        ArticlesTitle = articles.ArticlesTitle,
-                        ArticlesContent = articles.ArticlesContent,
-                        Comments = articles.Comments.Select(a=>_mapper.Map<CommentsGetDTOs>(a)).ToList(),
-                   
+                IQueryable<ArticlesWithCommentsDTOs> articleswithComments = _context.Articles
+                .Include(x => x.Comments)
+                .OrderBy(article => article.ArticlesId)  
+                .AsSplitQuery()
+                .Select(articles => new ArticlesWithCommentsDTOs
+                {
+                    ArticlesId = articles.ArticlesId,
+                    ArticlesTitle = articles.ArticlesTitle,
+                    ArticlesContent = articles.ArticlesContent,
+                    Comments = articles.Comments.Select(a => _mapper.Map<CommentsGetDTOs>(a)).ToList(),
+                })
+                .AsNoTracking()
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
 
-                    }).AsNoTracking().Skip((page-1)*pageSize).Take(pageSize).AsQueryable();
 
 
 
