@@ -18,8 +18,8 @@ namespace Master_DAL.Models
         public ICollection<Comments> Comments { get; set; }
         public ICollection<ArticlesImage> ArticlesImages { get; set; }
         public string? ApplicationUserId { get; set; }
-        public ApplicationUser User { get; set; }
 
+        public ApplicationUser User { get; set; }
 
         #region DomainDriven
         //public Articles(Guid id, string articleTitle, string articleContent, DateTime createdAt) : base(id)

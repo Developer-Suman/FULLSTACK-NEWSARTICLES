@@ -4,6 +4,7 @@ using Master_DAL.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Master_DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240303172030_SDFSD")]
+    partial class SDFSD
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -309,11 +312,9 @@ namespace Master_DAL.Migrations
 
             modelBuilder.Entity("Master_DAL.Models.Articles", b =>
                 {
-
                     b.HasOne("Master_DAL.Models.ApplicationUser", null)
                         .WithMany("Articles")
                         .HasForeignKey("ApplicationUserId");
-
                 });
 
             modelBuilder.Entity("Master_DAL.Models.ArticlesImage", b =>

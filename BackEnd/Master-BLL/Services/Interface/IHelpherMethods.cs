@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,5 +11,6 @@ namespace Master_BLL.Services.Interface
     {
         bool IsImage(string contentType);
         void CompressFile(string inputFilePath, string outputFilePath);
+        bool CompareImage(IFormFile imagePath1, string imagePath2);
     }
 }
