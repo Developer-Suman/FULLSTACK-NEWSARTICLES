@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Master_BLL.Repository.Implementation;
+using Master_BLL.Repository.Interface;
 using Master_BLL.Services.Implementation;
 using Master_BLL.Services.Interface;
 using Master_DAL.Abstraction;
@@ -37,6 +39,30 @@ namespace Master_BLL
             });
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
+
+
+            #region InjectDependency
+            services.AddAuthorization();
+            //builder.Services.AddAuthorization();
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IJwtProvider, JwtProvider>();
+            services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+            services.AddScoped<IAccountServices, AccountServices>();
+            services.AddMemoryCache();
+            services.AddScoped<IMemoryCacheRepository, MemoryCacheRepository>();
+            services.AddScoped<IUploadImageRepository, UploadImageRepository>();
+            services.AddScoped<IArticlesRepository, ArticlesRepository>();
+            services.AddScoped<IHelpherMethods, HelpherMethods>();
+
+            //builder.Services.Add(new ServiceDescriptor(
+            //    typeof(IArticlesRepository),
+            //    typeof(ArticlesRepository),
+            //    ServiceLifetime.Transient
+            //    ));
+
+
+            #endregion
 
             return services;
         }

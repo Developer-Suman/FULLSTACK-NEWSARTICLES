@@ -218,7 +218,7 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public async Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs)
+        public async Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs, Guid Id)
         {
             try
             {
@@ -241,7 +241,7 @@ namespace Master_BLL.Services.Implementation
                 {
                     return Result<ArticlesGetDTOs>.Exception("Mapping To articles Failed");
                 }
-
+                articles.ApplicationUserId = Id.ToString();
                 await uow.Repository<Articles>().AddAsync(articles);
                 await uow.SaveChangesAsync();
 

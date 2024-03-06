@@ -1,37 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Master_DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class SDFSD : Migration
+    public partial class InitialMigrationsfdf : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Articles_AspNetUsers_UserId",
-                table: "Articles");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Articles_UserId",
+                name: "FK_Articles_AspNetUsers_ApplicationUserId",
                 table: "Articles");
 
             migrationBuilder.DropColumn(
-                name: "UserId",
+                name: "ApplicationId",
                 table: "Articles");
 
-            migrationBuilder.AddColumn<string>(
+            migrationBuilder.AlterColumn<string>(
                 name: "ApplicationUserId",
                 table: "Articles",
                 type: "nvarchar(450)",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Articles_ApplicationUserId",
-                table: "Articles",
-                column: "ApplicationUserId");
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(450)");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Articles_AspNetUsers_ApplicationUserId",
@@ -48,30 +42,26 @@ namespace Master_DAL.Migrations
                 name: "FK_Articles_AspNetUsers_ApplicationUserId",
                 table: "Articles");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Articles_ApplicationUserId",
-                table: "Articles");
-
-            migrationBuilder.DropColumn(
+            migrationBuilder.AlterColumn<string>(
                 name: "ApplicationUserId",
-                table: "Articles");
-
-            migrationBuilder.AddColumn<string>(
-                name: "UserId",
                 table: "Articles",
                 type: "nvarchar(450)",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(450)",
+                oldNullable: true);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Articles_UserId",
+            migrationBuilder.AddColumn<Guid>(
+                name: "ApplicationId",
                 table: "Articles",
-                column: "UserId");
+                type: "uniqueidentifier",
+                nullable: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Articles_AspNetUsers_UserId",
+                name: "FK_Articles_AspNetUsers_ApplicationUserId",
                 table: "Articles",
-                column: "UserId",
+                column: "ApplicationUserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);

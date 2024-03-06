@@ -33,7 +33,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
 
                 }
 
-                var dbUser = _userManager.Users.FirstOrDefault(x=>x.UserName == nameIdentifier);
+                var dbUser = _userManager.Users.FirstOrDefault(x=>x.Id == nameIdentifier);
                 _currentUser = _mapper.Map<UserDTOs>(dbUser);
 
             }
