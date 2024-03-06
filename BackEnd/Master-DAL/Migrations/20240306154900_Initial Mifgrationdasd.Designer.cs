@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Master_DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240301130702_Add Relation in User and Articles")]
-    partial class AddRelationinUserandArticles
+    [Migration("20240306154900_Initial Mifgrationdasd")]
+    partial class InitialMifgrationdasd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -114,6 +114,13 @@ namespace Master_DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ApplicationUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ApplicationUserId1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("ArticlesContent")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -128,13 +135,9 @@ namespace Master_DAL.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("ArticlesId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ApplicationUserId1");
 
                     b.ToTable("Articles");
                 });
@@ -313,13 +316,13 @@ namespace Master_DAL.Migrations
 
             modelBuilder.Entity("Master_DAL.Models.Articles", b =>
                 {
-                    b.HasOne("Master_DAL.Models.ApplicationUser", "User")
-                        .WithMany("Articles")
-                        .HasForeignKey("UserId")
+                    b.HasOne("Master_DAL.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("Master_DAL.Models.ArticlesImage", b =>
@@ -393,11 +396,6 @@ namespace Master_DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Master_DAL.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Articles");
                 });
 
             modelBuilder.Entity("Master_DAL.Models.Articles", b =>

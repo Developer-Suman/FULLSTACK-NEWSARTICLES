@@ -44,8 +44,7 @@ namespace Master_DAL
                                 };
                             });
 
-
-
+      
 
             return services;
 

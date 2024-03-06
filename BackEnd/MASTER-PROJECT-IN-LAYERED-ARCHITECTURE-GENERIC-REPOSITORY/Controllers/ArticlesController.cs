@@ -3,6 +3,7 @@ using Master_BLL.DTOs.Articles;
 using Master_BLL.Services.Interface;
 using Master_DAL.Models;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -13,6 +14,8 @@ using System.Text;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
+    [Authorize(Roles = "admin")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
     [ApiController]
     public class ArticlesController : MasterProjectControllerBase
@@ -26,7 +29,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
         [HttpGet("{ArticlesId}")]
-        public async Task<IActionResult> GetArticlesById(Guid ArticlesId)
+        public async Task<IActionResult> GetArticlesById([FromRoute] Guid ArticlesId)
         {
             try
             {
@@ -49,12 +52,13 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         }
 
-        [HttpGet("all-articles")]
-        public async Task<IActionResult> GetAllArticles(int page, int pageSize)
+        [HttpGet]
+        [Route("all-articles")]
+        public async Task<IActionResult> GetAllArticles([FromQuery] int page, int pageSize)
         {
             try
             {
-                var userDetails = _currentUser;
+                
                 var articles = await _articlesRepository.GetAllArticles(page, pageSize);
                 if (articles.Data is null)
                 {
@@ -73,7 +77,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
         [HttpGet("articles-with-comments")]
-        public IActionResult GetArticlesWithComments(int page, int pageSize)
+        public IActionResult GetArticlesWithComments([FromBody] int page, int pageSize)
         {
             try
             {
@@ -114,8 +118,9 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, "No Files are Added");
 
                 }
-
-                var articles = await _articlesRepository.SaveArticles(articlesCreateDTOs);
+                GetCurrentUserFromDB();
+                var userDetails = _currentUser;
+                var articles = await _articlesRepository.SaveArticles(articlesCreateDTOs, _currentUser!.Id);
 
 
 

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Master_DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240304175433_Add New ApplicationId column")]
-    partial class AddNewApplicationIdcolumn
+    [Migration("20240306171811_Initial Migrationsfdf")]
+    partial class InitialMigrationsfdf
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -312,11 +312,9 @@ namespace Master_DAL.Migrations
 
             modelBuilder.Entity("Master_DAL.Models.Articles", b =>
                 {
-                    b.HasOne("Master_DAL.Models.ApplicationUser", "User")
+                    b.HasOne("Master_DAL.Models.ApplicationUser", null)
                         .WithMany("Articles")
                         .HasForeignKey("ApplicationUserId");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Master_DAL.Models.ArticlesImage", b =>

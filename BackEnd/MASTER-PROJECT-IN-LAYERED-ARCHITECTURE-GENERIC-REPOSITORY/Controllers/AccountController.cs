@@ -55,7 +55,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         #region Login
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginDTOs userModel)
+        public async Task<IActionResult> Login([FromBody]LoginDTOs userModel)
         {
             var loginResult = await _accountServices.LoginUser(userModel);
             if(loginResult.Data is not null)
