@@ -29,11 +29,11 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
         [HttpGet("{ArticlesId}")]
-        public async Task<IActionResult> GetArticlesById([FromRoute] Guid ArticlesId)
+        public async Task<IActionResult> GetArticlesById([FromRoute] Guid ArticlesId, CancellationToken cancellationToken)
         {
             try
             {
-                var articles = await _articlesRepository.GetArticlesById(ArticlesId);
+                var articles = await _articlesRepository.GetArticlesById(ArticlesId, cancellationToken);
 
                 if (!articles.IsSuccess)
                 {
@@ -54,12 +54,16 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         [HttpGet]
         [Route("all-articles")]
-        public async Task<IActionResult> GetAllArticles([FromQuery] int page, int pageSize)
+        public async Task<IActionResult> GetAllArticles([FromQuery] int page, int pageSize, CancellationToken cancellationToken)
         {
             try
             {
+                if(cancellationToken.IsCancellationRequested)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, "Operation Cancelled");
+                }
                 
-                var articles = await _articlesRepository.GetAllArticles(page, pageSize);
+                var articles = await _articlesRepository.GetAllArticles(page, pageSize, cancellationToken);
                 if (articles.Data is null)
                 {
                     return StatusCode(StatusCodes.Status400BadRequest, new { articles.Errors });
@@ -77,11 +81,11 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
         [HttpGet("articles-with-comments")]
-        public IActionResult GetArticlesWithComments([FromBody] int page, int pageSize)
+        public IActionResult GetArticlesWithComments([FromBody] int page, int pageSize, CancellationToken cancellationToken)
         {
             try
             {
-                var articlesWithComments = _articlesRepository.GetArticlesWithComments(page, pageSize);
+                var articlesWithComments = _articlesRepository.GetArticlesWithComments(page, pageSize, cancellationToken);
                 return Ok(articlesWithComments.Data);
 
             }
@@ -93,11 +97,11 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
         [HttpGet("all-comments-from-articles")]
-        public async Task<IActionResult> GetAllCommentsFromArticles(int page, int pageSize)
+        public async Task<IActionResult> GetAllCommentsFromArticles(int page, int pageSize, CancellationToken cancellationToken)
         {
             try
             {
-                var commentsfromarticles = await _articlesRepository.GetCommentsWithArticlesName(page, pageSize);
+                var commentsfromarticles = await _articlesRepository.GetCommentsWithArticlesName(page, pageSize, cancellationToken);
                 return Ok(commentsfromarticles.Data);
 
             }

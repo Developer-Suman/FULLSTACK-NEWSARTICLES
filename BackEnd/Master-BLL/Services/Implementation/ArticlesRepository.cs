@@ -61,7 +61,7 @@ namespace Master_BLL.Services.Implementation
 
         }
 
-        public async Task<Result<List<ArticlesGetDTOs>>> GetAllArticles(int page, int pageSize)
+        public async Task<Result<List<ArticlesGetDTOs>>> GetAllArticles(int page, int pageSize, CancellationToken cancellationToken)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace Master_BLL.Services.Implementation
                     return Result<List<ArticlesGetDTOs>>.Success(cacheData);
                 }
                 List<Articles> artices = await _context.Articles.AsNoTracking().OrderByDescending(x => x.CreatedAt)
-                    .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+                    .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
               
 
@@ -81,7 +81,7 @@ namespace Master_BLL.Services.Implementation
                 await _memoryCacheRepository.SetAsync(cacheKey, articlesGetDTOs, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
                 {
                     AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30)
-                });
+                }, cancellationToken);
 
                 return Result<List<ArticlesGetDTOs>>.Success(articlesGetDTOs);
 
@@ -91,7 +91,7 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public async Task<Result<ArticlesGetDTOs>> GetArticlesById(Guid Id)
+        public async Task<Result<ArticlesGetDTOs>> GetArticlesById(Guid Id, CancellationToken cancellationToken)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace Master_BLL.Services.Implementation
                 await _memoryCacheRepository.SetAsync(cacheKeys, articlesDTO, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
                 {
                     AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30)
-                });
+                }, cancellationToken);
                 
                 return Result<ArticlesGetDTOs>.Success(articlesDTO);
 
@@ -130,7 +130,7 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize)
+        public Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize, CancellationToken cancellationToken)
         {
             try
             {
@@ -161,7 +161,7 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public async Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesName(int page, int pageSize)
+        public async Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesName(int page, int pageSize, CancellationToken cancellationToken)
         {
             try
             {
@@ -190,7 +190,7 @@ namespace Master_BLL.Services.Implementation
                 {
                     AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30)
 
-                });
+                }, cancellationToken);
 
 
 

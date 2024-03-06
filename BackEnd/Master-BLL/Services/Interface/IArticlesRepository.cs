@@ -14,12 +14,12 @@ namespace Master_BLL.Services.Interface
     {
      
         Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs, Guid Id);
-        Task<Result<ArticlesGetDTOs>> GetArticlesById(Guid id);
+        Task<Result<ArticlesGetDTOs>> GetArticlesById(Guid id, CancellationToken cancellationToken);
         Task<Result<ArticlesGetDTOs>> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs);
         Task<Result<ArticlesGetDTOs>> DeleteArticles(Guid ArticlesId);
-        Task<Result<List<ArticlesGetDTOs>>> GetAllArticles(int page, int pageSize);
-        Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize);
-        Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesName(int page, int pageSize);
+        Task<Result<List<ArticlesGetDTOs>>> GetAllArticles(int page, int pageSize, CancellationToken cancellationToken);
+        Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize, CancellationToken cancellationToken);
+        Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesName(int page, int pageSize, CancellationToken cancellationToken);
 
     }
 }

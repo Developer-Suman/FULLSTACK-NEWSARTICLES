@@ -28,7 +28,7 @@ namespace Master_BLL.Services.Implementation
             return Task.CompletedTask;
         }
 
-        public async Task SetAsync<T>(string cacheKey, T value, MemoryCacheEntryOptions options)
+        public async Task SetAsync<T>(string cacheKey, T value, MemoryCacheEntryOptions options, CancellationToken cancellationToken = default)
         {
             if(value is not null)
             {
