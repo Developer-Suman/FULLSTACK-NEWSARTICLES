@@ -81,7 +81,7 @@ namespace Master_BLL.Services.Implementation
             return user;
         }
 
-        public async Task<List<UserDTOs>?> GetAllUsers(int page, int pageSize)
+        public async Task<List<UserDTOs>?> GetAllUsers(int page, int pageSize, CancellationToken cancellationToken)
         {
             var cacheKeys = CacheKeys.User;
             var cacheData = await _memoryCacheRepository.GetCahceKey<List<UserDTOs>>(cacheKeys);
@@ -91,12 +91,12 @@ namespace Master_BLL.Services.Implementation
                 return cacheData;
             }
             var users =  await _userManager.Users.AsNoTracking().OrderByDescending(x=>x.CreatedAt)
-                .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+                .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
             await _memoryCacheRepository.SetAsync(cacheKeys, users, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
             {
                 AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30) 
-            });
+            }, cancellationToken);
 
             var userDTO = _mapper.Map<List<UserDTOs>>(users);
 
@@ -135,7 +135,7 @@ namespace Master_BLL.Services.Implementation
 
         #endregion
 
-        public async Task<UserDTOs> GetById(string id)
+        public async Task<UserDTOs> GetById(string id, CancellationToken cancellationToken)
         {
             var caheKey = $"GetById{id}";
             var cahceData = await _memoryCacheRepository.GetCahceKey<UserDTOs>(caheKey);
@@ -154,7 +154,7 @@ namespace Master_BLL.Services.Implementation
             await _memoryCacheRepository.SetAsync<UserDTOs>(caheKey, userDTOs, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
             {
                 AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5)
-            });
+            }, cancellationToken);
             
             return userDTOs;
         }

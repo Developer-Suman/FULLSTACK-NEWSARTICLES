@@ -158,9 +158,9 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         #region AllUsers
         [HttpGet("AllUsers")]
-        public async Task<IActionResult> GetAllUsers(int page, int pageSize)
+        public async Task<IActionResult> GetAllUsers(int page, int pageSize, CancellationToken cancellationToken)
         {
-            var users = await _authenticationRepository.GetAllUsers(page,pageSize);
+            var users = await _authenticationRepository.GetAllUsers(page,pageSize, cancellationToken);
             if(users is null)
             {
                 return NotFound("User are Not Found");
@@ -173,9 +173,9 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         #region GetById
         [HttpGet("GetByUserId")]
-        public async Task<IActionResult> GetByUserId(string Id)
+        public async Task<IActionResult> GetByUserId(string Id, CancellationToken cancellationToken)
         {
-            var user = await _authenticationRepository.GetById(Id);
+            var user = await _authenticationRepository.GetById(Id, cancellationToken);
             if(user is null)
             {
                 return NotFound("User are Not Found");
