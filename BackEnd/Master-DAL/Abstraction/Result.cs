@@ -10,14 +10,13 @@ namespace Master_DAL.Abstraction
     public class Result<T>
     {
         public bool IsSuccess { get; }
-        public bool IsException { get; }
         public IEnumerable<string> Errors { get; }
 
         public T Data { get; }
 
         protected Result(bool isSuccess,bool isException, IEnumerable<string> errors, T data = default!)
         {
-            IsException = isException;
+         
             IsSuccess = isSuccess;
             Errors = errors ?? Enumerable.Empty<string>();
             Data = data;
@@ -44,11 +43,7 @@ namespace Master_DAL.Abstraction
             return new Result<T>(false,false, new List<string> { errors });
         }
 
-        public static Result<T> Exception(string exceptionErrors)
-        {
-            return new Result<T>(false, true, new List<string> { exceptionErrors });
-        }
-
+ 
         
     }
 }

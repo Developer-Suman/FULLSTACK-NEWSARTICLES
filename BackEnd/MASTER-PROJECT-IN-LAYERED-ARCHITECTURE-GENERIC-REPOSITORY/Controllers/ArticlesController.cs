@@ -125,10 +125,18 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 GetCurrentUserFromDB();
                 var userDetails = _currentUser;
                 var articles = await _articlesRepository.SaveArticles(articlesCreateDTOs, _currentUser!.Id);
+                if(articles.IsSuccess)
+                {
+                    return Ok(articles.Data);
+                }
+                else
+                {
+                    return BadRequest(articles.Errors);
+                }
 
 
 
-                return Ok(articles.Data);
+               
             }catch(Exception ex)
             {
                 return BadRequest(ex.Message);
