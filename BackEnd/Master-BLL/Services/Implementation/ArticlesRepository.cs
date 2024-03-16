@@ -5,8 +5,10 @@ using Master_BLL.DTOs.RegistrationDTOs;
 using Master_BLL.Repository.Interface;
 using Master_BLL.Services.Interface;
 using Master_BLL.Static.Cache;
+using Master_BLL.Validator;
 using Master_DAL.Abstraction;
 using Master_DAL.DbContext;
+using Master_DAL.Exceptions;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -55,7 +57,7 @@ namespace Master_BLL.Services.Implementation
 
             }catch (Exception ex)
             {
-                return Result<ArticlesGetDTOs>.Exception("An error occured while Deleting");
+                throw new Exception("An error occured while Deleting");
             }
             
 
@@ -223,10 +225,20 @@ namespace Master_BLL.Services.Implementation
             try
             {
                 await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
+
+
+                var validationError = ArticleValidator.Validate(articlesCreateDTOs);
+                if(validationError.Any()) 
+                {
+                    return Result<ArticlesGetDTOs>.Failure(validationError.ToArray());
+                }
+
+
+
                 List<string> images = await _uploadImageRepository.UploadMultipleImage(articlesCreateDTOs.filesList);
                 if (images is null || !images.Any())
                 {
-                    return Result<ArticlesGetDTOs>.Exception("Image upload Failed");
+                    throw new ImageuploadExceptions("Image upload Failed");
                 }
 
 
@@ -234,12 +246,12 @@ namespace Master_BLL.Services.Implementation
 
                 if (images is null && images.Count() <=0 )
                 {
-                    return Result<ArticlesGetDTOs>.Exception("Images URLs are missing");
+                    throw new Exception("Images URLs are missing");
 
                 }
                 if (articles is null)
                 {
-                    return Result<ArticlesGetDTOs>.Exception("Mapping To articles Failed");
+                    throw new Exception("Mapping To articles Failed");
                 }
                 articles.ApplicationUserId = Id.ToString();
                 await uow.Repository<Articles>().AddAsync(articles);
@@ -302,7 +314,7 @@ namespace Master_BLL.Services.Implementation
             }
             catch (Exception ex)
             {
-                return Result<ArticlesGetDTOs>.Exception("An error occured while adding multiple Images");
+                throw new Exception("An error occured while adding multiple Images");
             }
 
         }
@@ -349,7 +361,8 @@ namespace Master_BLL.Services.Implementation
             }
             catch (Exception ex)
             {
-                return Result<ArticlesGetDTOs>.Exception("An error occured while Updating Articles");
+                throw new Exception("An error occured while Updating Articles");
+   
             }
         }
     }
