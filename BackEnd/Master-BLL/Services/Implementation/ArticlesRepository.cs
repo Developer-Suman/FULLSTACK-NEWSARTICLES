@@ -246,7 +246,7 @@ namespace Master_BLL.Services.Implementation
 
                 if (images is null && images.Count() <=0 )
                 {
-                    throw new Exception("Images URLs are missing");
+                    throw new ImageUrlException("Images URLs are missing");
 
                 }
                 if (articles is null)

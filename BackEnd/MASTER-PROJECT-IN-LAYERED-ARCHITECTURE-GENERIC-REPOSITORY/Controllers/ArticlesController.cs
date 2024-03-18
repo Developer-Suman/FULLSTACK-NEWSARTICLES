@@ -151,12 +151,17 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             {
                 var articles = await _articlesRepository.UpdateArticles(articlesUpdateDTOs);
 
-                if (!articles.IsSuccess)
+                if (articles.IsSuccess)
+                {
+                    return Ok(articles.Data);
+
+                }
+                else
                 {
                     return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
                 }
 
-                return Ok(articles.Data);
+                
             }catch(Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -171,13 +176,17 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             {
                 var articles = await _articlesRepository.DeleteArticles(id);
 
-                if(!articles.IsSuccess)
+                if(articles.IsSuccess)
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new {articles.Errors});
+                    return Ok(articles.Data);
+
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
+
                 }
               
-
-                return Ok(articles.Data);
             }catch(Exception ex)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
