@@ -13,6 +13,7 @@ namespace Master_DAL.Models
         public string CommentDescription { get; set; }
         public Guid ArticlesId { get; set; }
         public Articles Articles { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         #region DomainDrivenapproach
         //public Comments(Guid id, string commentDescription,string articlesId) : base(id)
