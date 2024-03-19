@@ -54,6 +54,7 @@ namespace Master_BLL
             services.AddScoped<IUploadImageRepository, UploadImageRepository>();
             services.AddScoped<IArticlesRepository, ArticlesRepository>();
             services.AddScoped<IHelpherMethods, HelpherMethods>();
+            services.AddScoped<ICommentsRepository, CommentsRepository>();
 
             //builder.Services.Add(new ServiceDescriptor(
             //    typeof(IArticlesRepository),

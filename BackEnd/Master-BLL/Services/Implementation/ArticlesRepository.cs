@@ -44,6 +44,7 @@ namespace Master_BLL.Services.Implementation
         {
             try
             {
+                await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
                 var articles = await uow.Repository<Articles>().GetByIdAsync(ArticlesId);
                 if(articles is null)
                 {
@@ -110,7 +111,6 @@ namespace Master_BLL.Services.Implementation
                     return Result<ArticlesGetDTOs>.Failure("Not Found");
 
                 }
-                var testForException = _mapper.Map<ArticlesUpdateDTOs>(articles);
 
                 var articlesDTO = _mapper.Map<ArticlesGetDTOs>(articles);
                 await _memoryCacheRepository.SetAsync(cacheKeys, articlesDTO, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
@@ -251,7 +251,7 @@ namespace Master_BLL.Services.Implementation
                 }
                 if (articles is null)
                 {
-                    throw new Exception("Mapping To articles Failed");
+                    throw new MappingException("Mapping To articles Failed");
                 }
                 articles.ApplicationUserId = Id.ToString();
                 await uow.Repository<Articles>().AddAsync(articles);
