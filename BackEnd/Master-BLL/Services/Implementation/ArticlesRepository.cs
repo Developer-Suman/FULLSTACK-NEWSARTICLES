@@ -350,7 +350,7 @@ namespace Master_BLL.Services.Implementation
                     
                 }
               
-                _mapper.Map(articlesUpdateDTOs, articlesTobeUpdated);
+                _mapper.Map(articlesTobeUpdated, articlesUpdateDTOs);
                 await uow.SaveChangesAsync();
                 var articlesGetDTOs = _mapper.Map<ArticlesGetDTOs>(articlesTobeUpdated);
 
