@@ -9,14 +9,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
-    [Authorize(Roles = "admin")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
+    //[Authorize(Roles = "admin")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
+    //[Route("api/[controller]"), EnableCors("AllowAllOrigins")]
     [ApiController]
     public class ArticlesController : MasterProjectControllerBase
     {
@@ -68,7 +71,13 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 {
                     return StatusCode(StatusCodes.Status400BadRequest, new { articles.Errors });
                 }
-                return Ok(articles.Data);
+
+                return new JsonResult(articles.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+
+                });
+               
 
             }
             catch(Exception ex)
@@ -86,7 +95,15 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             try
             {
                 var articlesWithComments = _articlesRepository.GetArticlesWithComments(page, pageSize, cancellationToken);
-                return Ok(articlesWithComments.Data);
+                if(articlesWithComments.Data is null)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { articlesWithComments .Errors});  
+                }
+
+                return new JsonResult(articlesWithComments.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                });
 
             }
             catch(Exception ex)
@@ -102,7 +119,16 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             try
             {
                 var commentsfromarticles = await _articlesRepository.GetCommentsWithArticlesName(page, pageSize, cancellationToken);
-                return Ok(commentsfromarticles.Data);
+                if(commentsfromarticles.Data is null)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { commentsfromarticles .Errors});
+                }
+
+                return new JsonResult(commentsfromarticles.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+
+                });
 
             }
             catch(Exception ex)
@@ -125,19 +151,44 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 GetCurrentUserFromDB();
                 var userDetails = _currentUser;
                 var articles = await _articlesRepository.SaveArticles(articlesCreateDTOs, _currentUser!.Id);
-                if(articles.IsSuccess)
+
+
+                #region SwitchStatement
+                return articles switch
                 {
-                    return Ok(articles.Data);
-                }
-                else
-                {
-                    return BadRequest(articles.Errors);
-                }
+                    { IsSuccess: true, Data: not null } => new JsonResult(articles.Data, new JsonSerializerOptions
+                    {
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+
+                    }),
+                    { IsSuccess: false, Errors: not null}=> BadRequest(articles.Errors),
+                    { Data: null}=> BadRequest(articles.Errors),
+                    _ => BadRequest("Invalid articles object") //Default case if none of the above case match
+                };
+
+                #endregion
+              
+
+              #region IfStarement
+                //if(articles.IsSuccess)
+                //{
+                //    return Ok(articles.Data);
+                //}
+                //else
+                //{
+                //    return BadRequest(articles.Errors);
+                //}
+                //if (articles.Data is null)
+                //{
+                //    return BadRequest(articles.Errors);
+                //}
+                #endregion
 
 
 
-               
-            }catch(Exception ex)
+
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
