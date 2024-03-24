@@ -12,6 +12,7 @@ using Master_DAL.Exceptions;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -76,10 +77,18 @@ namespace Master_BLL.Services.Implementation
                 }
                 List<Articles> artices = await _context.Articles.AsNoTracking().OrderByDescending(x => x.CreatedAt)
                     .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
-
+                if(artices.Count < 0)
+                {
+                    return Result<List<ArticlesGetDTOs>>.Failure("All articles not found");
+                }
               
 
                 List<ArticlesGetDTOs> articlesGetDTOs = artices.Select(x=> _mapper.Map<ArticlesGetDTOs>(x)).ToList();
+
+                if(articlesGetDTOs is null)
+                {
+                    return Result<List<ArticlesGetDTOs>>.Failure("An error occured while mapping");
+                }
 
                 await _memoryCacheRepository.SetAsync(cacheKey, articlesGetDTOs, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
                 {
@@ -111,6 +120,8 @@ namespace Master_BLL.Services.Implementation
                     return Result<ArticlesGetDTOs>.Failure("Not Found");
 
                 }
+
+
 
                 var articlesDTO = _mapper.Map<ArticlesGetDTOs>(articles);
                 await _memoryCacheRepository.SetAsync(cacheKeys, articlesDTO, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
@@ -151,8 +162,10 @@ namespace Master_BLL.Services.Implementation
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize);
 
-
-
+                if(articleswithComments is null)
+                {
+                    return Result<IQueryable<ArticlesWithCommentsDTOs>>.Failure("Could not Found Articles with Comments");
+                }
 
                 return Result<IQueryable<ArticlesWithCommentsDTOs>>.Success(articleswithComments);
 
@@ -185,6 +198,11 @@ namespace Master_BLL.Services.Implementation
                     ArticleName = x.Articles.ArticlesTitle,
 
                 })).AsNoTracking().Skip((1 - page) * pageSize).Take(pageSize).ToListAsync();
+
+                if(commentsWithArticles is null)
+                {
+                    return Result<List<CommentsWithArticles>>.Failure("All the items were not found");
+                };
 
 
 
@@ -238,7 +256,12 @@ namespace Master_BLL.Services.Implementation
                 List<string> images = await _uploadImageRepository.UploadMultipleImage(articlesCreateDTOs.filesList);
                 if (images is null || !images.Any())
                 {
-                    throw new ImageuploadExceptions("Image upload Failed");
+                    return Result<ArticlesGetDTOs>.Failure( "Image upload Failed" );
+
+                    #region OtherOption
+                    //throw new ImageuploadExceptions("Image upload Failed");
+                    //return Result<ArticlesGetDTOs>.Failure("Image upload Failed");
+                    #endregion
                 }
 
 
@@ -246,12 +269,22 @@ namespace Master_BLL.Services.Implementation
 
                 if (images is null && images.Count() <=0 )
                 {
-                    throw new ImageUrlException("Images URLs are missing");
+                    return Result<ArticlesGetDTOs>.Failure("Images URLs are missing");
+                    #region OtherOption
+                    //return Result<ArticlesGetDTOs>.Failure(new List<string> { "Images URLs are missing" });
+                    //throw new ImageUrlException("Images URLs are missing");
+                    #endregion
 
                 }
                 if (articles is null)
-                {
-                    throw new MappingException("Mapping To articles Failed");
+                {                 
+                    return Result<ArticlesGetDTOs>.Failure( "Mapping To articles Failed" );
+                    #region Other Options
+                    //return Result<ArticlesGetDTOs>.Failure("Mapping To articles Failed");
+                    //Exception is more overhead
+                    //throw new MappingException("Mapping To articles Failed");
+                    #endregion
+
                 }
                 articles.ApplicationUserId = Id.ToString();
                 await uow.Repository<Articles>().AddAsync(articles);
