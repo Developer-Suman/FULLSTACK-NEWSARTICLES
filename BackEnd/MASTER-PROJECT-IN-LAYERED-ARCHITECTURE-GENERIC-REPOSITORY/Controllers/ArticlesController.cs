@@ -17,9 +17,9 @@ using System.Text.Json.Serialization;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
-    //[Authorize(Roles = "admin")]
-    //[Authorize(AuthenticationSchemes = "Bearer")]
-    //[Route("api/[controller]"), EnableCors("AllowAllOrigins")]
+    [Authorize(Roles = "admin")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
     [ApiController]
     public class ArticlesController : MasterProjectControllerBase
     {
@@ -37,15 +37,28 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             try
             {
                 var articles = await _articlesRepository.GetArticlesById(ArticlesId, cancellationToken);
-
-                if (!articles.IsSuccess)
+                #region SwitchStatemet
+                return articles switch
                 {
-                    return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
-                }
+                    { IsSuccess: true, Data: not null } => new JsonResult(articles.Data, new JsonSerializerOptions
+                    {
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
 
-                return Ok(articles.Data);
-         
+                    }),
+                    { IsSuccess: false, Errors: not null}=>BadRequest(articles.Errors),
+                    { Data: not null}=>BadRequest(articles.Errors),
+                    _ => BadRequest("Invalid articles object")
+                };
+                #endregion
 
+                #region IfStstement
+                //if (!articles.IsSuccess)
+                //{
+                //    return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
+                //}
+
+                //return Ok(articles.Data);
+                #endregion
             }
             catch (Exception ex)
             {
@@ -67,17 +80,33 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 }
                 
                 var articles = await _articlesRepository.GetAllArticles(page, pageSize, cancellationToken);
-                if (articles.Data is null)
+                #region switchStarement
+                return articles switch
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { articles.Errors });
-                }
+                    { IsSuccess: true, Data: not null } => new JsonResult(articles.Data, new JsonSerializerOptions
+                    {
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                    }),
+                    { IsSuccess: false, Errors: not null}=>BadRequest(articles.Errors),
+                    { Data: null}=> BadRequest(articles.Errors),
+                    _ => BadRequest("Invalid articles object")
+                };
 
-                return new JsonResult(articles.Data, new JsonSerializerOptions
-                {
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                #endregion
 
-                });
-               
+                #region IfStatement
+                //if (articles.Data is null)
+                //{
+                //    return StatusCode(StatusCodes.Status400BadRequest, new { articles.Errors });
+                //}
+
+                //return new JsonResult(articles.Data, new JsonSerializerOptions
+                //{
+                //    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+
+                //});
+
+                #endregion
 
             }
             catch(Exception ex)
@@ -95,15 +124,31 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             try
             {
                 var articlesWithComments = _articlesRepository.GetArticlesWithComments(page, pageSize, cancellationToken);
-                if(articlesWithComments.Data is null)
+                #region SwitchStatement
+                return articlesWithComments switch
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { articlesWithComments .Errors});  
-                }
+                    { IsSuccess: true, Data: not null } => new JsonResult(articlesWithComments.Data, new JsonSerializerOptions
+                    {
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                    }),
+                    { IsSuccess: false, Errors: not null}=> BadRequest(articlesWithComments.Errors),
+                    { Data: null} => BadRequest(articlesWithComments.Errors),
+                    _ => BadRequest(" Invalid articlesWithComments objects")
+                };
+                #endregion
 
-                return new JsonResult(articlesWithComments.Data, new JsonSerializerOptions
-                {
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                });
+
+                #region IfStatement
+                //if (articlesWithComments.Data is null)
+                //{
+                //    return StatusCode(StatusCodes.Status400BadRequest, new { articlesWithComments.Errors });
+                //}
+
+                //return new JsonResult(articlesWithComments.Data, new JsonSerializerOptions
+                //{
+                //    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                //});
+                #endregion
 
             }
             catch(Exception ex)
@@ -119,17 +164,33 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             try
             {
                 var commentsfromarticles = await _articlesRepository.GetCommentsWithArticlesName(page, pageSize, cancellationToken);
-                if(commentsfromarticles.Data is null)
+
+                #region SwitchStatement
+                return commentsfromarticles switch
                 {
-                    return StatusCode(StatusCodes.Status400BadRequest, new { commentsfromarticles .Errors});
-                }
+                    { IsSuccess: true, Data: not null } => new JsonResult(commentsfromarticles.Data, new JsonSerializerOptions
+                    {
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
 
-                return new JsonResult(commentsfromarticles.Data, new JsonSerializerOptions
-                {
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                    }),
+                    { IsSuccess: false, Errors: not null } => BadRequest(commentsfromarticles.Errors),
+                    { Data: null } => BadRequest(commentsfromarticles.Errors),
+                    _ => BadRequest("Invalid commentsfromarticles objects")
+                } ;
+                #endregion
 
-                });
+                #region IfStatement
+                //if (commentsfromarticles.Data is null)
+                //{
+                //    return StatusCode(StatusCodes.Status400BadRequest, new { commentsfromarticles.Errors });
+                //}
 
+                //return new JsonResult(commentsfromarticles.Data, new JsonSerializerOptions
+                //{
+                //    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+
+                //});
+                #endregion
             }
             catch(Exception ex)
             {
@@ -167,9 +228,8 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 };
 
                 #endregion
-              
-
-              #region IfStarement
+             
+                #region IfStarement
                 //if(articles.IsSuccess)
                 //{
                 //    return Ok(articles.Data);
@@ -183,10 +243,6 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 //    return BadRequest(articles.Errors);
                 //}
                 #endregion
-
-
-
-
             }
             catch (Exception ex)
             {
@@ -202,18 +258,38 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             {
                 var articles = await _articlesRepository.UpdateArticles(articlesUpdateDTOs);
 
-                if (articles.IsSuccess)
-                {
-                    return Ok(articles.Data);
 
-                }
-                else
-                {
-                    return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
-                }
+                #region SwitchStatement
 
-                
-            }catch(Exception ex)
+                return articles switch
+                {
+                    { IsSuccess: true, Data: not null } => new JsonResult(articles.Data, new JsonSerializerOptions
+                    {
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                    }),
+                    { IsSuccess: false, Errors: not null } => BadRequest(articles?.Errors),
+                    { Data: null } => BadRequest(articles.Errors),
+                    _ => BadRequest("Invalid articles update")
+                };
+
+                #endregion
+
+                #region IfStatement
+
+                //if (articles.IsSuccess)
+                //{
+                //    return Ok(articles.Data);
+
+                //}
+                //else
+                //{
+                //    return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
+                //}
+
+                #endregion
+
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
@@ -227,18 +303,35 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             {
                 var articles = await _articlesRepository.DeleteArticles(id);
 
-                if(articles.IsSuccess)
+                #region SwitchStatement
+                return articles switch
                 {
-                    return Ok(articles.Data);
+                    { IsSuccess: true, Data: not null}=> new  JsonResult(articles.Data, new JsonSerializerOptions
+                    {
+                        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                    }),
+                    { IsSuccess: false, Errors: not null}=> BadRequest(articles?.Errors),
+                    { Data: null } => BadRequest(articles?.Errors),
+                    _ => BadRequest("Invalid articles Delete")
+                };
+                #endregion
 
-                }
-                else
-                {
-                    return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
+                #region IFStatement
+                //if (articles.IsSuccess)
+                //{
+                //    return Ok(articles.Data);
 
-                }
-              
-            }catch(Exception ex)
+                //}
+                //else
+                //{
+                //    return StatusCode(StatusCodes.Status404NotFound, new { articles.Errors });
+
+                //}
+                #endregion
+
+
+            }
+            catch(Exception ex)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
             }
