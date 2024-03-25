@@ -14,6 +14,9 @@ namespace Master_DAL.Models
         public Guid ArticlesId { get; set; }
         public Articles Articles { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public string? ApplicationUserId { get; set; }
+
+        public ApplicationUser ApplicationUser { get; set; }
 
         #region DomainDrivenapproach
         //public Comments(Guid id, string commentDescription,string articlesId) : base(id)

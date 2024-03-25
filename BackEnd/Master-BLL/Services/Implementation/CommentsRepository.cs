@@ -153,7 +153,7 @@ namespace Master_BLL.Services.Implementation
                 }
 
                 var comments = _mapper.Map<Comments>(commentsCreateDTOs);
-                comments.Articles.ApplicationUserId = Id.ToString();
+                comments.ApplicationUserId = Id.ToString();
                 await _unitOfWork.Repository<Comments>().AddAsync(comments);
                 await _unitOfWork.SaveChangesAsync();
 

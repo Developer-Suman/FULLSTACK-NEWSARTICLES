@@ -16,5 +16,6 @@ namespace Master_DAL.Models
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
         public ICollection<Articles> Articles { get; set; }
+        public ICollection<Comments> Comments { get; set; }
     }
 }
