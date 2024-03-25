@@ -19,6 +19,8 @@ namespace Master_DAL.Models
         public ICollection<Comments> Comments { get; set; }
         public ICollection<ArticlesImage> ArticlesImages { get; set; }
 
+      
+
         public string? ApplicationUserId { get; set; }
 
         public ApplicationUser ApplicationUser { get; set; }

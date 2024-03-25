@@ -19,7 +19,7 @@ namespace Master_BLL.Validator
                 errors.Add("Comments data should not null");
             }
 
-            if(!string.IsNullOrEmpty(commentsCreateDTOs.CommentDescription))
+            if(string.IsNullOrEmpty(commentsCreateDTOs.CommentDescription))
             {
                 errors.Add("Comments description is null");
             }
