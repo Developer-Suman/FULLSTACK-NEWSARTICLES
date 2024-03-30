@@ -4,6 +4,7 @@ using Master_DAL.Extensions;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +55,25 @@ builder.Services.AddSwaggerGen(
     }
 );
 #endregion
+
+
+
+#region Logger Configuration
+//This logger facilitates only for debugger mode, When you want to use this for production mode, you can configure this in appsetting.js
+//Log.Logger = new LoggerConfiguration()
+//    .MinimumLevel.Information()
+//    .WriteTo.Console()
+//    .WriteTo.File("logs/SumanLog-.txt", rollingInterval: RollingInterval.Minute)
+//    .CreateLogger();
+
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration).CreateLogger();
+ 
+#endregion
+
+
+
 var app = builder.Build();
 
 app.ConfigureCustomExceptionMiddleware();
