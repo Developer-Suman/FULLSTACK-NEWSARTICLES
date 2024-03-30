@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -164,6 +165,8 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             {
                 var commentsfromarticles = await _articlesRepository.GetCommentsWithArticlesName(page, pageSize, cancellationToken);
 
+                Log.Information("CommentsFromArticles => {@commentsfromarticles}", commentsfromarticles);
+
                 #region SwitchStatement
                 return commentsfromarticles switch
                 {
@@ -214,7 +217,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 var userDetails = _currentUser;
                 var articles = await _articlesRepository.SaveArticles(articlesCreateDTOs, _currentUser!.Id);
 
-
+                Log.Information("Articles =>{@articles}", articles);
                 #region SwitchStatement
                 return articles switch
                 {

@@ -29,7 +29,7 @@ namespace Master_DAL.CustomExceptionMiddleware
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Something went wrong: {ex}");
+             
                 await HandleExceptionAsync(httpContext, ex);
 
             }
