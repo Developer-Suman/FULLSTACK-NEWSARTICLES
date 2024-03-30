@@ -2,12 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Master_DAL.Models
 {
+    //[DebuggerDisplay("ArticlesId = {ArticlesId}, ArticlesTitle = {ArticlesTitle,nq}")]
     public sealed class Articles 
     {
 
