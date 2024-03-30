@@ -1,5 +1,6 @@
 using Master_BLL;
 using Master_DAL;
+using Master_DAL.Extensions;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
@@ -55,7 +56,7 @@ builder.Services.AddSwaggerGen(
 #endregion
 var app = builder.Build();
 
-
+app.ConfigureCustomExceptionMiddleware();
 ApplicationConfiguration.Configure(app);
 
 

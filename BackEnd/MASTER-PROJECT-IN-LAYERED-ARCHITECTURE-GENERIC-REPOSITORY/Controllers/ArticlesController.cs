@@ -16,9 +16,9 @@ using System.Text.Json.Serialization;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
-    [Authorize(Roles = "admin")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
+    //[Authorize(Roles = "admin")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
+    //[Route("api/[controller]"), EnableCors("AllowAllOrigins")]
     [ApiController]
     public class ArticlesController : MasterProjectControllerBase
     {
@@ -199,6 +199,8 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
         [HttpPost]
+        //[ProducesResponseType(typeof(ArticlesGetDTOs), StatusCodes.Status201Created )]
+        //[ProducesResponseType(typeof(string[]), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SaveArticles([FromForm] ArticlesCreateDTOs articlesCreateDTOs)
         {
             try
@@ -220,7 +222,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                     {
                         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
 
-                    }),
+                    }){ StatusCode = StatusCodes.Status201Created},
                     { IsSuccess: false, Errors: not null}=> BadRequest(articles.Errors),
                     { Data: null}=> BadRequest(articles.Errors),
                     _ => BadRequest("Invalid articles object") //Default case if none of the above case match
@@ -245,7 +247,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                throw new NotImplementedException("An error Occured");
             }
         }
 
