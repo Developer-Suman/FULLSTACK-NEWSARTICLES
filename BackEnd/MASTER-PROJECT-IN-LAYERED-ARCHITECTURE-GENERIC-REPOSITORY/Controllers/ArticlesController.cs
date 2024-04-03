@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Serilog;
 using System.Net.Http;
 using System.Text;
@@ -24,11 +25,13 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
     public class ArticlesController : MasterProjectControllerBase
     {
         private readonly IArticlesRepository _articlesRepository;
+        private readonly ILogger<IArticlesRepository> _logger;
 
 
-        public ArticlesController(IArticlesRepository articlesRepository, IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper) : base(userManager, mapper)
+        public ArticlesController(IArticlesRepository articlesRepository, ILogger<IArticlesRepository> logger, IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper) : base(userManager, mapper)
         {
             _articlesRepository = articlesRepository;
+            _logger = logger;
         }
 
         [HttpGet("{ArticlesId}")]
@@ -74,6 +77,11 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         {
             try
             {
+                //string pages = page.ToString();
+                //if(pages != null)
+                //{
+                //    throw new AccessViolationException("Fuck You");
+                //}
                 if(cancellationToken.IsCancellationRequested)
                 {
                     return StatusCode(StatusCodes.Status400BadRequest, "Operation Cancelled");
@@ -111,7 +119,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             }
             catch(Exception ex)
             {
-                return BadRequest(ex.Message);  
+                throw new Exception(ex.Message);
 
             }
 
@@ -166,6 +174,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 var commentsfromarticles = await _articlesRepository.GetCommentsWithArticlesName(page, pageSize, cancellationToken);
 
                 Log.Information("CommentsFromArticles => {@commentsfromarticles}", commentsfromarticles);
+                _logger.LogInformation("Log Testing");
 
                 #region SwitchStatement
                 return commentsfromarticles switch
