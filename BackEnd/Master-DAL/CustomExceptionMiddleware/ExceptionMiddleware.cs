@@ -1,5 +1,6 @@
 ﻿using Master_DAL.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,11 +13,13 @@ namespace Master_DAL.CustomExceptionMiddleware
 {
     public class ExceptionMiddleware
     {
+        private readonly ILogger<ExceptionMiddleware> _logger;
         private readonly RequestDelegate _next;
 
-        public ExceptionMiddleware(RequestDelegate next)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
 
         }
 
@@ -29,8 +32,8 @@ namespace Master_DAL.CustomExceptionMiddleware
             }
             catch (Exception ex)
             {
-             
-                await HandleExceptionAsync(httpContext, ex);
+                 _logger.LogInformation(ex.Message);
+                 await HandleExceptionAsync(httpContext, ex);
 
             }
 

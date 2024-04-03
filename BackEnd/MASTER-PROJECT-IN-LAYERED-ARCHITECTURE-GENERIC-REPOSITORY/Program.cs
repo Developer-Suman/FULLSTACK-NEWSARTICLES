@@ -3,6 +3,7 @@ using Master_DAL;
 using Master_DAL.Extensions;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -68,10 +69,34 @@ builder.Services.AddSwaggerGen(
 
 
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration).CreateLogger();
- 
-#endregion
+    .ReadFrom.Configuration(builder.Configuration).Enrich.FromLogContext().CreateLogger();
 
+#endregion  
+// Register Serilog with DI
+builder.Services.AddLogging(loggingBuilder =>
+{
+    loggingBuilder.ClearProviders();
+    loggingBuilder.AddSerilog(dispose: true);
+});
+
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    //options.Providers.Add<GzipCompressionProvider>();
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.SmallestSize;
+
+});
+
+//builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+//{
+//    options.Level = System.IO.Compression.CompressionLevel.SmallestSize;
+//});
 
 
 var app = builder.Build();
@@ -80,5 +105,5 @@ app.ConfigureCustomExceptionMiddleware();
 ApplicationConfiguration.Configure(app);
 
 
-
+app.UseResponseCompression();
 app.Run();
