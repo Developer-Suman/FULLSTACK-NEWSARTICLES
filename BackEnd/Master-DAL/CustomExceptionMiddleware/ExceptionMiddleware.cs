@@ -32,7 +32,11 @@ namespace Master_DAL.CustomExceptionMiddleware
             }
             catch (Exception ex)
             {
-                 _logger.LogInformation(ex.Message);
+                //Log the exception with Detailed Information
+                _logger.LogError(ex, "An exception occured in the middleware:{ErrorMessage}", ex.Message);
+
+                //optionally log additional context;
+                 _logger.LogError(ex,"You got Exception In");
                  await HandleExceptionAsync(httpContext, ex);
 
             }
