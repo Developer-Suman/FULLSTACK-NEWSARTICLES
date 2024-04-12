@@ -22,6 +22,8 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
 
         }
 
+        public string ControllerName => this.GetType().Name;
+
         protected UserDTOs GetCurrentUserFromDB()
         {
             if (_currentUser is null)
@@ -39,6 +41,31 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             }
 
             return _currentUser;
+        }
+
+        protected IActionResult HandleFailureResult(IEnumerable<string> errors)
+        {
+            // Check the error messages and return appropriate status code
+            if (errors.Contains("InvalidCredentials"))
+            {
+                return Unauthorized(errors);
+            }
+            else if(errors.Contains("Not Found"))
+            {
+                return NotFound(errors);
+            }
+            else if (errors.Contains("InsufficientFunds"))
+            {
+                return StatusCode(402, errors);
+            }
+            else if (errors.Contains("ForbiddenAccess"))
+            {
+                return Forbid(string.Join(", ", errors));
+            }
+            else
+            {
+                return BadRequest(errors);
+            }
         }
 
     }

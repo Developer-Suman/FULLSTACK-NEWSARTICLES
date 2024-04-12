@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Master_BLL.DTOs.Articles;
 using Master_BLL.Services.Interface;
+using Master_DAL.Exceptions;
 using Master_DAL.Models;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +21,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
     //[Authorize(Roles = "admin")]
     //[Authorize(AuthenticationSchemes = "Bearer")]
-    //[Route("api/[controller]"), EnableCors("AllowAllOrigins")]
+    [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
     [ApiController]
     public class ArticlesController : MasterProjectControllerBase
     {
@@ -48,7 +49,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
 
                     }),
-                    { IsSuccess: false, Errors: not null}=>BadRequest(articles.Errors),
+                    { IsSuccess: false, Errors: not null}=>NotFound(articles.Errors),
                     { Data: not null}=>BadRequest(articles.Errors),
                     _ => BadRequest("Invalid articles object")
                 };
@@ -63,9 +64,13 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 //return Ok(articles.Data);
                 #endregion
             }
+            catch(NotFoundException ex)
+            {
+                throw new NotFoundException(ex.Message);                
+            }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                throw new Exception(ex.Message);
 
             }
 
@@ -78,17 +83,18 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             try
             {
 
-                string pages = page.ToString();
-                if (pages != null)
-                {
-                    throw new Exception("Fuck You");
-                }
+                //string pages = page.ToString();
+                //if (pages != null)
+                //{
+                //    throw new AccessViolationException("Fuck You");
+                //}
                 if (cancellationToken.IsCancellationRequested)
                 {
                     return StatusCode(StatusCodes.Status400BadRequest, "Operation Cancelled");
                 }
                 
                 var articles = await _articlesRepository.GetAllArticles(page, pageSize, cancellationToken);
+
                 #region switchStarement
                 return articles switch
                 {
@@ -96,8 +102,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                     {
                         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
                     }),
-                    { IsSuccess: false, Errors: not null}=>BadRequest(articles.Errors),
-                    { Data: null}=> BadRequest(articles.Errors),
+                    { IsSuccess: false, Errors: not null}=> HandleFailureResult(articles.Errors),
                     _ => BadRequest("Invalid articles object")
                 };
 
@@ -118,14 +123,19 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 #endregion
 
             }
-            catch(Exception ex)
+            catch(MappingException ex)
             {
-                throw new Exception(ex.Message);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw;
 
             }
-
            
         }
+
+      
 
         [HttpGet("articles-with-comments")]
         public IActionResult GetArticlesWithComments([FromBody] int page, int pageSize, CancellationToken cancellationToken)
@@ -242,7 +252,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 };
 
                 #endregion
-             
+
                 #region IfStarement
                 //if(articles.IsSuccess)
                 //{
@@ -257,7 +267,12 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 //    return BadRequest(articles.Errors);
                 //}
                 #endregion
+            }catch(ConflictException ex) 
+            { 
+                return Conflict();
             }
+
+
             catch (Exception ex)
             {
                 throw new NotImplementedException("An error Occured");
@@ -324,7 +339,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                     {
                         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
                     }),
-                    { IsSuccess: false, Errors: not null}=> BadRequest(articles?.Errors),
+                    { IsSuccess: false, Errors: not null}=> HandleFailureResult(articles.Errors),
                     { Data: null } => BadRequest(articles?.Errors),
                     _ => BadRequest("Invalid articles Delete")
                 };

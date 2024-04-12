@@ -62,15 +62,18 @@ try
 
     #region Logger Configuration
     //This logger facilitates only for debugger mode, When you want to use this for production mode, you can configure this in appsetting.js
-    //Log.Logger = new LoggerConfiguration()
-    //    .MinimumLevel.Information()
-    //    .WriteTo.Console()
-    //    .WriteTo.File("logs/SumanLog-.txt", rollingInterval: RollingInterval.Minute)
-    //    .CreateLogger();
+    Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Information()
+        .WriteTo.Console()
+        .WriteTo.File("logs/SumanLog-.txt", rollingInterval: RollingInterval.Minute)
+        .CreateLogger();
 
 
     Log.Logger = new LoggerConfiguration()
         .ReadFrom.Configuration(builder.Configuration).Enrich.FromLogContext().CreateLogger();
+
+
+
 
     #endregion
     // Register Serilog with DI
@@ -90,18 +93,18 @@ try
 
 
 
-    builder.Services.AddResponseCompression(options =>
-    {
-        options.EnableForHttps = true;
-        options.Providers.Add<BrotliCompressionProvider>();
-        //options.Providers.Add<GzipCompressionProvider>();
-    });
+    //builder.Services.AddResponseCompression(options =>
+    //{
+    //    options.EnableForHttps = true;
+    //    options.Providers.Add<BrotliCompressionProvider>();
+    //    //options.Providers.Add<GzipCompressionProvider>();
+    //});
 
-    builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
-    {
-        options.Level = System.IO.Compression.CompressionLevel.SmallestSize;
+    //builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+    //{
+    //    options.Level = System.IO.Compression.CompressionLevel.SmallestSize;
 
-    });
+    //});
 
     //builder.Services.Configure<GzipCompressionProviderOptions>(options =>
     //{
@@ -114,15 +117,8 @@ try
     app.ConfigureCustomExceptionMiddleware();
     ApplicationConfiguration.Configure(app);
 
-    app.UseSerilogRequestLogging(options
-        => options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
-        {
-            RequestEnricher.LogAdditionalInfo(diagnosticContext, httpContext);
-        });
 
-
-
-    app.UseResponseCompression();
+    //app.UseResponseCompression();
     app.Run();
 
 }
