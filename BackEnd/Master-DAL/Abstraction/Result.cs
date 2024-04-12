@@ -14,7 +14,7 @@ namespace Master_DAL.Abstraction
 
         public T Data { get; }
 
-        protected Result(bool isSuccess,bool isException, IEnumerable<string> errors, T data = default!)
+        protected Result(bool isSuccess, IEnumerable<string> errors, T data = default!)
         {
          
             IsSuccess = isSuccess;
@@ -25,25 +25,23 @@ namespace Master_DAL.Abstraction
 
         public static Result<T> Success(T data)
         {
-            return new Result<T>(true, false, Enumerable.Empty<string>(), data);
+            return new Result<T>(true,  Enumerable.Empty<string>(), data);
         }
 
         public static Result<T> Success()
         {
-            return new Result<T>(true,false, Enumerable.Empty<string>(), default!);
+            return new Result<T>(true, Enumerable.Empty<string>(), default!);
         }
 
         public static Result<T> Failure(IEnumerable<string> errors)
         {
-            return new Result<T>(false,false, errors);
+            return new Result<T>(false, errors);
         }
 
         public static Result<T> Failure(string errors)
         {
-            return new Result<T>(false,false, new List<string> { errors });
+            return new Result<T>(false, new List<string> { errors });
         }
 
- 
-        
     }
 }

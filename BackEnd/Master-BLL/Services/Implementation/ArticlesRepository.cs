@@ -30,8 +30,6 @@ namespace Master_BLL.Services.Implementation
         private readonly IUploadImageRepository _uploadImageRepository;
         private readonly IUnitOfWork uow;
 
-        
-
         public ArticlesRepository(IUnitOfWork unitOfWork,IUploadImageRepository uploadImageRepository,ApplicationDbContext applicationDbContext, IMapper mapper, IMemoryCacheRepository memoryCacheRepository)
         {
             _context = applicationDbContext;
@@ -49,7 +47,7 @@ namespace Master_BLL.Services.Implementation
                 var articles = await uow.Repository<Articles>().GetByIdAsync(ArticlesId);
                 if(articles is null)
                 {
-                    return Result<ArticlesGetDTOs>.Failure("Articles Not Found");
+                    return Result<ArticlesGetDTOs>.Failure("Not Found");
                 }
                 uow.Repository<Articles>().Delete(articles);
                 await uow.SaveChangesAsync();
@@ -67,27 +65,28 @@ namespace Master_BLL.Services.Implementation
 
         public async Task<Result<List<ArticlesGetDTOs>>> GetAllArticles(int page, int pageSize, CancellationToken cancellationToken)
         {
+
             try
             {
                 var cacheKey = CacheKeys.Articles;
                 var cacheData = await _memoryCacheRepository.GetCahceKey<List<ArticlesGetDTOs>>(cacheKey);
-                if(cacheData is not null && cacheData.Count > 0)
+                if (cacheData is not null && cacheData.Count > 0)
                 {
                     return Result<List<ArticlesGetDTOs>>.Success(cacheData);
                 }
                 List<Articles> artices = await _context.Articles.AsNoTracking().OrderByDescending(x => x.CreatedAt)
                     .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
-                if(artices.Count < 0)
+                if (artices.Count < 0)
                 {
-                    return Result<List<ArticlesGetDTOs>>.Failure("All articles not found");
+                    return Result<List<ArticlesGetDTOs>>.Failure("Not Found");
                 }
-              
+   
+                //throw new MappingException("An error occurred while mapping");
+                List<ArticlesGetDTOs> articlesGetDTOs = artices.Select(x => _mapper.Map<ArticlesGetDTOs>(x)).ToList();          
 
-                List<ArticlesGetDTOs> articlesGetDTOs = artices.Select(x=> _mapper.Map<ArticlesGetDTOs>(x)).ToList();
-
-                if(articlesGetDTOs is null)
+                if (articlesGetDTOs is null)
                 {
-                    return Result<List<ArticlesGetDTOs>>.Failure("An error occured while mapping");
+                    return Result<List<ArticlesGetDTOs>>.Failure("Not Found");
                 }
 
                 await _memoryCacheRepository.SetAsync(cacheKey, articlesGetDTOs, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
@@ -97,16 +96,22 @@ namespace Master_BLL.Services.Implementation
 
                 return Result<List<ArticlesGetDTOs>>.Success(articlesGetDTOs);
 
-            }catch(Exception ex)
-            {
-                throw new Exception("An error occured while getting All articles");
             }
+            catch(MappingException ex)
+            {
+                throw;
+            }
+            catch(Exception ex)
+            {
+                throw;
+
+            }
+                       
         }
 
         public async Task<Result<ArticlesGetDTOs>> GetArticlesById(Guid Id, CancellationToken cancellationToken)
         {
-            try
-            {
+         
                 var cacheKeys = $"GetArticlesById{Id}";
                 var cacheData = await _memoryCacheRepository.GetCahceKey<ArticlesGetDTOs>(cacheKeys);
                 if(cacheData is not null)
@@ -117,12 +122,8 @@ namespace Master_BLL.Services.Implementation
                 var articles = await _context.Articles.SingleOrDefaultAsync(x=>x.ArticlesId == Id);
                 if(articles is null)
                 {
-                    return Result<ArticlesGetDTOs>.Failure("Not Found");
-
+                    return Result<ArticlesGetDTOs>.Failure("Articles not found");
                 }
-
-
-
                 var articlesDTO = _mapper.Map<ArticlesGetDTOs>(articles);
                 await _memoryCacheRepository.SetAsync(cacheKeys, articlesDTO, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
                 {
@@ -130,23 +131,12 @@ namespace Master_BLL.Services.Implementation
                 }, cancellationToken);
                 
                 return Result<ArticlesGetDTOs>.Success(articlesDTO);
-
-
-
-
-            }catch(Exception ex)
-            {
-                //return Result<ArticlesGetDTOs>.Exception(ex.ToString());
-                throw new Exception(ex.Message);
-               
-              
-            }
+      
         }
 
         public Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize, CancellationToken cancellationToken)
         {
-            try
-            {
+           
                 IQueryable<ArticlesWithCommentsDTOs> articleswithComments = _context.Articles
                 .Include(x => x.Comments)
                 .OrderBy(article => article.ArticlesId)  
@@ -169,11 +159,7 @@ namespace Master_BLL.Services.Implementation
 
                 return Result<IQueryable<ArticlesWithCommentsDTOs>>.Success(articleswithComments);
 
-            }
-            catch(Exception ex)
-            {
-                throw new Exception("An error occured while getting AllArticleswithComments");
-            }
+        
         }
 
         public async Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesName(int page, int pageSize, CancellationToken cancellationToken)
@@ -242,6 +228,8 @@ namespace Master_BLL.Services.Implementation
         {
             try
             {
+
+                throw new ConflictException("I got Exception like Conflict in Service");
                 await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
 
 
@@ -347,7 +335,9 @@ namespace Master_BLL.Services.Implementation
             }
             catch (Exception ex)
             {
-                throw new Exception("An error occured while adding multiple Images");
+                throw new ConflictException("I got Exception like NotFoundException in Service");
+                //return Result<ArticlesGetDTOs>.Failure("An unexpected error occured.");
+                //throw new Exception("An error occured while adding multiple Images");
             }
 
         }
