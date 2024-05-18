@@ -44,6 +44,10 @@ namespace Master_DAL.CustomExceptionMiddleware
             {
                 await HandleExceptionAsync(httpContext, ex, ex.StatusCode);
             }
+            catch(ConflictException ex)
+            {
+                await HandleExceptionAsync(httpContext, ex, ex.StatusCode);
+            }
             catch(MappingException ex)
             {
                 await HandleExceptionAsync(httpContext, ex, ex.StatusCode);

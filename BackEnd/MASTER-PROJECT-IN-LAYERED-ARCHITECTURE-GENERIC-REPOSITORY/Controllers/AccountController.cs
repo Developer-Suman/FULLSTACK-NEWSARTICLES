@@ -40,15 +40,21 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         public async Task<IActionResult> Register(RegistrationCreateDTOs registrationCreateDTOs)
         {
             var registrationResult = await _accountServices.RegisterUser(registrationCreateDTOs);
-            if(registrationResult.Data is not null)
+            return registrationResult switch
             {
-                return Ok(registrationResult.Data);
-            }
-            else
-            {
-                return BadRequest(registrationResult.Errors);
-            }
-            
+                { IsSuccess: true, Data: not null } => CreatedAtAction(nameof(Register), registrationResult.Data),
+                //{ IsSuccess: false, Errors: not null } => HandleFailureResult(registrationResult.Errors),
+                _ => BadRequest("Invalid Fields for Register User")
+            };
+            //if(registrationResult.Data is not null)
+            //{
+            //    return Ok(registrationResult.Data);
+            //}
+            //else
+            //{
+            //    return BadRequest(registrationResult.Errors);
+            //}
+
 
         }
         #endregion
@@ -72,7 +78,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
 
         #region Create Roles
-        [HttpGet("CreateRole")]
+        [HttpPost("CreateRole")]
         public async Task<ActionResult> CreateRolesAsync(string rolename)
         {
             var roleExists = await _authenticationRepository.CheckRoleAsync(rolename);
@@ -149,7 +155,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             var roles = await _authenticationRepository.GetRolesAsync(user);
             var newToken = _jwtProvider.Generate(user, roles);
             var newRefreshToken = _jwtProvider.GenerateRefreshToken();
-            user.RefreshToken= newToken;
+            user.RefreshToken= newRefreshToken;
             await _authenticationRepository.UpdateUserAsync(user);
 
             return Ok(new {Token = newToken, RefreshToken = newRefreshToken });

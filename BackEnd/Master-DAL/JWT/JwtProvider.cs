@@ -25,9 +25,9 @@ namespace Master_DAL.JWT
         public string Generate(ApplicationUser user, IList<string> roles)
         {
             var claims = new List<Claim> {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-        new Claim(ClaimTypes.Name, user.UserName!),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName!),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
             if (roles is not null && roles.Count > 0)

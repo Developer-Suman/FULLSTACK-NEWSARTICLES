@@ -47,9 +47,11 @@ namespace Master_BLL.Services.Implementation
                 var articles = await uow.Repository<Articles>().GetByIdAsync(ArticlesId);
                 if(articles is null)
                 {
-                    return Result<ArticlesGetDTOs>.Failure("Not Found");
+                    return Result<ArticlesGetDTOs>.Failure(new List<string> { "Not Found","The Articles cannot be deleted"});
                 }
+                
                 uow.Repository<Articles>().Delete(articles);
+
                 await uow.SaveChangesAsync();
 
                 var getArticlesDTO = _mapper.Map<ArticlesGetDTOs>(articles);
@@ -70,10 +72,12 @@ namespace Master_BLL.Services.Implementation
             {
                 var cacheKey = CacheKeys.Articles;
                 var cacheData = await _memoryCacheRepository.GetCahceKey<List<ArticlesGetDTOs>>(cacheKey);
+
                 if (cacheData is not null && cacheData.Count > 0)
                 {
                     return Result<List<ArticlesGetDTOs>>.Success(cacheData);
                 }
+
                 List<Articles> artices = await _context.Articles.AsNoTracking().OrderByDescending(x => x.CreatedAt)
                     .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
                 if (artices.Count < 0)
@@ -97,9 +101,9 @@ namespace Master_BLL.Services.Implementation
                 return Result<List<ArticlesGetDTOs>>.Success(articlesGetDTOs);
 
             }
-            catch(MappingException ex)
+            catch(ConflictException ex)
             {
-                throw;
+                throw new ConflictException("An error occured while mapping reference of database") ;
             }
             catch(Exception ex)
             {
@@ -229,7 +233,6 @@ namespace Master_BLL.Services.Implementation
             try
             {
 
-                throw new ConflictException("I got Exception like Conflict in Service");
                 await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
 
 

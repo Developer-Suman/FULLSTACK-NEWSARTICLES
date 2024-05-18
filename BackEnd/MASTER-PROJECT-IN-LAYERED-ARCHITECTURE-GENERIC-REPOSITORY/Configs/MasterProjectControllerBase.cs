@@ -46,6 +46,8 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
         protected IActionResult HandleFailureResult(IEnumerable<string> errors)
         {
             // Check the error messages and return appropriate status code
+
+           
             if (errors.Contains("InvalidCredentials"))
             {
                 return Unauthorized(errors);

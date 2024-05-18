@@ -14,8 +14,8 @@ using System.Text.Json;
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
 
-    [Authorize(Roles = "admin")]
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    //[Authorize(Roles = "admin")]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
 
 

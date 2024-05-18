@@ -83,11 +83,6 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             try
             {
 
-                //string pages = page.ToString();
-                //if (pages != null)
-                //{
-                //    throw new AccessViolationException("Fuck You");
-                //}
                 if (cancellationToken.IsCancellationRequested)
                 {
                     return StatusCode(StatusCodes.Status400BadRequest, "Operation Cancelled");
@@ -123,7 +118,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                 #endregion
 
             }
-            catch(MappingException ex)
+            catch(ConflictException ex)
             {
                 throw;
             }

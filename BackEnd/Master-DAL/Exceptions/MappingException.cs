@@ -24,6 +24,6 @@ namespace Master_DAL.Exceptions
             
         }
 
-        public HttpStatusCode StatusCode { get { return HttpStatusCode.BadRequest; } }
+        public HttpStatusCode StatusCode { get { return HttpStatusCode.Conflict; } }
     }
 }
