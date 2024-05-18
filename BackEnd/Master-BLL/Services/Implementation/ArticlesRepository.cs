@@ -120,7 +120,8 @@ namespace Master_BLL.Services.Implementation
         {
          
                 var cacheKeys = $"GetArticlesById{Id}";
-            var data = "Suman";
+                var data = "Suman Rai";
+                var data2 = "Morang";
                 var cacheData = await _memoryCacheRepository.GetCahceKey<ArticlesGetDTOs>(cacheKeys);
                 if(cacheData is not null)
                 {
