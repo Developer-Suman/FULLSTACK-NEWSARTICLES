@@ -113,10 +113,14 @@ namespace Master_BLL.Services.Implementation
                        
         }
 
+
+
+
         public async Task<Result<ArticlesGetDTOs>> GetArticlesById(Guid Id, CancellationToken cancellationToken)
         {
          
                 var cacheKeys = $"GetArticlesById{Id}";
+            var data = "Suman";
                 var cacheData = await _memoryCacheRepository.GetCahceKey<ArticlesGetDTOs>(cacheKeys);
                 if(cacheData is not null)
                 {
