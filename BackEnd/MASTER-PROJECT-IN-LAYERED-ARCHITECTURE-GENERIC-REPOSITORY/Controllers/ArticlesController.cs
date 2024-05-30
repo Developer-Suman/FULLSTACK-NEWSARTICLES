@@ -240,13 +240,15 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                     {
                         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
 
-                    }){ StatusCode = StatusCodes.Status201Created},
-                    { IsSuccess: false, Errors: not null}=> BadRequest(articles.Errors),
-                    { Data: null}=> BadRequest(articles.Errors),
+                    })
+                    { StatusCode = StatusCodes.Status201Created },
+                    { IsSuccess: false, Errors: not null } => BadRequest(articles.Errors),
+                    { Data: null } => BadRequest(articles.Errors),
                     _ => BadRequest("Invalid articles object") //Default case if none of the above case match
                 };
+                return Ok();
 
-                #endregion
+                //#endregion
 
                 #region IfStarement
                 //if(articles.IsSuccess)
@@ -363,3 +365,4 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
     }
 }
+#endregion

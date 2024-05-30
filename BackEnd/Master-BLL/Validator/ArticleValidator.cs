@@ -27,7 +27,7 @@ namespace Master_BLL.Validator
             {
                 errors.Add("Content is required");
             }
-            if (articlesCreateDTOs.filesList == null || articlesCreateDTOs.filesList.Count == 0)
+            if (articlesCreateDTOs.filesList == null )
             {
                 errors.Add("At least one image is required");
             }
