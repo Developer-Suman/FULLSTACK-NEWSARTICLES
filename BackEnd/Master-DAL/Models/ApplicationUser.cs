@@ -15,7 +15,10 @@ namespace Master_DAL.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
+
+        //Navigation Property
         public ICollection<Articles> Articles { get; set; }
         public ICollection<Comments> Comments { get; set; }
+        public ICollection<Likes> Likes { get; set; }
     }
 }

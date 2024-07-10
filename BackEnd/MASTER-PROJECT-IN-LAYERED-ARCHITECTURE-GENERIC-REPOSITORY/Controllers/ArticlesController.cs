@@ -4,16 +4,10 @@ using Master_BLL.Services.Interface;
 using Master_DAL.Exceptions;
 using Master_DAL.Models;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Serilog;
-using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -246,7 +240,6 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
                     { Data: null } => BadRequest(articles.Errors),
                     _ => BadRequest("Invalid articles object") //Default case if none of the above case match
                 };
-                return Ok();
 
                 //#endregion
 

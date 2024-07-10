@@ -7,16 +7,33 @@ using System.Threading.Tasks;
 
 namespace Master_DAL.Models
 {
-    public sealed class Comments 
+    public sealed class Comments : Entity
     {
-        public Guid CommentsId { get; set; }
-        public string CommentDescription { get; set; }
-        public Guid ArticlesId { get; set; }
-        public Articles Articles { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public string? ApplicationUserId { get; set; }
 
-        public ApplicationUser ApplicationUser { get; set; }
+        public Comments() : base(null) { }
+
+        public Comments(
+            string id,
+            string content,
+            string articlesId
+            ): base(id)
+        {
+            Content = content;
+            ArticlesId = articlesId;
+        }
+        public string Content { get; set; }
+        public string ArticlesId { get; set; }
+        
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public string? UserId { get; set; }
+
+
+        //Navigation Property
+        public Articles Articles { get; set; }
+        public ApplicationUser ApplicationUsers { get; set; }
+        //This is due to the Polymorphic Association(ie without Pk in Like table it take relationship with Comments)
+        public ICollection<Likes> Likes { get; set; }
+
 
         #region DomainDrivenapproach
         //public Comments(Guid id, string commentDescription,string articlesId) : base(id)
