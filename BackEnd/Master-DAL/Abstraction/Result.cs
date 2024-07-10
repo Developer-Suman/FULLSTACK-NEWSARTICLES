@@ -33,7 +33,7 @@ namespace Master_DAL.Abstraction
             return new Result<T>(true, Enumerable.Empty<string>(), default!);
         }
 
-        public static Result<T> Failure(IEnumerable<string> errors)
+        public static Result<T> Failure(params string[] errors)
         {
             return new Result<T>(false, errors);
         }

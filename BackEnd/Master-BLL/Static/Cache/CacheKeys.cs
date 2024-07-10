@@ -12,5 +12,6 @@ namespace Master_BLL.Static.Cache
         public const string Articles = "ArticlesCacheKey";
         public const string ArticlesWithComment = "ArticlesWithCommentCacheKey";
         public const string Comments = "CommentsCacheKey";
+        public const string Likes = "Likes";
     }
 }

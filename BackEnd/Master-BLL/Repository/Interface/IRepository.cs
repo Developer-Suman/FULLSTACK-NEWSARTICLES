@@ -9,7 +9,7 @@ namespace Master_BLL.Repository.Interface
 {
     public interface IRepository<TEntity> where TEntity : class
     {
-        Task<TEntity> GetByIdAsync(Guid id);
+        Task<TEntity> GetByIdAsync(string id);
         Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate);
         Task<bool> AnyAsync(Expression<Func<TEntity, bool>> filter);
         Task<TEntity> GetSingleAsync(Expression<Func<TEntity, bool>> predicate);

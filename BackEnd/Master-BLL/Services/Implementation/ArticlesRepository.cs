@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Master_BLL.DTOs.Articles;
 using Master_BLL.DTOs.Comment;
+using Master_BLL.DTOs.Likes;
 using Master_BLL.DTOs.RegistrationDTOs;
+using Master_BLL.Enum.Like;
 using Master_BLL.Repository.Interface;
 using Master_BLL.Services.Interface;
 using Master_BLL.Static.Cache;
@@ -19,6 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Master_BLL.Services.Implementation
 {
@@ -39,15 +42,15 @@ namespace Master_BLL.Services.Implementation
             _memoryCacheRepository = memoryCacheRepository;
 
         }
-        public async Task<Result<ArticlesGetDTOs>> DeleteArticles(Guid ArticlesId)
+        public async Task<Result<ArticlesGetDTOs>> Delete(string Id)
         {
             try
             {
                 await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
-                var articles = await uow.Repository<Articles>().GetByIdAsync(ArticlesId);
+                var articles = await uow.Repository<Articles>().GetByIdAsync(Id);
                 if (articles is null)
                 {
-                    return Result<ArticlesGetDTOs>.Failure(new List<string> { "Not Found", "The Articles cannot be deleted" });
+                    return Result<ArticlesGetDTOs>.Failure("Not Found", "The Articles cannot be deleted");
                 }
 
                 uow.Repository<Articles>().Delete(articles);
@@ -66,7 +69,7 @@ namespace Master_BLL.Services.Implementation
 
         }
 
-        public async Task<Result<List<ArticlesGetDTOs>>> GetAllArticles(int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<Result<List<ArticlesGetDTOs>>> GetAll(int page, int pageSize, CancellationToken cancellationToken)
         {
 
             try
@@ -117,20 +120,20 @@ namespace Master_BLL.Services.Implementation
 
 
 
-        public async Task<Result<ArticlesGetDTOs>> GetArticlesById(Guid Id, CancellationToken cancellationToken)
+        public async Task<Result<ArticlesGetDTOs>> GetArticlesById(string Id, CancellationToken cancellationToken)
         {
 
             var cacheKeys = $"GetArticlesById{Id}";
-   
 
 
-                var cacheData = await _memoryCacheRepository.GetCahceKey<ArticlesGetDTOs>(cacheKeys);
+
+            var cacheData = await _memoryCacheRepository.GetCahceKey<ArticlesGetDTOs>(cacheKeys);
             if (cacheData is not null)
             {
                 return Result<ArticlesGetDTOs>.Success(cacheData);
             }
 
-            var articles = await _context.Articles.SingleOrDefaultAsync(x => x.ArticlesId == Id);
+            var articles = await _context.Articles.SingleOrDefaultAsync(x => x.Id == Id);
             if (articles is null)
             {
                 return Result<ArticlesGetDTOs>.Failure("Articles not found");
@@ -170,6 +173,48 @@ namespace Master_BLL.Services.Implementation
 
             return Result<IQueryable<ArticlesWithCommentsDTOs>>.Success(articleswithComments);
 
+
+        }
+
+        public Task<Result<ArticlesGetDTOs>> GetById(string id, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesId(int ArticlesId)
+        {
+            public IActionResult GetProductDetails(int productId)
+            {
+                using (var context = new MyDbContext())
+                {
+                    var product = context.Products
+                                         .Include(p => p.Category)
+                                         .Include(p => p.Supplier)
+                                         .Include(p => p.Reviews) // Load initial reviews
+                                         .FirstOrDefault(p => p.ProductId == productId);
+
+                    if (product == null)
+                    {
+                        return NotFound();
+                    }
+
+                    var productDetails = new ProductDetailsViewModel
+                    {
+                        ProductId = product.ProductId,
+                        Name = product.Name,
+                        CategoryName = product.Category.CategoryName,
+                        SupplierName = product.Supplier.SupplierName,
+                        Reviews = product.Reviews.Select(r => new ReviewViewModel
+                        {
+                            ReviewId = r.ReviewId,
+                            Content = r.Content,
+                            Rating = r.Rating
+                        }).ToList()
+                    };
+
+                    return View(productDetails);
+                }
+            }
 
         }
 
@@ -235,7 +280,96 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public async Task<Result<ArticlesGetDTOs>> SaveArticles(ArticlesCreateDTOs articlesCreateDTOs, Guid Id)
+        public Task<Result<List<CommentsWithArticles>>> GetHighRatedReview(int ArticlesId)
+        {
+            var product = context.Products.Find(productId);
+            if (product != null)
+            {
+                context.Entry(product).Collection(p => p.Reviews).Query()
+                    .Where(r => r.Rating > 4) // Filter to only high-rated reviews
+                    .Load();
+            }
+
+
+        }
+
+        public Task<Result<List<CommentsWithArticles>>> GetHighRatedReview(string ArticlesId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Result<List<CommentsWithArticles>>> GetMoreReviews(int ArticlesId, int skip, int take, CancellationToken cancellationToken)
+        {
+            public IActionResult LoadMoreReviews(int productId, int skip, int take)
+            {
+                using (var context = new MyDbContext())
+                {
+                    var product = context.Products
+                                         .Include(p => p.Reviews) // Ensure initial reviews are loaded
+                                         .FirstOrDefault(p => p.ProductId == productId);
+
+                    if (product == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // Explicitly load more reviews
+                    var moreReviews = context.Reviews
+                                             .Where(r => r.ProductId == productId)
+                                             .OrderByDescending(r => r.ReviewId)  // Sort as needed
+                                             .Skip(skip)
+                                             .Take(take)
+                                             .ToList();
+
+                    // Add the additional reviews to the existing collection
+                    product.Reviews = product.Reviews.Concat(moreReviews).ToList();
+
+                    var reviewModels = product.Reviews.Select(r => new ReviewViewModel
+                    {
+                        ReviewId = r.ReviewId,
+                        Content = r.Content,
+                        Rating = r.Rating
+                    }).ToList();
+
+                    return Json(reviewModels);
+                }
+            }
+
+        }
+
+        public Task<Result<List<CommentsWithArticles>>> GetMoreReviews(string ArticlesId, int skip, int take, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Result<LikesArticlesGetDTOs>> LikeArticles(LikesArticlesCreateDTOs likesArticlesCreateDTOs)
+        {
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                
+                try
+                {
+                    await _memoryCacheRepository.RemoveAsync(CacheKeys.Likes);
+                    string newId = Guid.NewGuid().ToString();
+                    var likeArticles = new Likes(
+                        newId,
+                        likesArticlesCreateDTOs.userId,
+                        likesArticlesCreateDTOs.articlesId,
+                        LikeableType.Article
+                        );
+
+                    scope.Complete();
+                }
+                catch (Exception ex)
+                {
+                    scope.Dispose();
+                    throw new Exception("An error occured while Like Articles");
+                }
+            }
+          
+        }
+
+        public async Task<Result<ArticlesGetDTOs>> Save(ArticlesCreateDTOs articlesCreateDTOs, string Id)
         {
             try
             {
@@ -284,7 +418,7 @@ namespace Master_BLL.Services.Implementation
                     #endregion
 
                 }
-                articles.ApplicationUserId = Id.ToString();
+                articles.Id = Id.ToString();
                 await uow.Repository<Articles>().AddAsync(articles);
                 await uow.SaveChangesAsync();
 
@@ -321,7 +455,7 @@ namespace Master_BLL.Services.Implementation
                     articlesImageList.Add(new ArticlesImage
                     {
                         ArticlesImagesUrl = image,
-                        ArticlesId = articles.ArticlesId
+                        ArticlesId = articles.Id
 
                     });
 
@@ -352,12 +486,17 @@ namespace Master_BLL.Services.Implementation
 
         }
 
+        public Task<Result<ArticlesGetDTOs>> Update(ArticlesUpdateDTOs articlesUpdateDTOs)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<Result<ArticlesGetDTOs>> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs)
         {
             try
             {
                 await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
-                Articles articlesTobeUpdated = await uow.Repository<Articles>().GetByIdAsync(articlesUpdateDTOs.ArticlesId);
+                Articles articlesTobeUpdated = await uow.Repository<Articles>().GetByIdAsync(articlesUpdateDTOs.Id);
 
                 List<string> articlesImage = await _context.ArticlesImages.Where(articlesImage => articlesImage.ArticlesId == articlesUpdateDTOs.ArticlesId)
                     .Select(articlesImages => articlesImages.ArticlesImagesUrl).AsNoTracking().ToListAsync();

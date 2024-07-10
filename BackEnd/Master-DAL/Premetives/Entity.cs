@@ -8,8 +8,8 @@ namespace Master_DAL.Premetives
 {
     public abstract class Entity
     {
-        protected Entity(Guid id) =>Id = id;
+        protected Entity(string id) =>Id = id;
        
-        public Guid Id { get; set; }
+        public string Id { get; set; }
     }
 }
