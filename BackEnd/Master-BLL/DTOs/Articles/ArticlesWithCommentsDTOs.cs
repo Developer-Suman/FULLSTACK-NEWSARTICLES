@@ -9,13 +9,12 @@ using System.Threading.Tasks;
 
 namespace Master_BLL.DTOs.Articles
 {
-    public class ArticlesWithCommentsDTOs
-    {
-        public Guid ArticlesId { get; set; }
-        public string ArticlesTitle { get; set; }
-        public string ArticlesContent { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public bool IsActive { get; set; }
-        public ICollection<CommentsGetDTOs> Comments { get; set; }
-    }
+    public record ArticlesWithCommentsDTOs(
+        string Id,
+        string Title,
+        string Content,
+        DateTime PublishedDate,
+        bool IsActive,
+        List<CommentsGetDTOs> Comments
+        );
 }

@@ -7,14 +7,11 @@ using System.Threading.Tasks;
 
 namespace Master_BLL.DTOs.Articles
 {
-    public class ArticlesUpdateDTOs
-    {
-        public Guid ArticlesId { get; set; }
-        public string? ArticlesTitle { get; set; }
-        public string? ArticlesContent { get; set; }
-
-        public List<IFormFile>? filesList { get; set; }
-
-        public bool IsActive { get; set; }
-    }
+    public record ArticlesUpdateDTOs(
+        string Id,
+        string Title,
+        string Content,
+        bool IsActive,
+        List<IFormFile>? filesList
+        );
 }
