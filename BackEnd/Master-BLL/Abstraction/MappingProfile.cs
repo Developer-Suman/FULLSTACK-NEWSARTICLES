@@ -22,9 +22,9 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             CreateMap<CommentsGetDTOs, Comments>().ReverseMap();
             CreateMap<CommentsCreateDTOs, Comments>().ReverseMap();
             CreateMap<CommentsWithArticlesDTOs, Comments>().ReverseMap()
-                .ForMember(dest => dest.CommentsId, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.CommentDescription, opt => opt.MapFrom(src => src.Content))
-                .ForMember(dest => dest.ArticleName, opt => opt.MapFrom(src => src.Articles.Title));
+                .ForMember(dest => dest.ArticlesId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Comments, opt => opt.MapFrom(src => src.Content))
+                .ForMember(dest => dest.ArticlesName, opt => opt.MapFrom(src => src.Articles.Title));
 
 
             #region Likes and LikesArticlesGetDTOs

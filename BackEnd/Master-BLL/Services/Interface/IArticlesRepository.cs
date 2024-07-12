@@ -20,7 +20,7 @@ namespace Master_BLL.Services.Interface
         Task<Result<ArticlesGetDTOs>> Delete(string ArticlesId);
         Task<Result<List<ArticlesGetDTOs>>> GetAll(int page, int pageSize, CancellationToken cancellationToken);
         Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize, CancellationToken cancellationToken);
-        Task<Result<List<CommentsWithArticlesDTOs>>> GetArticlesDetails(int ArticlesId, CancellationToken cancellationToken);
+        Task<Result<List<CommentsWithArticlesDTOs>>> GetArticlesDetails(string ArticlesId, CancellationToken cancellationToken);
         //Task<Result<List<CommentsWithArticlesDTOs>>> GetCommentsWithArticlesId(int ArticlesId);
         Task<Result<List<CommentsGetDTOs>>> GetMoreComments(string ArticlesId, int skip, int take, CancellationToken cancellationToken);
         Task<Result<List<CommentsWithArticlesDTOs>>>GetHighRatedReview(string ArticlesId);

@@ -8,7 +8,7 @@ namespace Master_BLL.DTOs.Comment
 {
     public class CommentsUpdateDTOs
     {
-        public Guid CommentsId { get; set; }
+        public string CommentsId { get; set; }
         public string CommentDescription { get; set; }
         public Guid ArticlesId { get; set; }
     }

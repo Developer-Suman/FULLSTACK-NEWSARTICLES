@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Master_BLL.DTOs.Articles;
+using Master_BLL.DTOs.Comment;
+using Master_BLL.DTOs.Likes;
 using Master_BLL.Services.Interface;
 using Master_DAL.Exceptions;
 using Master_DAL.Models;
@@ -115,6 +117,82 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             };
             #endregion
         }
+
+        [HttpGet("{Id}")]
+        public async Task<IActionResult> GetArticlesWithComments([FromQuery] int pageIndex, [FromQuery] int PageSize, CancellationToken cancellationToken)
+        {
+            var getArticlesWithCommentstData = _articlesRepository.GetArticlesWithComments(pageIndex, PageSize, cancellationToken);
+
+            #region switch
+            return getArticlesWithCommentstData switch
+            {
+                { IsSuccess: true, Data: not null } => new JsonResult(getArticlesWithCommentstData.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                }),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(getArticlesWithCommentstData.Errors),
+                _ => BadRequest("Invalid Data")
+            };
+            #endregion
+        }
+
+
+        [HttpGet("{Id}")]
+        public async Task<IActionResult> GetArticlesDetails([FromRoute] string Id, CancellationToken cancellationToken)
+        {
+            var getArticlesWithCommentstData = await _articlesRepository.GetArticlesDetails(Id, cancellationToken);
+
+            #region switch
+            return getArticlesWithCommentstData switch
+            {
+                { IsSuccess: true, Data: not null } => new JsonResult(getArticlesWithCommentstData.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                }),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(getArticlesWithCommentstData.Errors),
+                _ => BadRequest("Invalid Data")
+            };
+            #endregion
+        }
+
+
+        [HttpGet("{Id}")]
+        public async Task<IActionResult> GetMoreComments([FromRoute] string Id, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var getmoreCommentstData = await _articlesRepository.GetMoreComments(Id, page, pageSize,cancellationToken);
+
+            #region switch
+            return getmoreCommentstData switch
+            {
+                { IsSuccess: true, Data: not null } => new JsonResult(getmoreCommentstData.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                }),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(getmoreCommentstData.Errors),
+                _ => BadRequest("Invalid Data")
+            };
+            #endregion
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> LikeArticles([FromBody] LikesArticlesCreateDTOs likesArticlesCreateDTOs, CancellationToken cancellationToken)
+        {
+            var getLikeArticles = await _articlesRepository.LikeArticles(likesArticlesCreateDTOs);
+
+            #region switch
+            return getLikeArticles switch
+            {
+                { IsSuccess: true, Data: not null } => new JsonResult(getLikeArticles.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                }),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(getLikeArticles.Errors),
+                _ => BadRequest("Invalid Data")
+            };
+            #endregion
+        }
+
 
 
 

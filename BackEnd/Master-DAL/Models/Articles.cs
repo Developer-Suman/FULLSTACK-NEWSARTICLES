@@ -35,7 +35,7 @@ namespace Master_DAL.Models
         public string Title { get; set; }
         public string Content { get; set; }
         public DateTime PublishedDate { get; set; } = DateTime.Now;
-        public bool IsActive { get; set; }
+        public bool? IsActive { get; set; }
         public string? UserId { get; set; }
 
 

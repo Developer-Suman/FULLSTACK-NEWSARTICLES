@@ -194,7 +194,7 @@ namespace Master_BLL.Services.Implementation
         }
 
 
-        public async Task<Result<List<CommentsWithArticlesDTOs>>> GetArticlesDetails(int ArticlesId,CancellationToken cancellationToken)
+        public async Task<Result<List<CommentsWithArticlesDTOs>>> GetArticlesDetails(string ArticlesId,CancellationToken cancellationToken)
         {
             try
             {
@@ -208,7 +208,9 @@ namespace Master_BLL.Services.Implementation
 
 
 
-                List<CommentsWithArticlesDTOs> commentsWithArticles = await _context.Articles.SelectMany(a => a.Comments
+                List<CommentsWithArticlesDTOs> commentsWithArticles = await _context.Articles
+                .SelectMany(a => a.Comments
+                .Where(x=>x.ArticlesId == ArticlesId)
                 .Select(x => new CommentsWithArticlesDTOs(
                     x.Content,
                     x.Id,
@@ -380,7 +382,7 @@ namespace Master_BLL.Services.Implementation
                         articlesData.Title,
                         articlesData.Content,
                         articlesData.PublishedDate,
-                        articlesData.IsActive,
+                        articlesData.IsActive ?? true,
                         articlesData.UserId,
                         imagesPath.Select(image=>image.ImagesUrl).ToList());
 
@@ -450,7 +452,7 @@ namespace Master_BLL.Services.Implementation
                         articlesToBeUpdated.Title,
                         articlesToBeUpdated.Content,
                         articlesToBeUpdated.PublishedDate,
-                        articlesToBeUpdated.IsActive,
+                        articlesToBeUpdated.IsActive ?? true,
                         articlesToBeUpdated.UserId,
                         updatedImages.Select(image => image.ImagesUrl).ToList()
                         );
