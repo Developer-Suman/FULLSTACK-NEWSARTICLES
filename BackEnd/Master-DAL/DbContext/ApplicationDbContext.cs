@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -47,7 +48,7 @@ namespace Master_DAL.DbContext
             builder.Entity<ArticlesImage>(entity =>
             {
                 entity.HasKey(a => a.Id);
-                entity.Property(e=>e.ArticlesImagesUrl).IsRequired();
+                entity.Property(e=>e.ImagesUrl).IsRequired();
 
                 entity.HasOne(x=>x.Articles)
                 .WithMany(x=>x.ArticlesImages)
@@ -68,7 +69,7 @@ namespace Master_DAL.DbContext
                 entity.HasMany(a => a.Articles)
                 .WithOne(a => a.ApplicationUsers)
                 .HasForeignKey(a => a.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
                 
             });
 
@@ -80,7 +81,7 @@ namespace Master_DAL.DbContext
                 entity.HasOne(a=>a.ApplicationUsers)
                 .WithMany(a=>a.Articles)
                 .HasForeignKey(a=>a.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
             });
 
             #endregion
@@ -115,7 +116,7 @@ namespace Master_DAL.DbContext
                 entity.HasOne(x => x.ApplicationUsers)
                 .WithMany(x => x.Comments)
                 .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
             });
 
             #endregion
@@ -126,7 +127,7 @@ namespace Master_DAL.DbContext
                 entity.HasMany(x=>x.Comments)
                 .WithOne(x=>x.ApplicationUsers)
                 .HasForeignKey(x=>x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
             });
 
             #endregion
@@ -138,7 +139,7 @@ namespace Master_DAL.DbContext
                 entity.HasOne(x=>x.User)
                 .WithMany(x=>x.Likes)
                 .HasForeignKey(x=>x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             });
             #endregion
@@ -149,7 +150,7 @@ namespace Master_DAL.DbContext
                 entity.HasMany(x=>x.Likes)
                 .WithOne(x=>x.User)
                 .HasForeignKey(x=>x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
             });
 
             #endregion
@@ -161,7 +162,7 @@ namespace Master_DAL.DbContext
                 .WithOne()
                 .HasForeignKey(e => e.LikelableId)
                 .HasPrincipalKey(e => e.Id)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             });
 
@@ -171,9 +172,10 @@ namespace Master_DAL.DbContext
                 .WithOne()
                 .HasForeignKey(e => e.Id)
                 .HasPrincipalKey(e => e.Id)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             });
+
 
             #endregion
 

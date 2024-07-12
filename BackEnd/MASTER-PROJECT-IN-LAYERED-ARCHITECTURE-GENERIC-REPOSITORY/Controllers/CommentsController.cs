@@ -15,7 +15,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
 
     //[Authorize(Roles = "admin")]
-    //[Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
 
 
@@ -31,7 +31,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
         [HttpGet("{CommentsId}")]
-        public async Task<IActionResult> GetCommentsById([FromRoute] Guid CommentsId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetCommentsById([FromRoute] string CommentsId, CancellationToken cancellationToken)
         {
             try
             {

@@ -7,16 +7,13 @@ using System.Threading.Tasks;
 
 namespace Master_BLL.DTOs.Articles
 {
-    public class ArticlesGetDTOs
-    {
-        public Guid ArticlesId { get; set; }
-        public string ArticlesTitle { get; set; }
-        public string ArticlesContent { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public bool IsActive { get; set; }
-
-        public string ApplicationUserId { get; set; }
-
-
-    }
+    public record ArticlesGetDTOs(
+        string Id,
+        string Title,
+        string Content,
+        DateTime PublishedDate,
+        bool IsActive,
+        string userId,
+        List<string> articlesImages
+        );
 }

@@ -10,11 +10,11 @@ namespace Master_BLL.Services.Interface
 {
     public interface ICommentsRepository
     {
-        Task<Result<CommentsGetDTOs>> SaveComments(CommentsCreateDTOs commentsCreateDTOs, Guid Id);
-        Task<Result<List<CommentsGetDTOs>>> GetCommentsByUserId(Guid userId, CancellationToken cancellationToken);
-        Task<Result<CommentsGetDTOs>> GetCommentsByCommentId(Guid commentId, CancellationToken cancellationToken);
+        Task<Result<CommentsGetDTOs>> SaveComments(CommentsCreateDTOs commentsCreateDTOs, string Id);
+        Task<Result<List<CommentsGetDTOs>>> GetCommentsByUserId(string userId, CancellationToken cancellationToken);
+        Task<Result<CommentsGetDTOs>> GetCommentsByCommentId(string commentId, CancellationToken cancellationToken);
         Task<Result<List<CommentsGetDTOs>>> GetAllComments(int page, int pazeSize, CancellationToken cancellationToken);
         Task<Result<CommentsGetDTOs>> UpdateComments(CommentsUpdateDTOs commentsUpdateDTOs);
-        Task<Result<CommentsGetDTOs>> DeleteComments(Guid CommentsId);
+        Task<Result<CommentsGetDTOs>> DeleteComments(string CommentsId);
     }
 }

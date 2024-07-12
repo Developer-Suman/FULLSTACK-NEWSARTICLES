@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Master_DAL.Models
 {
     //[DebuggerDisplay("ArticlesId = {ArticlesId}, ArticlesTitle = {ArticlesTitle,nq}")]
-    public sealed class Articles : Entity
+    public class Articles : Entity
     {
 
         public Articles() : base(null)
@@ -35,14 +35,14 @@ namespace Master_DAL.Models
         public string Title { get; set; }
         public string Content { get; set; }
         public DateTime PublishedDate { get; set; } = DateTime.Now;
-        public bool IsActive { get; set; }
+        public bool? IsActive { get; set; }
         public string? UserId { get; set; }
 
 
         //NavigaionProperty
         public ICollection<ArticlesImage> ArticlesImages { get; set; }
         public ApplicationUser ApplicationUsers { get; set; }
-        public ICollection<Comments> Comments { get; set; }
+        public virtual ICollection<Comments> Comments { get; set; } = new List<Comments>();
         //This is due to the Polymorphic Association(ie without Pk in Like table it take relationship with Articles)
         public ICollection<Likes> Likes { get; set; }
 

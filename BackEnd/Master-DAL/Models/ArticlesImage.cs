@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Master_DAL.Premetives;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,12 +9,22 @@ using System.Threading.Tasks;
 
 namespace Master_DAL.Models
 {
-    public sealed class ArticlesImage
+    public sealed class ArticlesImage : Entity
     {
-        
-        public string Id { get; set; }
+        public ArticlesImage(): base(null) { }
 
-        public string? ArticlesImagesUrl { get; set; }
+        public ArticlesImage(
+            string id,
+            string imageUrl,
+            string articlesId
+            ): base(id)
+        {
+            ImagesUrl = imageUrl;
+            ArticlesId = articlesId;
+            
+        }
+
+        public string? ImagesUrl { get; set; }
 
         public string ArticlesId { get; set; }
         public Articles? Articles { get; set; }

@@ -3,7 +3,6 @@ using Master_BLL.DTOs.Articles;
 using Master_BLL.DTOs.Comment;
 using Master_BLL.DTOs.Likes;
 using Master_BLL.DTOs.RegistrationDTOs;
-using Master_BLL.Enum.Like;
 using Master_BLL.Repository.Interface;
 using Master_BLL.Services.Interface;
 using Master_BLL.Static.Cache;
@@ -12,6 +11,7 @@ using Master_DAL.Abstraction;
 using Master_DAL.DbContext;
 using Master_DAL.Exceptions;
 using Master_DAL.Models;
+using Master_DAL.Models.Enum.Likes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -31,31 +31,31 @@ namespace Master_BLL.Services.Implementation
         private readonly IMapper _mapper;
         private readonly IMemoryCacheRepository _memoryCacheRepository;
         private readonly IUploadImageRepository _uploadImageRepository;
-        private readonly IUnitOfWork uow;
+        private readonly IUnitOfWork _unitofwork;
 
         public ArticlesRepository(IUnitOfWork unitOfWork, IUploadImageRepository uploadImageRepository, ApplicationDbContext applicationDbContext, IMapper mapper, IMemoryCacheRepository memoryCacheRepository)
         {
             _context = applicationDbContext;
             _mapper = mapper;
-            uow = unitOfWork;
+            _unitofwork = unitOfWork;
             _uploadImageRepository = uploadImageRepository;
             _memoryCacheRepository = memoryCacheRepository;
 
         }
-        public async Task<Result<ArticlesGetDTOs>> Delete(string Id)
+        public async Task<Result<ArticlesGetDTOs>> Delete(string Id )
         {
             try
             {
                 await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
-                var articles = await uow.Repository<Articles>().GetByIdAsync(Id);
+                var articles = await _unitofwork.Repository<Articles>().GetByIdAsync(Id);
                 if (articles is null)
                 {
                     return Result<ArticlesGetDTOs>.Failure("Not Found", "The Articles cannot be deleted");
                 }
 
-                uow.Repository<Articles>().Delete(articles);
+                _unitofwork.Repository<Articles>().Delete(articles);
 
-                await uow.SaveChangesAsync();
+                await _unitofwork.SaveChangesAsync();
 
                 var getArticlesDTO = _mapper.Map<ArticlesGetDTOs>(articles);
                 return Result<ArticlesGetDTOs>.Success(getArticlesDTO);
@@ -68,7 +68,7 @@ namespace Master_BLL.Services.Implementation
 
 
         }
-
+            
         public async Task<Result<List<ArticlesGetDTOs>>> GetAll(int page, int pageSize, CancellationToken cancellationToken)
         {
 
@@ -82,7 +82,7 @@ namespace Master_BLL.Services.Implementation
                     return Result<List<ArticlesGetDTOs>>.Success(cacheData);
                 }
 
-                List<Articles> artices = await _context.Articles.AsNoTracking().OrderByDescending(x => x.CreatedAt)
+                List<Articles> artices = await _context.Articles.AsNoTracking().OrderByDescending(x => x.PublishedDate)
                     .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
                 if (artices.Count < 0)
                 {
@@ -117,13 +117,10 @@ namespace Master_BLL.Services.Implementation
 
         }
 
-
-
-
-        public async Task<Result<ArticlesGetDTOs>> GetArticlesById(string Id, CancellationToken cancellationToken)
+        public async Task<Result<ArticlesGetDTOs>> GetById(string Id, CancellationToken cancellationToken)
         {
 
-            var cacheKeys = $"GetArticlesById{Id}";
+            var cacheKeys = $"GetById{Id}";
 
 
 
@@ -151,99 +148,79 @@ namespace Master_BLL.Services.Implementation
         public Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize, CancellationToken cancellationToken)
         {
 
-            IQueryable<ArticlesWithCommentsDTOs> articleswithComments = _context.Articles
-            .Include(x => x.Comments)
-            .OrderBy(article => article.ArticlesId)
-            .AsSplitQuery()
-            .Select(articles => new ArticlesWithCommentsDTOs
-            {
-                ArticlesId = articles.ArticlesId,
-                ArticlesTitle = articles.ArticlesTitle,
-                ArticlesContent = articles.ArticlesContent,
-                Comments = articles.Comments.Select(a => _mapper.Map<CommentsGetDTOs>(a)).ToList(),
-            })
-            .AsNoTracking()
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            var articlesQuery = _context.Articles
+                .Include(articles => articles.Comments)
+                .OrderBy(article => article.Id)
+                .AsSingleQuery()
+                .AsNoTracking()
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
 
-            if (articleswithComments is null)
+            var articlesWithCommentsDTOs = articlesQuery
+                .Select(articles => new ArticlesWithCommentsDTOs(
+                articles.Id,
+                articles.Title,
+                articles.Content,
+                articles.PublishedDate,
+                true,
+                articles.Comments.Select(a => _mapper.Map<CommentsGetDTOs>(a)).ToList()
+                )).ToList();
+
+            #region Less Optimized
+            //IQueryable<ArticlesWithCommentsDTOs> articleswithComments = _context.Articles
+            //.Include(x => x.Comments)
+            //.OrderBy(article => article.Id)
+            //.AsSplitQuery()
+            //.Select(articles => new ArticlesWithCommentsDTOs(
+            //    articles.Id,
+            //    articles.Title,
+            //    articles.Content,
+            //    articles.PublishedDate,
+            //    true,
+            //    articles.Comments.Select(a => _mapper.Map<CommentsGetDTOs>(a)).ToList()
+            //    ))
+            //.AsNoTracking()
+            //.Skip((page - 1) * pageSize)
+            //.Take(pageSize);
+            #endregion
+            if (!articlesWithCommentsDTOs.Any())
             {
                 return Result<IQueryable<ArticlesWithCommentsDTOs>>.Failure("Could not Found Articles with Comments");
             }
 
-            return Result<IQueryable<ArticlesWithCommentsDTOs>>.Success(articleswithComments);
+            return Result<IQueryable<ArticlesWithCommentsDTOs>>.Success(articlesWithCommentsDTOs.AsQueryable());
 
 
         }
 
-        public Task<Result<ArticlesGetDTOs>> GetById(string id, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
 
-        public Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesId(int ArticlesId)
-        {
-            public IActionResult GetProductDetails(int productId)
-            {
-                using (var context = new MyDbContext())
-                {
-                    var product = context.Products
-                                         .Include(p => p.Category)
-                                         .Include(p => p.Supplier)
-                                         .Include(p => p.Reviews) // Load initial reviews
-                                         .FirstOrDefault(p => p.ProductId == productId);
-
-                    if (product == null)
-                    {
-                        return NotFound();
-                    }
-
-                    var productDetails = new ProductDetailsViewModel
-                    {
-                        ProductId = product.ProductId,
-                        Name = product.Name,
-                        CategoryName = product.Category.CategoryName,
-                        SupplierName = product.Supplier.SupplierName,
-                        Reviews = product.Reviews.Select(r => new ReviewViewModel
-                        {
-                            ReviewId = r.ReviewId,
-                            Content = r.Content,
-                            Rating = r.Rating
-                        }).ToList()
-                    };
-
-                    return View(productDetails);
-                }
-            }
-
-        }
-
-        public async Task<Result<List<CommentsWithArticles>>> GetCommentsWithArticlesName(int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<Result<List<CommentsWithArticlesDTOs>>> GetArticlesDetails(string ArticlesId,CancellationToken cancellationToken)
         {
             try
             {
-                var cacheKey = $"GetCommentsWithArticlesName{page}{pageSize}";
-                var cacheData = await _memoryCacheRepository.GetCahceKey<List<CommentsWithArticles>>(cacheKey);
+                var cacheKey = $"GetArticlesDetails{ArticlesId}";
+                var cacheData = await _memoryCacheRepository.GetCahceKey<List<CommentsWithArticlesDTOs>>(cacheKey);
 
                 if (cacheData is not null)
                 {
-                    return Result<List<CommentsWithArticles>>.Success(cacheData);
+                    return Result<List<CommentsWithArticlesDTOs>>.Success(cacheData);
                 }
 
 
 
-                List<CommentsWithArticles> commentsWithArticles = await _context.Articles.SelectMany(x => x.Comments
-                .Select(x => new CommentsWithArticles()
-                {
-                    CommentsId = x.CommentsId,
-                    CommentDescription = x.CommentDescription,
-                    ArticleName = x.Articles.ArticlesTitle,
-
-                })).AsNoTracking().Skip((1 - page) * pageSize).Take(pageSize).ToListAsync();
+                List<CommentsWithArticlesDTOs> commentsWithArticles = await _context.Articles
+                .SelectMany(a => a.Comments
+                .Where(x=>x.ArticlesId == ArticlesId)
+                .Select(x => new CommentsWithArticlesDTOs(
+                    x.Content,
+                    x.Id,
+                    a.Content
+                    )
+                )).AsNoTracking().Skip((1 - 1) * 1).Take(1).ToListAsync();
 
                 if (commentsWithArticles is null)
                 {
-                    return Result<List<CommentsWithArticles>>.Failure("All the items were not found");
+                    return Result<List<CommentsWithArticlesDTOs>>.Failure("All the items were not found");
                 };
 
 
@@ -256,22 +233,7 @@ namespace Master_BLL.Services.Implementation
 
 
 
-                //List<CommentsWithArticles> commentsWithArticles = await _context.Articles.SelectMany(x => x.Comments
-                //.Select(x => _mapper.Map<CommentsWithArticles>(x)));
-
-                #region ImplementArticlesNameInAutomapper
-                //List<CommentsWithArticles> commentsWithArticles = await _context.Articles.SelectMany(x => x.Comments
-                //.Select(x => new CommentsWithArticles()
-                //{
-                //    CommentsId = x.CommentsId,
-                //    CommentDescription = x.CommentDescription,
-                //    ArticleName = x.Articles.ArticlesTitle,
-
-                //})).AsNoTracking().Skip((1 - page) * pageSize).Take(pageSize).ToListAsync();
-                #endregion
-
-
-                return Result<List<CommentsWithArticles>>.Success(commentsWithArticles);
+                return Result<List<CommentsWithArticlesDTOs>>.Success(commentsWithArticles);
 
             }
             catch (Exception)
@@ -280,66 +242,62 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public Task<Result<List<CommentsWithArticles>>> GetHighRatedReview(int ArticlesId)
-        {
-            var product = context.Products.Find(productId);
-            if (product != null)
-            {
-                context.Entry(product).Collection(p => p.Reviews).Query()
-                    .Where(r => r.Rating > 4) // Filter to only high-rated reviews
-                    .Load();
-            }
 
-
-        }
-
-        public Task<Result<List<CommentsWithArticles>>> GetHighRatedReview(string ArticlesId)
+        public Task<Result<List<CommentsWithArticlesDTOs>>> GetHighRatedReview(string ArticlesId)
         {
             throw new NotImplementedException();
+            //var articles = _context.Articles.Find(ArticlesId);
+            //if (articles != null)
+            //{
+            //    _context.Entry(articles).Collection(p => p.ArticlesImages).Query()
+            //        .Where(r => r.Rating > 4) // Filter to only high-rated reviews
+            //        .Load();
+            //}
         }
 
-        public Task<Result<List<CommentsWithArticles>>> GetMoreReviews(int ArticlesId, int skip, int take, CancellationToken cancellationToken)
-        {
-            public IActionResult LoadMoreReviews(int productId, int skip, int take)
-            {
-                using (var context = new MyDbContext())
-                {
-                    var product = context.Products
-                                         .Include(p => p.Reviews) // Ensure initial reviews are loaded
-                                         .FirstOrDefault(p => p.ProductId == productId);
 
-                    if (product == null)
+        public async Task<Result<List<CommentsGetDTOs>>> GetMoreComments(string ArticlesId, int skip, int take, CancellationToken cancellationToken)
+        {
+            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    var articles = _context.Articles
+                                     .Include(p => p.Comments) 
+                                     .FirstOrDefault(p => p.Id == ArticlesId);
+
+                    if (articles is null)
                     {
-                        return NotFound();
+                        return Result<List<CommentsGetDTOs>>.Failure("NotFound", "Articles are not Found");
                     }
 
-                    // Explicitly load more reviews
-                    var moreReviews = context.Reviews
-                                             .Where(r => r.ProductId == productId)
-                                             .OrderByDescending(r => r.ReviewId)  // Sort as needed
+                    // Explicitly load more Comments
+                    var moreComments = _context.Comments
+                                             .Where(r => r.ArticlesId == ArticlesId)
+                                             .OrderByDescending(r => r.Id)  
                                              .Skip(skip)
                                              .Take(take)
                                              .ToList();
 
-                    // Add the additional reviews to the existing collection
-                    product.Reviews = product.Reviews.Concat(moreReviews).ToList();
+                    // Add the additional Comments to the existing collection
+                    articles.Comments = articles.Comments.Concat(moreComments).ToList();
 
-                    var reviewModels = product.Reviews.Select(r => new ReviewViewModel
-                    {
-                        ReviewId = r.ReviewId,
-                        Content = r.Content,
-                        Rating = r.Rating
-                    }).ToList();
+                    var reviewModels = articles.Comments.Select(r => new CommentsGetDTOs
+                    (
+                        r.Id,
+                        r.Content,
+                        r.ArticlesId
+                        )).ToList();
 
-                    return Json(reviewModels);
+                    return Result<List<CommentsGetDTOs>>.Success(reviewModels);
+
                 }
+                catch (Exception ex)
+                {
+                    throw new Exception("An error occured while getting Review");
+                }
+               
             }
-
-        }
-
-        public Task<Result<List<CommentsWithArticles>>> GetMoreReviews(string ArticlesId, int skip, int take, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<Result<LikesArticlesGetDTOs>> LikeArticles(LikesArticlesCreateDTOs likesArticlesCreateDTOs)
@@ -357,8 +315,11 @@ namespace Master_BLL.Services.Implementation
                         likesArticlesCreateDTOs.articlesId,
                         LikeableType.Article
                         );
+                    await _unitofwork.Repository<Likes>().AddAsync(likeArticles);
+                    await _unitofwork.SaveChangesAsync();
 
                     scope.Complete();
+                    return Result<LikesArticlesGetDTOs>.Success(_mapper.Map<LikesArticlesGetDTOs>(likeArticles));
                 }
                 catch (Exception ex)
                 {
@@ -369,173 +330,147 @@ namespace Master_BLL.Services.Implementation
           
         }
 
-        public async Task<Result<ArticlesGetDTOs>> Save(ArticlesCreateDTOs articlesCreateDTOs, string Id)
+        public async Task<Result<ArticlesGetDTOs>> Save(ArticlesCreateDTOs articlesCreateDTOs, List<IFormFile> filesList, string Id)
         {
-            try
+            using(var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-
-                await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
-
-
-                var validationError = ArticleValidator.Validate(articlesCreateDTOs);
-                if (validationError.Any())
+                try
                 {
-                    return Result<ArticlesGetDTOs>.Failure(validationError.ToArray());
-                }
+                    await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
 
 
-
-                List<string> images = await _uploadImageRepository.UploadMultipleImage(articlesCreateDTOs.filesList);
-                if (images is null || !images.Any())
-                {
-                    return Result<ArticlesGetDTOs>.Failure("Image upload Failed");
-
-                    #region OtherOption
-                    //throw new ImageuploadExceptions("Image upload Failed");
-                    //return Result<ArticlesGetDTOs>.Failure("Image upload Failed");
-                    #endregion
-                }
-
-
-                var articles = _mapper.Map<Articles>(articlesCreateDTOs);
-
-                if (images is null && images.Count() <= 0)
-                {
-                    return Result<ArticlesGetDTOs>.Failure("Images URLs are missing");
-                    #region OtherOption
-                    //return Result<ArticlesGetDTOs>.Failure(new List<string> { "Images URLs are missing" });
-                    //throw new ImageUrlException("Images URLs are missing");
-                    #endregion
-
-                }
-                if (articles is null)
-                {
-                    return Result<ArticlesGetDTOs>.Failure("Mapping To articles Failed");
-                    #region Other Options
-                    //return Result<ArticlesGetDTOs>.Failure("Mapping To articles Failed");
-                    //Exception is more overhead
-                    //throw new MappingException("Mapping To articles Failed");
-                    #endregion
-
-                }
-                articles.Id = Id.ToString();
-                await uow.Repository<Articles>().AddAsync(articles);
-                await uow.SaveChangesAsync();
-
-                #region UseSelectToSaveMultipleImage
-                //List<string> imagess = await _uploadImageRepository.UploadMultipleImage(articlesCreateDTOs.filesList);
-                //if (images is null || !images.Any())
-                //{
-                //    return Result<ArticlesGetDTOs>.Exception("Image upload Failed");
-                //}
-
-
-                //List<ArticlesImagesDTOs> articlesImages = articlesCreateDTOs.articlesImages.ToList();
-                //IList<ArticlesImage> articlesImagesList = articlesImages.Select(article => new ArticlesImage
-                //{
-                //    ArticlesImagesUrl = images,
-                //    ArticlesId = articles.ArticlesId
-
-                //}).ToList();
-
-                //var Articles = new Articles()
-                //{
-
-                //    ArticlesImages = articlesImagesList,
-
-                //};
-
-                //await uow.Repository<Articles>().AddAsync(Articles);
-                #endregion
-
-
-                var articlesImageList = new List<ArticlesImage>();
-                foreach (var image in images)
-                {
-                    articlesImageList.Add(new ArticlesImage
+                    var validationError = ArticleValidator.Validate(articlesCreateDTOs);
+                    if (validationError.Any())
                     {
-                        ArticlesImagesUrl = image,
-                        ArticlesId = articles.Id
+                        return Result<ArticlesGetDTOs>.Failure(validationError.ToArray());
+                    }
 
+
+                    string newId = Guid.NewGuid().ToString();
+                    var articlesData = new Articles(
+                        newId,
+                        articlesCreateDTOs.ArticlesTitle,
+                        articlesCreateDTOs.ArticlesContent,
+                        true
+                        ); 
+
+                    if(articlesData is null)
+                    {
+                        return Result<ArticlesGetDTOs>.Failure("NotFound", "Error while mapping");
+                    }
+
+                    await _unitofwork.Repository<Articles>().AddAsync(articlesData);
+
+                    var tasks = filesList.Select(async item =>
+                    {
+                        string imageUrl = await _uploadImageRepository.UploadImage(item);
+                        return new ArticlesImage(
+                            Guid.NewGuid().ToString(),
+                            imageUrl,
+                            newId
+                            );
+
+                    }).ToList();
+
+                    //Await the completion of all tasks
+                    var imagesPath = (await Task.WhenAll(tasks)).ToList();
+                    await _unitofwork.Repository<ArticlesImage>().AddRange(imagesPath);
+                    await _unitofwork.SaveChangesAsync();
+
+                    var resultDTOs = new ArticlesGetDTOs(
+                        articlesData.Id,
+                        articlesData.Title,
+                        articlesData.Content,
+                        articlesData.PublishedDate,
+                        articlesData.IsActive ?? true,
+                        articlesData.UserId,
+                        imagesPath.Select(image=>image.ImagesUrl).ToList());
+
+                    scope.Complete();
+
+                    return Result<ArticlesGetDTOs>.Success(_mapper.Map<ArticlesGetDTOs>(resultDTOs));
+
+                }
+                catch (Exception ex)
+                {
+                    scope.Dispose();
+                    throw new ConflictException("An Exception occured while Adding Articles");
+                }
+            }
+
+
+        }
+
+        public async Task<Result<ArticlesGetDTOs>> Update(string ArticlesId, ArticlesUpdateDTOs articlesUpdateDTOs, List<IFormFile> multipleFiles)
+        {
+            using(var scope= new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                try
+                {
+                    await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
+                    if (string.IsNullOrEmpty(ArticlesId))
+                    {
+                        return Result<ArticlesGetDTOs>.Failure("Please provide a valid ArticlesId");
+                    }
+
+                    var articlesToBeUpdated = await _unitofwork.Repository<Articles>().GetByIdAsync(ArticlesId);
+                    if (articlesToBeUpdated is null)
+                    {
+                        return Result<ArticlesGetDTOs>.Failure("NotFound", "ArticlesData are not Found");
+                    }
+
+                    List<string> articlesImages = _context.ArticlesImages.Where(p => p.ArticlesId == articlesToBeUpdated.Id).AsQueryable().Select(x => x.ImagesUrl).ToList();
+
+                    List<string> updateImageUrl = await _uploadImageRepository.UpdateMultipleImage(multipleFiles, articlesImages);
+
+                    List<ArticlesImage> articlesImages1 = await _context.ArticlesImages.Where(x => x.ArticlesId == articlesToBeUpdated.Id).ToListAsync();
+
+                    _unitofwork.Repository<ArticlesImage>().DeleteRange(articlesImages1);
+
+
+                    List<ArticlesImage> updatedImages = new List<ArticlesImage>();
+
+                    var task = multipleFiles.Select(async item =>
+                    {
+                        string imageURL = await _uploadImageRepository.UploadImage(item);
+                        return new ArticlesImage(
+                            Guid.NewGuid().ToString(),
+                            imageURL,
+                            articlesToBeUpdated.Id);
                     });
 
+                    var results = await Task.WhenAll(task);
+                    updatedImages.AddRange(results);
+
+                    articlesToBeUpdated.ArticlesImages = updatedImages;
+
+                    _mapper.Map(articlesUpdateDTOs, articlesToBeUpdated);
+                    await _unitofwork.SaveChangesAsync();
+
+                    var resultDTOs = new ArticlesGetDTOs(
+                        articlesToBeUpdated.Id,
+                        articlesToBeUpdated.Title,
+                        articlesToBeUpdated.Content,
+                        articlesToBeUpdated.PublishedDate,
+                        articlesToBeUpdated.IsActive ?? true,
+                        articlesToBeUpdated.UserId,
+                        updatedImages.Select(image => image.ImagesUrl).ToList()
+                        );
+
+                    scope.Complete();
+
+                    return Result<ArticlesGetDTOs>.Success(_mapper.Map<ArticlesGetDTOs>(resultDTOs));
+
                 }
-                //articles.ArticlesImages = articlesImageList;
-
-                await uow.Repository<ArticlesImage>().AddRange(articlesImageList);
-
-
-
-                await uow.SaveChangesAsync();
-
-
-
-                var articlesGet = _mapper.Map<ArticlesGetDTOs>(articles);
-                return Result<ArticlesGetDTOs>.Success(articlesGet);
-
-
-
-
-            }
-            catch (Exception ex)
-            {
-                throw new ConflictException("I got Exception like NotFoundException in Service");
-                //return Result<ArticlesGetDTOs>.Failure("An unexpected error occured.");
-                //throw new Exception("An error occured while adding multiple Images");
-            }
-
-        }
-
-        public Task<Result<ArticlesGetDTOs>> Update(ArticlesUpdateDTOs articlesUpdateDTOs)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<Result<ArticlesGetDTOs>> UpdateArticles(ArticlesUpdateDTOs articlesUpdateDTOs)
-        {
-            try
-            {
-                await _memoryCacheRepository.RemoveAsync(CacheKeys.Articles);
-                Articles articlesTobeUpdated = await uow.Repository<Articles>().GetByIdAsync(articlesUpdateDTOs.Id);
-
-                List<string> articlesImage = await _context.ArticlesImages.Where(articlesImage => articlesImage.ArticlesId == articlesUpdateDTOs.ArticlesId)
-                    .Select(articlesImages => articlesImages.ArticlesImagesUrl).AsNoTracking().ToListAsync();
-
-                if (articlesTobeUpdated is null)
+                catch (Exception ex)
                 {
-                    return Result<ArticlesGetDTOs>.Failure("Articles Not Found");
+                    scope.Dispose();
+                    throw new Exception("An exception occured while updating Articles Data");
                 }
-                List<string> updatedImage = await _uploadImageRepository.UpdateMultipleImage(articlesUpdateDTOs.filesList, articlesImage);
-
-                List<ArticlesImage> articlesImage1 = await _context.ArticlesImages.Where(x => x.ArticlesId == articlesTobeUpdated.ArticlesId).ToListAsync();
-                uow.Repository<ArticlesImage>().DeleteRange(articlesImage1);
-
-                foreach (var image in updatedImage)
-                {
-                    var articleImage = new ArticlesImage()
-                    {
-                        ArticlesId = articlesTobeUpdated.ArticlesId,
-                        ArticlesImagesUrl = image
-                    };
-
-                    uow.Repository<ArticlesImage>().Update(articleImage);
-
-                }
-
-                _mapper.Map(articlesTobeUpdated, articlesUpdateDTOs);
-                await uow.SaveChangesAsync();
-                var articlesGetDTOs = _mapper.Map<ArticlesGetDTOs>(articlesTobeUpdated);
-
-
-
-                return Result<ArticlesGetDTOs>.Success(articlesGetDTOs);
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("An error occured while Updating Articles");
 
             }
         }
+
+  
     }
 }

@@ -24,7 +24,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
 
         public string ControllerName => this.GetType().Name;
 
-        protected UserDTOs GetCurrentUserFromDB()
+        protected async Task<UserDTOs> GetCurrentUserFromDB()
         {
             if (_currentUser is null)
             {
@@ -47,22 +47,30 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
         {
             // Check the error messages and return appropriate status code
 
-           
-            if (errors.Contains("InvalidCredentials"))
+
+            if (errors.Any(errors => errors.Contains("Unauthorized")))
             {
                 return Unauthorized(errors);
             }
-            else if(errors.Contains("Not Found"))
+            else if (errors.Any(errors => errors.Contains("NotFound")))
             {
                 return NotFound(errors);
             }
-            else if (errors.Contains("InsufficientFunds"))
+            else if (errors.Any(errors => errors.Contains("InsufficientFunds")))
             {
                 return StatusCode(402, errors);
             }
-            else if (errors.Contains("ForbiddenAccess"))
+            else if (errors.Any(errors => errors.Contains("ForbiddenAccess")))
             {
                 return Forbid(string.Join(", ", errors));
+            }
+            else if (errors.Any(errors => errors.Contains("Conflict")))
+            {
+                return Conflict(errors);
+            }
+            else if (errors.Any(errors => errors.Contains("NoContent")))
+            {
+                return StatusCode(204, new { Message = "No content available.", Errors = errors });
             }
             else
             {

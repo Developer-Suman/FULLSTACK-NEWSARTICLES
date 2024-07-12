@@ -20,7 +20,7 @@ namespace Master_BLL.Repository.Implementation
             _dbSet = context.Set<TEntity>();
         }
 
-        public async Task<TEntity> GetByIdAsync(Guid id) => await _dbSet.FindAsync(id);
+        public async Task<TEntity> GetByIdAsync(string id) => await _dbSet.FindAsync(id);
 
         public async Task<int> CountAsync(Expression<Func<TEntity, bool>> predicate)
         {

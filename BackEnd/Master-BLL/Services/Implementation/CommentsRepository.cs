@@ -33,7 +33,7 @@ namespace Master_BLL.Services.Implementation
             _unitOfWork = unitOfWork;
             
         }
-        public async Task<Result<CommentsGetDTOs>> DeleteComments(Guid CommentsId)
+        public async Task<Result<CommentsGetDTOs>> DeleteComments(string CommentsId)
         {
             try
             {
@@ -53,6 +53,11 @@ namespace Master_BLL.Services.Implementation
             {
                 throw new Exception("An error occured while deleting comments");
             }
+        }
+
+        public Task<Result<CommentsGetDTOs>> DeleteComments(Guid CommentsId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Result<List<CommentsGetDTOs>>> GetAllComments(int page, int pazeSize, CancellationToken cancellationToken)
@@ -83,7 +88,7 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public async Task<Result<CommentsGetDTOs>> GetCommentsByCommentId(Guid commentId, CancellationToken cancellationToken)
+        public async Task<Result<CommentsGetDTOs>> GetCommentsByCommentId(string commentId, CancellationToken cancellationToken)
         {
             try
             {
@@ -94,7 +99,7 @@ namespace Master_BLL.Services.Implementation
                     return Result<CommentsGetDTOs>.Success(cacheData);
                 }
 
-                var comments = await _context.Comments.SingleOrDefaultAsync(x=>x.CommentsId == commentId);
+                var comments = await _context.Comments.SingleOrDefaultAsync(x=>x.Id == commentId);
                 if(comments is null)
                 {
                     return Result<CommentsGetDTOs>.Failure("Comments is not Found");
@@ -113,6 +118,11 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
+        public Task<Result<CommentsGetDTOs>> GetCommentsByCommentId(Guid commentId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<Result<List<CommentsGetDTOs>>> GetCommentsByUserId(Guid userId, CancellationToken cancellationToken)
         {
             try
@@ -125,7 +135,7 @@ namespace Master_BLL.Services.Implementation
                     return Result<List<CommentsGetDTOs>>.Success(cacheData);
                 }
 
-                List<Comments> comments = await _context.Comments.Include(x=>x.Articles).ThenInclude(y=>y.ApplicationUser).Where(x=>x.Articles.ApplicationUserId == userId.ToString()).ToListAsync();
+                List<Comments> comments = await _context.Comments.Include(x=>x.Articles).ThenInclude(y=>y.ApplicationUsers).Where(x=>x.Articles.UserId == userId.ToString()).ToListAsync();
                 List<CommentsGetDTOs> commentsDTOsByUserId = comments.Select(x=>_mapper.Map<CommentsGetDTOs>(x)).ToList();
 
                 await _memoryCacheRepository.SetAsync(cacheKey, commentsDTOsByUserId, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
@@ -140,7 +150,11 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        
+        public Task<Result<List<CommentsGetDTOs>>> GetCommentsByUserId(string userId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<Result<CommentsGetDTOs>> SaveComments(CommentsCreateDTOs commentsCreateDTOs, Guid Id)
         {
             try
@@ -154,7 +168,7 @@ namespace Master_BLL.Services.Implementation
                 }
 
                 var comments = _mapper.Map<Comments>(commentsCreateDTOs);
-                comments.ApplicationUserId = Id.ToString();
+                comments.UserId = Id.ToString();
                 await _unitOfWork.Repository<Comments>().AddAsync(comments);
                 await _unitOfWork.SaveChangesAsync();
 
@@ -166,6 +180,11 @@ namespace Master_BLL.Services.Implementation
             {
                 throw new Exception("An error occured while Saving Comments");
             }
+        }
+
+        public Task<Result<CommentsGetDTOs>> SaveComments(CommentsCreateDTOs commentsCreateDTOs, string Id)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Result<CommentsGetDTOs>> UpdateComments(CommentsUpdateDTOs commentsUpdateDTOs)

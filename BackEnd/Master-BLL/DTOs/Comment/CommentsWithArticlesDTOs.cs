@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Master_BLL.DTOs.Comment
 {
-    public record CommentsGetDTOs(
-        string CommentsId,
-        string Content,
-        string ArticlesId
+    public record CommentsWithArticlesDTOs(
+         string ArticlesName,
+        string ArticlesId,
+        string Comments
         );
 }
