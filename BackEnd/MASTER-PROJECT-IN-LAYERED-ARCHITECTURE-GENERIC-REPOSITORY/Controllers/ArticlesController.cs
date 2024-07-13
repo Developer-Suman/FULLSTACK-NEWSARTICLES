@@ -11,12 +11,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Serialization;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
-    //[Authorize(Roles = "admin")]
-    //[Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
     [ApiController]
     public class ArticlesController : MasterProjectControllerBase
@@ -31,8 +32,8 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             _logger = logger;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Save([FromBody] ArticlesCreateDTOs articlesCreateDTOs, List<IFormFile> imagefiles)
+        [HttpPost("save")]
+        public async Task<IActionResult> Save([FromForm] ArticlesCreateDTOs articlesCreateDTOs, List<IFormFile> imagefiles)
         {
             await GetCurrentUserFromDB();
             var saveArticlesResult = await _articlesRepository.Save(articlesCreateDTOs, imagefiles, _currentUser!.Id);
@@ -118,7 +119,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             #endregion
         }
 
-        [HttpGet("{Id}")]
+        [HttpGet("{id}/details-with-comments")]
         public async Task<IActionResult> GetArticlesWithComments([FromQuery] int pageIndex, [FromQuery] int PageSize, CancellationToken cancellationToken)
         {
             var getArticlesWithCommentstData = _articlesRepository.GetArticlesWithComments(pageIndex, PageSize, cancellationToken);
@@ -137,7 +138,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
 
-        [HttpGet("{Id}")]
+        [HttpGet("details/{id}")]
         public async Task<IActionResult> GetArticlesDetails([FromRoute] string Id, CancellationToken cancellationToken)
         {
             var getArticlesWithCommentstData = await _articlesRepository.GetArticlesDetails(Id, cancellationToken);
@@ -156,7 +157,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
 
-        [HttpGet("{Id}")]
+        [HttpGet("{id}/comments")]
         public async Task<IActionResult> GetMoreComments([FromRoute] string Id, int page, int pageSize, CancellationToken cancellationToken)
         {
             var getmoreCommentstData = await _articlesRepository.GetMoreComments(Id, page, pageSize,cancellationToken);
@@ -175,7 +176,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("like")]
         public async Task<IActionResult> LikeArticles([FromBody] LikesArticlesCreateDTOs likesArticlesCreateDTOs, CancellationToken cancellationToken)
         {
             var getLikeArticles = await _articlesRepository.LikeArticles(likesArticlesCreateDTOs);
