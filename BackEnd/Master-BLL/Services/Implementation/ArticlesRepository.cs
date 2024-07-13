@@ -330,7 +330,7 @@ namespace Master_BLL.Services.Implementation
           
         }
 
-        public async Task<Result<ArticlesGetDTOs>> Save(ArticlesCreateDTOs articlesCreateDTOs, List<IFormFile> filesList, string Id)
+        public async Task<Result<ArticlesGetDTOs>> Save(ArticlesCreateDTOs articlesCreateDTOs, List<IFormFile> filesList, string userId)
         {
             using(var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -352,9 +352,11 @@ namespace Master_BLL.Services.Implementation
                         articlesCreateDTOs.ArticlesTitle,
                         articlesCreateDTOs.ArticlesContent,
                         true
-                        ); 
+                        );
 
-                    if(articlesData is null)
+                    articlesData.UserId = userId;
+
+                    if (articlesData is null)
                     {
                         return Result<ArticlesGetDTOs>.Failure("NotFound", "Error while mapping");
                     }
