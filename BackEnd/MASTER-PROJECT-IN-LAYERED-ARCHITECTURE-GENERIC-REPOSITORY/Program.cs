@@ -1,5 +1,6 @@
 using Master_BLL;
 using Master_DAL;
+using Master_DAL.DbContext;
 using Master_DAL.Extensions;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -8,12 +9,10 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-
-
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-
+    
     ConfigurationManager configuration = builder.Configuration;
     builder.Services
         .AddBLL()
@@ -77,9 +76,16 @@ try
     //});
 
     DipendencyInjection.Inject(builder);
+   
     var app = builder.Build();
    
     app.ConfigureCustomExceptionMiddleware();
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(); // Replace with your actual DbContext type
+        ControllerReflection.InitializePermissionTable(dbContext);
+    }
+
     ApplicationConfiguration.Configure(app);
 
 
