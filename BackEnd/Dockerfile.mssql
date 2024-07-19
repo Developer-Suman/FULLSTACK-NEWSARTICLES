@@ -1,0 +1,15 @@
+# Use the official Microsoft SQL Server image
+FROM mcr.microsoft.com/mssql/server:2022-latest
+
+# Set environment variables
+ENV SA_PASSWORD=Silicon321
+ENV ACCEPT_EULA=Y
+
+# Create a directory for the initialization script
+RUN mkdir -p /var/opt/mssql/scripts
+
+# Copy the initialization script into the container
+COPY init.sql /var/opt/mssql/scripts/
+
+# Start SQL Server and run the initialization script
+CMD /bin/bash -c "/opt/mssql/bin/sqlservr & sleep 30 && /opt/mssql-tools/bin/sqlcmd -S 103.94.159.228 -U SA -P 'Silicon321' -i /var/opt/mssql/scripts/init.sql && wait"

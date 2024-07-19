@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: developersumaney/fullstack-database:v1
+    container_name: my_sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"   # Set the SA password for SQL Server
+      ACCEPT_EULA: "Y"                    # Accept the EULA for SQL Server
+    ports:
+      - "1433:1433"                       # Map port 1433 from container to host
+    volumes:
+      - sqlserver_data:/var/opt/mssql     # Persist SQL Server data
+
+  app:
+    #build:
+      #context: .
+      #dockerfile: Dockerfile
+    image: developersumaney/fullstack:v1
+    container_name: my_app
+    environment:
+      DB_HOST: db                         # Hostname for the SQL Server service
+      DB_USER: sa                         # SQL Server user (SA user)
+      DB_PASSWORD: YourStrong!Passw0rd    # SQL Server user password
+      DB_NAME: your_database_name         # Name of the database
+      ConnectionStrings__DefaultConnection: "Server=db;Database=your_database_name;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;Encrypt=False;"
+    depends_on:
+      - db                                # Ensure that SQL Server starts before the app
+    ports:
+      - "8080:80"                         # Map port 80 from container to host
+
+volumes:
+  sqlserver_data:

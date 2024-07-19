@@ -16,13 +16,13 @@ namespace Master_DAL.DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) 
         {
-            var databaseCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
-            if(databaseCreator != null)
-            {
-                if (!databaseCreator.CanConnect()) databaseCreator.Create();
-                if(!databaseCreator.HasTables()) databaseCreator.CreateTables();
+            //var databaseCreator = Database.GetService<IDatabaseCreator>() as RelationalDatabaseCreator;
+            //if(databaseCreator != null)
+            //{
+            //    if (!databaseCreator.CanConnect()) databaseCreator.Create();
+            //    if(!databaseCreator.HasTables()) databaseCreator.CreateTables();
 
-            }
+            //}
         }
 
 

@@ -4,7 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY</RootNamespace>
+ 
     <UserSecretsId>3cc88aa1-0240-41e7-84bf-d6ea14c41254</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
