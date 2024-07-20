@@ -179,6 +179,40 @@ namespace Master_DAL.DbContext
 
             #endregion
 
+            #region User and Permission(m:m)
+            builder.Entity<UserPermission>()
+            .HasKey(up => new { up.UserId, up.PermissionId });
+
+            builder.Entity<UserPermission>()
+            .HasOne(up => up.User)
+            .WithMany(u => u.UserPermissions)
+            .HasForeignKey(up => up.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserPermission>()
+            .HasOne(up => up.Permissions)
+            .WithMany(p => p.UserPermissions)
+            .HasForeignKey(up => up.PermissionId);
+
+            #endregion
+
+            #region Permission and ControllerAction(m:m)
+
+            builder.Entity<PermissionControllerAction>()
+            .HasKey(pca => new { pca.PermissionId, pca.ControlleractionId });
+
+            builder.Entity<PermissionControllerAction>()
+                .HasOne(pca => pca.Permission)
+                .WithMany(p => p.PermissionControllerActions)
+                .HasForeignKey(pca => pca.PermissionId);
+
+            builder.Entity<PermissionControllerAction>()
+                .HasOne(pca => pca.ControllerAction)
+                .WithMany(ca => ca.PermissionControllerActions)
+                .HasForeignKey(pca => pca.ControlleractionId);
+
+            #endregion
+
 
 
             base.OnModelCreating(builder);
@@ -188,5 +222,10 @@ namespace Master_DAL.DbContext
         public DbSet<Articles> Articles { get; set; }
         public DbSet<Comments> Comments { get; set; }
         public DbSet<ArticlesImage> ArticlesImages { get; set; }
+
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<ControllerAction> ControllerActions { get; set; }
+        public DbSet<UserPermission> UserPermissions { get; set; }
+        public DbSet<PermissionControllerAction> PermissionControllerActions { get; set; }
     }
 }
