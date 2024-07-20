@@ -23,6 +23,7 @@ namespace Master_DAL.Abstraction
 
         }
 
+
         public static Result<T> Success(T data)
         {
             return new Result<T>(true,  Enumerable.Empty<string>(), data);
