@@ -3,6 +3,7 @@ using Master_BLL.DTOs.Articles;
 using Master_BLL.DTOs.Authentication;
 using Master_BLL.DTOs.Comment;
 using Master_BLL.DTOs.Likes;
+using Master_BLL.DTOs.Permission;
 using Master_BLL.DTOs.RegistrationDTOs;
 using Master_DAL.Models;
 
@@ -17,6 +18,10 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             CreateMap<ArticlesGetDTOs, Articles>().ReverseMap();
             CreateMap<Articles, ArticlesCreateDTOs>().ReverseMap();
             CreateMap<Articles, ArticlesUpdateDTOs>().ReverseMap();
+
+
+
+            CreateMap<UserPermission, AssignPermissionGetDTOs>().ReverseMap();
 
 
             CreateMap<CommentsGetDTOs, Comments>().ReverseMap();

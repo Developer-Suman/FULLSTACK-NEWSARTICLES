@@ -79,11 +79,11 @@ try
 
 
     app.ConfigureCustomExceptionMiddleware();
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(); // Replace with your actual DbContext type
-        ControllerReflection.InitializePermissionTable(dbContext);
-    }
+    //using (var scope = app.Services.CreateScope())
+    //{
+    //    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>(); // Replace with your actual DbContext type
+    //    ControllerReflection.InitializePermissionTable(dbContext);
+    //}
 
     ApplicationConfiguration.Configure(app);
 
