@@ -97,12 +97,12 @@ namespace Master_BLL.Services.Implementation
             throw new NotImplementedException();
         }
 
-        public async Task<Result<AssignPermissionGetDTOs>> AssignPermissionToUserAsync(string userId, List<string> permissionIds)
+        public async Task<Result<AssignPermissionGetDTOs>> AssignPermissionToUserAsync(PermissionUserDTOs permissionUserDTOs)
         {
             try
             {
                 var permissions = await _context.Permissions
-                    .Where(x=> permissionIds.Contains(x.Id)).ToListAsync();
+                    .Where(x=> permissionUserDTOs.permissionIds.Contains(x.Id)).ToListAsync();
 
                 if(permissions is  null)
                 {
@@ -112,7 +112,7 @@ namespace Master_BLL.Services.Implementation
                 var UserPermission = permissions
                    .Select(p => new UserPermission
                    {
-                       UserId = userId,
+                       UserId = permissionUserDTOs.userId,
                        PermissionId = p.Id
                    }).ToList();
 
@@ -122,7 +122,7 @@ namespace Master_BLL.Services.Implementation
               
                 var assignedPermissions = UserPermission.Select(up => _mapper.Map<AssignPermissionGetDTOs>(up)).ToList();
 
-                return Result<AssignPermissionGetDTOs>.Success(new AssignPermissionGetDTOs(userId, assignedPermissions));
+                return Result<AssignPermissionGetDTOs>.Success(new AssignPermissionGetDTOs(permissionUserDTOs.userId, assignedPermissions));
                
 
 
@@ -138,13 +138,13 @@ namespace Master_BLL.Services.Implementation
             throw new NotImplementedException();
         }
 
-        public async Task<Result<bool>> RemoveControllerActionsToPermissionsAsync(PermissionDTOs permissionDTOs)
+        public async Task<Result<PermissionDTOs>> RemoveControllerActionsToPermissionsAsync(PermissionDTOs permissionDTOs)
         {
             // Check if the user exists
             var userExists = await _context.ApplicationUsers.AnyAsync(u => u.Id == permissionDTOs.userId);
             if (!userExists)
             {
-                return Result<bool>.Failure("NotFound", "User not found");
+                return Result<PermissionDTOs>.Failure("NotFound", "User not found");
             }
 
             // Retrieve permissions
@@ -153,7 +153,7 @@ namespace Master_BLL.Services.Implementation
 
             if (permissions.Count != permissionDTOs.permissionIds.Count())
             {
-                return Result<bool>.Failure("NotFound", "One or more permissions do not exist");
+                return Result<PermissionDTOs>.Failure("NotFound", "One or more permissions do not exist");
             }
 
             // Retrieve controller actions
@@ -162,7 +162,7 @@ namespace Master_BLL.Services.Implementation
 
             if (controllerActions.Count != permissionDTOs.controllerActionIds.Count())
             {
-                return Result<bool>.Failure("NotFound", "One or more controller actions do not exist");
+                return Result<PermissionDTOs>.Failure("NotFound", "One or more controller actions do not exist");
             }
 
             // Remove PermissionControllerAction entries
@@ -181,7 +181,24 @@ namespace Master_BLL.Services.Implementation
 
             await _context.SaveChangesAsync();
 
-            return Result<bool>.Success(true);
+              var UserPermission = permissions
+                   .Select(p => new UserPermission
+                   {
+                       UserId = permissionDTOs.userId,
+                       PermissionId = p.Id
+                   }).ToList();
+
+                _context.UserPermissions.AddRange(UserPermission);
+                await _context.SaveChangesAsync();
+
+
+            var result = new PermissionDTOs(
+              permissionDTOs.userId,
+              permissions.Select(x => x.Id),
+              controllerActions.Select(x => x.Id)
+              );
+
+            return Result<PermissionDTOs>.Success(result);
         }
 
         public Task<Result<AssignControllerActionToUserGetDTOs>> RemoveControllerActionToUserAsync(string userId, List<string> controlleractionId)
@@ -189,13 +206,13 @@ namespace Master_BLL.Services.Implementation
             throw new NotImplementedException();
         }
 
-        public async Task<Result<AssignPermissionGetDTOs>> RemovePermissionToUserAsync(string userId, List<string> permissionIds)
+        public async Task<Result<AssignPermissionGetDTOs>> RemovePermissionToUserAsync(PermissionUserDTOs permissionUserDTOs)
         {
             try
             {
                 // Fetch user permissions based on userId and permissionIds
                 var userPermissions = await _context.UserPermissions
-                    .Where(up => up.UserId == userId && permissionIds.Contains(up.PermissionId))
+                    .Where(up => up.UserId == permissionUserDTOs.userId && permissionUserDTOs.permissionIds.Contains(up.PermissionId))
                     .ToListAsync();
 
                 if (!userPermissions.Any())
@@ -210,7 +227,7 @@ namespace Master_BLL.Services.Implementation
                 var assignedPermissions = userPermissions.
                     Select(up => _mapper.Map<AssignPermissionGetDTOs>(up)).ToList();
 
-                return Result<AssignPermissionGetDTOs>.Success(new AssignPermissionGetDTOs(userId, assignedPermissions));
+                return Result<AssignPermissionGetDTOs>.Success(new AssignPermissionGetDTOs(permissionUserDTOs.userId, assignedPermissions));
 
 
             }
