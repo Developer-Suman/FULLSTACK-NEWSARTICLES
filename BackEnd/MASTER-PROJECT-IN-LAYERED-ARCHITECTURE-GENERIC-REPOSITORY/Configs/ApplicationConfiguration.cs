@@ -7,20 +7,6 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
         public static void Configure(WebApplication app)
         {
 
-
-            #region HTTPRequestPipeline
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Simple Api");
-                    c.DocExpansion(DocExpansion.None);
-                });
-            }
-            #endregion
-
             #region SecurityLayerForWebAttack
             //Remove from Response Headers
             app.Use((context, next) =>
