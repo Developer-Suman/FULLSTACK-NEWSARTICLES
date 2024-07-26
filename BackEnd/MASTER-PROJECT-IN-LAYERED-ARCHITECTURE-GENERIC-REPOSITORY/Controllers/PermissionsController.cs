@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Master_BLL.DTOs.Permission;
+using Master_BLL.DTOs.Permission.PermissionController;
 using Master_BLL.DTOs.Permission.PermissionUser;
 using Master_BLL.Services.Interface;
 using Master_DAL.Models;
@@ -83,6 +84,21 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             {
                 { IsSuccess: true, Data: not null } => CreatedAtAction(nameof(AssignPermission), getControllerAction.Data),
                 { IsSuccess: false, Errors: not null } => HandleFailureResult(getControllerAction.Errors),
+                _ => BadRequest("Invalid Some Fields")
+            };
+            #endregion
+        }
+
+        [HttpPost("AssignTaskToListOfUsers")]
+        public async Task<IActionResult> AssignTaskToListOfUsers([FromBody] List<PermissionGetDTOs> permissionGetDTOs)
+        {
+            var assignTask = await _permissionServices.AssignTaskToListOfUsers(permissionGetDTOs);
+
+            #region switch
+            return assignTask switch
+            {
+                { IsSuccess: true, Data: not null } => CreatedAtAction(nameof(AssignPermission), assignTask.Data),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(assignTask.Errors),
                 _ => BadRequest("Invalid Some Fields")
             };
             #endregion

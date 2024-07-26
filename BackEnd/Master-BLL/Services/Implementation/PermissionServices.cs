@@ -225,6 +225,138 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
+        public async Task<Result<List<PermissionGetDTOs>>> AssignTaskToListOfUsers(List<PermissionGetDTOs> permissionDTOsList)
+        {
+            try
+            {
+                // Check if all users exist
+                var userIds = permissionDTOsList.Select(dto => dto.userId).Distinct().ToList();
+                var usersExist = await _context.ApplicationUsers
+                    .Where(u => userIds.Contains(u.Id))
+                    .Select(u => u.Id)
+                    .ToListAsync();
+
+                if (userIds.Except(usersExist).Any())
+                {
+                    return Result<List<PermissionGetDTOs>>.Failure("NotFound", "One or more users not found");
+                }
+
+                // Prepare collections for processing
+                var permissionIdsList = permissionDTOsList.SelectMany(dto => dto.permissionIds).Distinct().ToList();
+                var controllerActionIdsList = permissionDTOsList
+                    .SelectMany(dto => dto.controllerActionIds.Split(',').Select(id => id.Trim()))
+                    .Distinct()
+                    .ToList();
+
+                // Retrieve the specified permissions and controller actions
+                var permissions = await _context.Permissions
+                    .Where(p => permissionIdsList.Contains(p.Id))
+                    .Include(p => p.PermissionControllerActions)
+                    .ToListAsync();
+
+                var controllerActions = await _context.ControllerActions
+                    .Where(ca => controllerActionIdsList.Contains(ca.Id))
+                    .ToListAsync();
+
+                // Ensure all specified permissions and controller actions exist
+                if (permissions.Count != permissionIdsList.Count || controllerActions.Count != controllerActionIdsList.Count)
+                {
+                    return Result<List<PermissionGetDTOs>>.Failure("NotFound", "One or more permissions or controller actions do not exist");
+                }
+
+                // Check for existing PermissionControllerAction entries
+                var existingPermissionControllerActions = await _context.PermissionControllerActions
+                    .Where(pca => permissionIdsList.Contains(pca.PermissionId) &&
+                                  controllerActionIdsList.Contains(pca.ControlleractionId))
+                    .ToListAsync();
+
+                // Process each PermissionDTOs
+                var results = new List<PermissionGetDTOs>();
+                foreach (var permissionDTOs in permissionDTOsList)
+                {
+                    // Existing PermissionControllerAction entries for the current user
+                    var existingPermissionControllerActionsForUser = await _context.PermissionControllerActions
+                        .Where(pca => permissionDTOs.permissionIds.Contains(pca.PermissionId) &&
+                                      controllerActionIdsList.Contains(pca.ControlleractionId))
+                        .ToListAsync();
+
+                    // Create new PermissionControllerAction entries if they do not already exist
+                    var newPermissionControllerActions = permissions
+                        .Where(p => permissionDTOs.permissionIds.Contains(p.Id))
+                        .SelectMany(p => controllerActions, (p, ca) => new PermissionControllerAction
+                        {
+                            PermissionId = p.Id,
+                            ControlleractionId = ca.Id
+                        })
+                        .Where(pca => !existingPermissionControllerActionsForUser
+                            .Any(ea => ea.PermissionId == pca.PermissionId && ea.ControlleractionId == pca.ControlleractionId))
+                        .ToList();
+
+                    // Determine PermissionControllerAction entries to remove
+                    var toRemovePermissionControllerActions = existingPermissionControllerActions
+                        .Where(ea => !permissionDTOs.controllerActionIds.Split(',').Select(id => id.Trim()).Contains(ea.ControlleractionId) ||
+                                     !permissionDTOs.permissionIds.Contains(ea.PermissionId))
+                        .ToList();
+
+                    // Add the new entries to the database
+                    if (newPermissionControllerActions.Any())
+                    {
+                        _context.PermissionControllerActions.AddRange(newPermissionControllerActions);
+                    }
+
+                    // Remove the old entries from the database
+                    if (toRemovePermissionControllerActions.Any())
+                    {
+                        _context.PermissionControllerActions.RemoveRange(toRemovePermissionControllerActions);
+                    }
+
+                    // Assign permissions to the user if not already assigned
+                    var existingUserPermissions = await _context.UserPermissions
+                        .Where(up => up.UserId == permissionDTOs.userId &&
+                                     permissionDTOs.permissionIds.Contains(up.PermissionId))
+                        .ToListAsync();
+
+                    var newUserPermissions = permissions
+                        .Where(p => permissionDTOs.permissionIds.Contains(p.Id) && !existingUserPermissions.Any(up => up.PermissionId == p.Id))
+                        .Select(p => new UserPermission
+                        {
+                            UserId = permissionDTOs.userId,
+                            PermissionId = p.Id
+                        }).ToList();
+
+                    if (newUserPermissions.Any())
+                    {
+                        _context.UserPermissions.AddRange(newUserPermissions);
+                    }
+
+                    // Determine UserPermission entries to remove
+                    var toRemoveUserPermissions = existingUserPermissions
+                        .Where(up => !permissionDTOs.permissionIds.Contains(up.PermissionId))
+                        .ToList();
+
+                    if (toRemoveUserPermissions.Any())
+                    {
+                        _context.UserPermissions.RemoveRange(toRemoveUserPermissions);
+                    }
+
+                    results.Add(new PermissionGetDTOs(
+                        permissionDTOs.userId,
+                        permissionDTOs.permissionIds,
+                        string.Join(",", controllerActions.Where(ca => permissionDTOs.controllerActionIds.Split(',').Select(id => id.Trim()).Contains(ca.Id)).Select(ca => ca.Id))
+                    ));
+                    await _context.SaveChangesAsync();
+                }
+
+                
+
+                return Result<List<PermissionGetDTOs>>.Success(results);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<PermissionGetDTOs>>.Failure("Error", ex.Message);
+            }
+        }
+
         public async Task<Result<List<UserDTOs>>> GetAllUser()
         {
             try
@@ -305,7 +437,12 @@ namespace Master_BLL.Services.Implementation
 
                 //Fetch Permission
                 var permissions = await _context.Permissions
-                    .Where(p=> getPermission.Contains(p.Id)).ToListAsync();
+                  .Where(p => getPermission.Contains(p.Id))
+                  .Include(p => p.PermissionControllerActions)
+                      .ThenInclude(pca => pca.ControllerAction)
+                  .ToListAsync();
+
+
 
 
                 var result = permissions
@@ -313,7 +450,11 @@ namespace Master_BLL.Services.Implementation
                     (
                         userId: UserId,
                         permissionId : p.Id,
-                        permissionName : p.Permissions
+                        permissionName : p.Permissions,
+                        controllerActionId: p.PermissionControllerActions.Select(pca => new PermissionControllerGetDTOs(controllerActionId: pca.ControlleractionId,
+                            controllerActionName: pca.ControllerAction != null ? pca.ControllerAction.Controller+"/"+pca.ControllerAction.Action : "Unknown")).ToList()
+              
+
                    )).ToList();
 
                 return Result<List<PermissionUserGetDTOs>>.Success(result);

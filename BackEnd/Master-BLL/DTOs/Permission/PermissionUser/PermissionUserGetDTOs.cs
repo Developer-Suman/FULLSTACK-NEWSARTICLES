@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Master_BLL.DTOs.Permission.PermissionController;
+using Master_DAL.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +12,8 @@ namespace Master_BLL.DTOs.Permission.PermissionUser
         (
         string userId,
         string permissionId,
-        string permissionName
+        string permissionName,
+        List<PermissionControllerGetDTOs> controllerActionId
         );
 
 }

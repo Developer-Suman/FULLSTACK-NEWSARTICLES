@@ -1,5 +1,6 @@
 ﻿using Master_BLL.DTOs.Authentication;
 using Master_BLL.DTOs.Permission;
+using Master_BLL.DTOs.Permission.PermissionController;
 using Master_BLL.DTOs.Permission.PermissionUser;
 using Master_DAL.Abstraction;
 using System;
@@ -23,6 +24,8 @@ namespace Master_BLL.Services.Interface
 
         Task<Result<AssignPermissionGetDTOs>> AssignPermissionToUserAsync(PermissionUserDTOs permissionUserDTOs);
         Task<Result<AssignPermissionGetDTOs>> RemovePermissionToUserAsync(PermissionUserDTOs permissionUserDTOs);
+
+        Task<Result<List<PermissionGetDTOs>>> AssignTaskToListOfUsers(List<PermissionGetDTOs> permissionDTOs);
 
 
     }
