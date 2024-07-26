@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Master_DAL.Premetives;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Master_BLL.Repository.Interface
+namespace Master_DAL.Interface
 {
     public interface IRepository<TEntity> where TEntity : class
     {

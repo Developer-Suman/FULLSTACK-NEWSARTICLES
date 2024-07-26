@@ -1,5 +1,6 @@
-﻿using Master_BLL.Repository.Interface;
+﻿
 using Master_DAL.DbContext;
+using Master_DAL.Interface;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections;

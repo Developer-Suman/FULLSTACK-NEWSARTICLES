@@ -1,14 +1,10 @@
 using Master_BLL;
 using Master_DAL;
+using Master_DAL.DataSeed;
 using Master_DAL.DbContext;
 using Master_DAL.Extensions;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using Serilog;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 try
 {
@@ -76,6 +72,13 @@ try
    
     var app = builder.Build();
 
+    using (var scope = app.Services.CreateScope())
+    {
+        var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+        await dataSeeder.Seed();
+    }
+
+
 
 
     app.ConfigureCustomExceptionMiddleware();
@@ -90,11 +93,11 @@ try
 
 
     // Apply migrations during application startup
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate();  // Apply any pending migrations
-    }
+    //using (var scope = app.Services.CreateScope())
+    //{
+    //    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    //    context.Database.Migrate();  // Apply any pending migrations
+    //}
 
     //app.UseResponseCompression();
     app.Run();

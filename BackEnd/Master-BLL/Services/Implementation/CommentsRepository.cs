@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using Master_BLL.DTOs.Comment;
-using Master_BLL.Repository.Interface;
 using Master_BLL.Services.Interface;
 using Master_BLL.Static.Cache;
 using Master_BLL.Validator;
 using Master_DAL.Abstraction;
 using Master_DAL.DbContext;
+using Master_DAL.Interface;
 using Master_DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using System;

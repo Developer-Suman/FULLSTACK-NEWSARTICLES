@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using Master_BLL.DTOs.Permission;
+using Master_BLL.DTOs.Permission.PermissionUser;
 using Master_BLL.Services.Interface;
 using Master_DAL.Models;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
@@ -22,7 +24,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
         }
 
-        [HttpPost]
+        [HttpPost("AssignPermission")]
         public async Task<IActionResult> AssignPermission([FromBody] PermissionDTOs permissionDTOs)
         {
             var permissionResult = await _permissionServices.AssignControllerActionsToPermissionsAsync(permissionDTOs);
@@ -37,47 +39,50 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             #endregion
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RemovePermission([FromBody] PermissionDTOs permissionDTOs)
+        [HttpGet("GetAllUser")]
+        public async Task<IActionResult> GetAllUser()
         {
-            var permissionRemoveResult = await _permissionServices.AssignControllerActionsToPermissionsAsync(permissionDTOs);
+            var getAllUser = await _permissionServices.GetAllUser();
 
             #region switch
-            return permissionRemoveResult switch
+            return getAllUser switch
             {
-                { IsSuccess: true, Data: not null } => CreatedAtAction(nameof(RemovePermission), permissionRemoveResult.Data),
-                { IsSuccess: false, Errors: not null } => HandleFailureResult(permissionRemoveResult.Errors),
-                _ => BadRequest("Invalid Some Fields")
+                { IsSuccess: true, Data: not null } => new JsonResult(getAllUser.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                }),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(getAllUser.Errors),
+                _ => BadRequest("Invalid Data")
             };
             #endregion
         }
 
 
-        [HttpPost("AssignPermission")]
-        public async Task<IActionResult> AssignPermissionToUser([FromBody] PermissionUserDTOs permissionUserDTOs)
+        [HttpGet("GetPermissionByUserId/{userId}")]
+        public async Task<IActionResult> GetPermissionByUserId([FromRoute] string userId)
         {
-            var permissionUserResult = await _permissionServices.AssignPermissionToUserAsync(permissionUserDTOs);
+            var getPermission = await _permissionServices.GetPermissionByUserId(userId);
 
             #region switch
-            return permissionUserResult switch
+            return getPermission switch
             {
-                { IsSuccess: true, Data: not null } => CreatedAtAction(nameof(AssignPermission), permissionUserResult.Data),
-                { IsSuccess: false, Errors: not null } => HandleFailureResult(permissionUserResult.Errors),
+                { IsSuccess: true, Data: not null } => CreatedAtAction(nameof(AssignPermission), getPermission.Data),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(getPermission.Errors),
                 _ => BadRequest("Invalid Some Fields")
             };
             #endregion
         }
 
-        [HttpPost("RemovePermission")]
-        public async Task<IActionResult> RemovePermissionToUser([FromBody] PermissionUserDTOs permissionUserDTOs)
+        [HttpGet("GetControllerActionByUserId/{UserId}")]
+        public async Task<IActionResult> GetControllerActionByUserId([FromRoute] string UserId)
         {
-            var permissionremoveUserResult = await _permissionServices.RemovePermissionToUserAsync(permissionUserDTOs);
+            var getControllerAction = await _permissionServices.GetControllerActionByUserId(UserId);
 
             #region switch
-            return permissionremoveUserResult switch
+            return getControllerAction switch
             {
-                { IsSuccess: true, Data: not null } => CreatedAtAction(nameof(AssignPermission), permissionremoveUserResult.Data),
-                { IsSuccess: false, Errors: not null } => HandleFailureResult(permissionremoveUserResult.Errors),
+                { IsSuccess: true, Data: not null } => CreatedAtAction(nameof(AssignPermission), getControllerAction.Data),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(getControllerAction.Errors),
                 _ => BadRequest("Invalid Some Fields")
             };
             #endregion

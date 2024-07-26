@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Master_BLL.Repository.Implementation;
-using Master_BLL.Repository.Interface;
 using Master_BLL.Services.Implementation;
 using Master_BLL.Services.Interface;
 using Master_DAL.Abstraction;

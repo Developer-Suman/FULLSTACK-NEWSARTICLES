@@ -32,6 +32,11 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
                 .ForMember(dest => dest.ArticlesName, opt => opt.MapFrom(src => src.Articles.Title));
 
 
+
+            CreateMap<ControllerActionUserGetDTOs, ControllerAction>().ReverseMap();
+
+
+
             #region Likes and LikesArticlesGetDTOs
             CreateMap<Likes, LikesArticlesGetDTOs>().ReverseMap();
             #endregion
