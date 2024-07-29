@@ -20,6 +20,11 @@ jobs:
 
       - name: check the current working directory and ls
         run: ls
+
+      - name: Go to Next Directory
+        run: |
+          cd BackEnd
+          ls
         
       - name: Build
         run: dotnet build --configuration Release
