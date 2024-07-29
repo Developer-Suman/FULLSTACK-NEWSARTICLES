@@ -18,12 +18,14 @@ jobs:
         with:
           dotnet-version: '7.x'  # Specify the .NET version your project uses
 
+      - name: check the current working directory and ls
+        run: ls
+        
       - name: Build
         run: dotnet build --configuration Release
 
       - name: Publish
         run: dotnet publish --configuration Release --output ./publish
 
-      - name: check the current working directory and ls
-        run: ls
+      
 
