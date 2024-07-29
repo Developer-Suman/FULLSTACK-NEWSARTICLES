@@ -24,6 +24,7 @@ jobs:
       - name: Go to Next Directory
         run: |
           cd BackEnd
+          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
           dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
