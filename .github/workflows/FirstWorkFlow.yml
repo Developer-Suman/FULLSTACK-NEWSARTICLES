@@ -18,22 +18,19 @@ jobs:
         with:
           dotnet-version: '7.x'  # Specify the .NET version your project uses
 
-      - name: check the current working directory and ls
-        run: ls
+      - name: Check the current working directory and list contents
+        run: dir  # Use `ls` for Linux/macOS
 
-      - name: Go to Next Directory
+      - name: Go to Next Directory and Build & Publish
         run: |
           cd BackEnd
           cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
           dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
-        
-      - name: Build
-        run: dotnet build --configuration Release
 
-      - name: Publish
-        run: dotnet publish --configuration Release --output ./publish
-
-      
-
+      - name: Archive Publish Output
+        uses: actions/upload-artifact@v3
+        with:
+          name: publish
+          path: BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish
