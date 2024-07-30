@@ -36,6 +36,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          scp -o StrictHostKeyChecking=no -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish sumaney@192.168.137.1:/path/to/remote/directory
+          scp -o StrictHostKeyChecking=no -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish sumaney@192.168.137.1:/home/sumaney/publish
+
       - name: Display Message
-         run echo "Completed Task"
+        run: echo "Completed Task"
+
