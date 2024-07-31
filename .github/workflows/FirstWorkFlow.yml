@@ -33,9 +33,10 @@ jobs:
         run: |
           powershell -Command "
           if (-not (Test-Path '$env:USERPROFILE\.ssh')) { 
-              New-Item -ItemType Directory -Path '$env:USERPROFILE\.ssh' 
+              New-Item -ItemType Directory -Path '$env:USERPROFILE\.ssh'
           }
-          ssh-keyscan -p 22 $env:REMOTE_HOST | Out-File -FilePath '$env:USERPROFILE\.ssh\known_hosts' -Encoding ASCII -Append"
+          $sshKeyScanOutput = ssh-keyscan -p 22 $env:REMOTE_HOST
+          $sshKeyScanOutput | Out-File -FilePath '$env:USERPROFILE\.ssh\known_hosts' -Encoding ASCII -Append"
 
       - name: Set up SSH Key
         run: |
