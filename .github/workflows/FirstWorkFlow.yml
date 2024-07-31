@@ -32,11 +32,11 @@ jobs:
       - name: Copy Files to Remote Server
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          REMOTE_USER: Silicon-Soft
-          REMOTE_HOST: 192.168.1.178
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          plink.exe -pw "$SSH_PASSWORD" $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/sumaney/publish"
-          pscp.exe -pw "$SSH_PASSWORD" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish $REMOTE_USER@$REMOTE_HOST:/home/sumaney/publish
+          plink.exe -pw "$SSH_PASSWORD" $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/sumaney/publish" || exit 1
+          pscp.exe -pw "$SSH_PASSWORD" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish $REMOTE_USER@$REMOTE_HOST:/home/sumaney/publish || exit 1
 
       - name: Display Message
         run: echo "Completed Task"
