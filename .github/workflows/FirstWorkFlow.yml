@@ -27,19 +27,17 @@ jobs:
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
       - name: Install OpenSSH
-        run: |
-          choco install openssh -y
+        run: choco install openssh -y
 
       - name: Configure SSH Known Hosts
         run: |
-          mkdir -p ~/.ssh
           ssh-keyscan -p 22 ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
 
       - name: Set up SSH Key
         run: |
-          mkdir -p ~/.ssh
+          powershell -Command "if (-not (Test-Path '~/.ssh')) { New-Item -ItemType Directory -Path '~/.ssh' }"
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          powershell -Command "icacls ~/.ssh/id_rsa /inheritance:r /grant:r \"Users:(R)\""
 
       - name: Copy Files to Remote Server
         env:
