@@ -26,8 +26,8 @@ jobs:
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
-      - name: Install sshpass
-        run: choco install sshpass -y
+      - name: Install PuTTY
+        run: choco install putty -y
 
       - name: Copy Files to Remote Server
         env:
@@ -35,7 +35,8 @@ jobs:
           REMOTE_USER: Silicon-Soft
           REMOTE_HOST: 192.168.1.178
         run: |
-          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish $REMOTE_USER@$REMOTE_HOST:/home/sumaney/publish
+          plink.exe -pw "$SSH_PASSWORD" $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/sumaney/publish"
+          pscp.exe -pw "$SSH_PASSWORD" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish $REMOTE_USER@$REMOTE_HOST:/home/sumaney/publish
 
       - name: Display Message
         run: echo "Completed Task"
