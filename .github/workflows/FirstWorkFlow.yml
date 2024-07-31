@@ -35,8 +35,8 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          plink.exe -pw "$SSH_PASSWORD" $REMOTE_USER@$REMOTE_HOST "mkdir -p /home/sumaney/publish" || exit 1
-          pscp.exe -pw "$SSH_PASSWORD" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish $REMOTE_USER@$REMOTE_HOST:/home/sumaney/publish || exit 1
+          plink.exe -pw "${{ env.SSH_PASSWORD }}" ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
+          pscp.exe -pw "${{ env.SSH_PASSWORD }}" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}:/home/sumaney/publish
 
       - name: Display Message
         run: echo "Completed Task"
