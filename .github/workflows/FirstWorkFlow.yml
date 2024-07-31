@@ -30,7 +30,7 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_USER: suman
-          REMOTE_HOST: 192.168.137.1
+          REMOTE_HOST: 192.168.1.70
 
         run: |
           mkdir -p ~/.ssh
