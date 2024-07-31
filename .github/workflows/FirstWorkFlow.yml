@@ -26,18 +26,16 @@ jobs:
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
+      - name: Install sshpass
+        run: choco install sshpass -y
+
       - name: Copy Files to Remote Server
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: Silicon-Soft
-          REMOTE_HOST: 192.168.178
-
+          REMOTE_HOST: 192.168.1.178
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          scp -o StrictHostKeyChecking=no -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish Silicon-Soft@192.168.1.178:/home/sumaney/publish
+          sshpass -p "$SSH_PASSWORD" scp -o StrictHostKeyChecking=no -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish $REMOTE_USER@$REMOTE_HOST:/home/sumaney/publish
 
       - name: Display Message
         run: echo "Completed Task"
-
