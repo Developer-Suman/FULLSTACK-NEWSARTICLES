@@ -26,10 +26,11 @@ jobs:
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
-      - name: Install PuTTY
+      - name: Install PuTTY (Optional)
+        # This step is optional if you already have PuTTY installed on the runner
         run: choco install putty -y
 
-      - name: Add Host Key and Copy Files
+      - name: Add Host Key and Copy Files (**Handle host key error**)
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
@@ -37,10 +38,11 @@ jobs:
         run: |
           echo "Adding host key to known_hosts..."
           mkdir -p ~/.ssh
-          ssh-keyscan -p 22 ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          # **Comment out this line if host key is already added**
+          # ssh-keyscan -p 22 ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
           echo "Attempting to connect to remote server..."
-          plink.exe -batch -pw "${{ env.SSH_PASSWORD }}" ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
-          pscp.exe -batch -pw "${{ env.SSH_PASSWORD }}" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}:/home/sumaney/publish
+          plink.exe -batch -pw "${{ env.REMOTE_PASSWORD }}" ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
+          pscp.exe -batch -pw "${{ env.REMOTE_PASSWORD }}" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}:/home/sumaney/publish
 
       - name: Display Message
         run: echo "Completed Task"
