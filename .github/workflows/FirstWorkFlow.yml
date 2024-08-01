@@ -38,8 +38,7 @@ jobs:
         run: |
           echo "Adding host key to known_hosts..."
           mkdir -p ~/.ssh
-          # **Comment out this line if host key is already added**
-          # ssh-keyscan -H ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
+   
           echo "Attempting to connect to remote server..."
           echo y |
           plink.exe -batch -pw "${{ env.REMOTE_PASSWORD }}" ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
