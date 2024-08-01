@@ -10,7 +10,22 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x'
+
+      - name: Build and Publish
+        run: |
+          cd BackEnd
+          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
+          dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
+          dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
+          dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
+
       - name: Install Chocolatey
         uses: chocolately/install-action@v1
 
