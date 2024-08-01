@@ -39,7 +39,7 @@ jobs:
           echo "Adding host key to known_hosts..."
           mkdir -p ~/.ssh
           # **Comment out this line if host key is already added**
-          # ssh-keyscan -p 22 ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          # ssh-keyscan -H ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
           echo "Attempting to connect to remote server..."
           plink.exe -batch -pw "${{ env.REMOTE_PASSWORD }}" ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
           pscp.exe -batch -pw "${{ env.REMOTE_PASSWORD }}" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}:/home/sumaney/publish
