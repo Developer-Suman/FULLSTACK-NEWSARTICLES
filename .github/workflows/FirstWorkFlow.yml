@@ -11,19 +11,35 @@ jobs:
 
     steps:
       
-      - name: Add Host Key and Copy Files (**Handle host key error**)
+      - name: Install Chocolatey
+        uses: chocolately/install-action@v1
+
+      - name: Install PuTTY
+        run: choco install putty -y
+
+      - name: Verify plink.exe
+        run: |
+          where plink.exe
+
+      - name: Set up SSH Key
+        run: |
+          powershell -Command "
+          if (-not (Test-Path '$env:USERPROFILE\.ssh')) { 
+              New-Item -ItemType Directory -Path '$env:USERPROFILE\.ssh'
+          }
+          $keyContent = '${{ secrets.SSH_PRIVATE_KEY }}'
+          $keyPath = Join-Path -Path '$env:USERPROFILE\.ssh' -ChildPath 'id_rsa'
+          $keyContent | Out-File -FilePath $keyPath -Encoding ASCII
+          icacls $keyPath /inheritance:r /grant:r \"Users:(R)\""
+
+      - name: Copy Files to Remote Server
         env:
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          echo "Adding host key to known_hosts..."
-          mkdir -p ~/.ssh
-   
           echo "Attempting to connect to remote server..."
-          echo y |
-          plink.exe -batch -pw "${{ env.REMOTE_PASSWORD }}" ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
-          pscp.exe -batch -pw "${{ env.REMOTE_PASSWORD }}" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}:/home/sumaney/publish
+          plink.exe -batch -pw "${{ secrets.SSH_PASSWORD }}" ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
+          pscp.exe -pw "${{ secrets.SSH_PASSWORD }}" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}:/home/sumaney/publish
 
       - name: Display Message
         run: echo "Completed Task"
