@@ -26,21 +26,22 @@ jobs:
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
-      - name: Install PuTTY
-        run: choco install putty -y
+      - name: Install OpenSSH
+        run: choco install openssh -y
 
-      - name: Add Host Key and Copy Files
+      - name: Set up SSH Key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $env:USERPROFILE\.ssh\id_rsa
+          powershell -Command "icacls $env:USERPROFILE\.ssh\id_rsa /inheritance:r /grant:r \"Users:(R)\""
+
+      - name: Copy Files to Remote Server
         env:
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          echo "Adding host key to known_hosts..."
-          mkdir -p ~/.ssh
-          ssh-keyscan -p 22 ${{ env.REMOTE_HOST }} >> ~/.ssh/known_hosts
           echo "Attempting to connect to remote server..."
-          plink.exe -batch -pw "${{ env.SSH_PASSWORD }}" ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
-          pscp.exe -batch -pw "${{ env.SSH_PASSWORD }}" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}:/home/sumaney/publish
+          scp -o StrictHostKeyChecking=no -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}:/home/sumaney/publish
+          ssh -o StrictHostKeyChecking=no ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
 
       - name: Display Message
         run: echo "Completed Task"
