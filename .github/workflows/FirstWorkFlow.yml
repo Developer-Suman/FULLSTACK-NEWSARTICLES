@@ -43,7 +43,7 @@ jobs:
           name: publish
           
       - name: List downloaded publish directory
-        run: ls -l publish
+        run: ls -ltra
 
       - name: Install sshpass
         run: sudo apt-get install -y sshpass
