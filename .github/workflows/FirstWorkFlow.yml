@@ -56,7 +56,7 @@ jobs:
       - name: List Remote Server folder
         run: |
           # List the contents of the /publish directory on the remote server
-          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -l"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -ltra"
       
       - name: Deploy to server
         run: |
