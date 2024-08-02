@@ -52,6 +52,10 @@ namespace Master_BLL.Services.Implementation
 
 
 
+
+
+
+
                 // Retrieve the specified controller actions
                 var controllerActions = await _context.ControllerActions
                     .Where(ca => permissionDTOs.controllerActionIds.Contains(ca.Id)).ToListAsync();
