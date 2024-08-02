@@ -57,7 +57,7 @@ jobs:
       - name: Deploy to server
         run: |
           # Copy files to the remote server
-          sshpass -p '${{ secrets.SSH_PASSWORD }}' scp -r -o StrictHostKeyChecking=no ./publish/ ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/publish
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' scp -r -o StrictHostKeyChecking=no ./* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/publish
 
           # Execute the application on the remote server
           sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "cd /publish && dotnet MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.dll"
