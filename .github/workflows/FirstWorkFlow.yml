@@ -52,12 +52,12 @@ jobs:
 
       - name: Test SSH connection
         run: |
-          sshpass -p ${{ secrets.REMOTE_PASSWORD }} ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
 
       - name: Deploy to server
         run: |
           # Copy files to the remote server using scp
-          sshpass -p ${{ secrets.REMOTE_PASSWORD }} scp -o StrictHostKeyChecking=no -r ./publish ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/path/to/remote/directory
+          sshpass -p ${{ secrets.SSH_PASSWORD }} scp -o StrictHostKeyChecking=no -r ./publish ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/path/to/remote/directory
 
           # Execute the application on the remote server
-          sshpass -p ${{ secrets.REMOTE_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "cd /path/to/remote/directory && dotnet MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.dll"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "cd /path/to/remote/directory && dotnet MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.dll"
