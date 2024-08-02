@@ -45,6 +45,12 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get install -y sshpass
 
+      - name: Copy file to ssh
+        run: |
+          mkdir -p ~/.ssh
+          echo "54.233.227.63 ssh-ed25519 255 SHA256:L7UrsSv51Nn6NOhlKTSK1RpDHTr26xRIpc+OrRvWaRo" >> ~/.ssh/known_hosts
+        
+
       - name: Deploy to server
         run: |
           # Copy files to the remote server
