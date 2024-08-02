@@ -48,8 +48,11 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get install -y sshpass
 
-      
+      - name: Verify the Connection To Remote Server
+        run: |
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
 
+    
       - name: Create Folder in the remote server
         run: |
           #Create the publish folder to the server
