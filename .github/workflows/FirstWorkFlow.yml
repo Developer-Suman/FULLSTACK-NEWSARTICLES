@@ -52,16 +52,6 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           echo "54.233.227.63 ssh-ed25519 255 SHA256:L7UrsSv51Nn6NOhlKTSK1RpDHTr26xRIpc+OrRvWaRo" >> ~/.ssh/known_hosts
-
-      - name: Create Folder in the remote server
-        run: |
-          #Create the publish folder to the server
-          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ~/publish"
-        
-      - name: List Remote Server folder
-        run: |
-          # List the contents of the /publish directory on the remote server
-          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -ltra"
       
       - name: Deploy to server
         run: |
