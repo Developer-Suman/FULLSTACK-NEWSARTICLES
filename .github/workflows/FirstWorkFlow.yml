@@ -1,9 +1,9 @@
-name: Build and Publish ASP.NET
+name: Build and Deploy to Remote Server
 
 on:
   push:
     branches:
-      - main  # Or the branch you want to trigger this workflow
+      - main  # or the branch you want to trigger this workflow
 
 jobs:
   build:
@@ -26,31 +26,26 @@ jobs:
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
-      - name: Install PuTTY
-        run: choco install putty -y
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: publish
+          path: BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/
 
-      - name: Verify plink.exe
-        run: where plink.exe
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: publish
 
-      - name: Set up SSH Directory and Key
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Deploy to server
         run: |
-          powershell -Command "
-          if (-not (Test-Path '$env:USERPROFILE\.ssh')) { 
-              New-Item -ItemType Directory -Path '$env:USERPROFILE\.ssh'
-          }
-          $keyContent = '${{ secrets.SSH_PRIVATE_KEY }}'
-          $keyPath = Join-Path -Path '$env:USERPROFILE\.ssh' -ChildPath 'id_rsa'
-          $keyContent | Out-File -FilePath $keyPath -Encoding ASCII
-          icacls $keyPath /inheritance:r /grant:r 'Users:(R)'"
-
-      - name: Copy Files to Remote Server
-        env:
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-        run: |
-          echo "Attempting to connect to remote server..."
-          plink.exe -batch -pw "${{ secrets.SSH_PASSWORD }}" ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }} "mkdir -p /home/sumaney/publish"
-          pscp.exe -pw "${{ secrets.SSH_PASSWORD }}" -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish ${{ env.REMOTE_USER }}@${{ env.REMOTE_HOST }}:/home/sumaney/publish
-
-      - name: Display Message
-        run: echo "Completed Task"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} scp -o StrictHostKeyChecking=no -r ./publish ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/path/to/remote/directory
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /path/to/remote/directory/publish && dotnet your-application.dll"
