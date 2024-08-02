@@ -1,23 +1,18 @@
 name: Build and Deploy to Remote Server
-
 on:
   push:
     branches:
       - main  # or the branch you want to trigger this workflow
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '7.x'
-
       - name: Build and Publish
         run: |
           cd BackEnd
@@ -25,7 +20,6 @@ jobs:
           dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -35,20 +29,37 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-
     steps:
       - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
           name: publish
-
-      - name: Install sshpass
-        run: sudo apt-get install -y sshpass
-
+      
       - name: Deploy to server
-        run: |
-          # Copy files to the remote server
-          sshpass -p '${{ secrets.REMOTE_PASSWORD }}' scp -r -o StrictHostKeyChecking=no ./publish/* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/path/to/remote/directory
-
-          # Execute the application on the remote server
-          sshpass -p '${{ secrets.REMOTE_PASSWORD }}' ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "cd /path/to/remote/directory && dotnet MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.dll"
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          password: ${{ secrets.REMOTE_PASSWORD }}
+          script: |
+            mkdir -p /path/to/remote/directory
+            echo "Remote directory created or already exists"
+          
+      - name: Copy files via SCP
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          password: ${{ secrets.REMOTE_PASSWORD }}
+          source: "./*"
+          target: "/path/to/remote/directory"
+          
+      - name: Execute application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          password: ${{ secrets.REMOTE_PASSWORD }}
+          script: |
+            cd /path/to/remote/directory
+            dotnet MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.dll
