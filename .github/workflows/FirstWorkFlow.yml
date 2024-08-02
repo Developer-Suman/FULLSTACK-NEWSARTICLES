@@ -1,13 +1,13 @@
-name: Build and Publish ASP.NET
+name: Build and Deploy to Remote Server
 
 on:
   push:
     branches:
-      - main  # Or the branch you want to trigger this workflow
+      - main  # or the branch you want to trigger this workflow
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -16,12 +16,9 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '7.x'  # Specify the .NET version your project uses
+          dotnet-version: '7.x'
 
-      - name: Check the current working directory and list contents
-        run: dir  # Use `ls` for Linux/macOS
-
-      - name: Go to Next Directory and Build & Publish
+      - name: Build and Publish
         run: |
           cd BackEnd
           cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
@@ -29,8 +26,52 @@ jobs:
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
-      - name: Archive Publish Output
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: publish
-          path: BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish
+          path: BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: publish
+          
+      - name: List downloaded publish directory
+        run: ls -ltra
+
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Verify the Connection To Remote Server
+        run: |
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
+
+    
+      - name: Create Folder in the remote server
+        run: |
+          #Create the publish folder to the server
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ~/publish"
+        
+      - name: List Remote Server folder
+        run: |
+          # List the contents of the /publish directory on the remote server
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -ltra"
+      
+      - name: Deploy to server
+        run: |
+          # List the contents of the /publish directory on the remote server
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -l"
+          
+          # Copy files to the remote server
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' scp -r -o StrictHostKeyChecking=no ./* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/publish/
+
+          # List the contents of the ~/publish directory on the remote server to verify upload
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -l ~/publish"
+
+          
