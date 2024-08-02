@@ -55,9 +55,6 @@ jobs:
       
       - name: Deploy to server
         run: |
-          # List the contents of the /publish directory on the remote server
-          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -l"
-          
           # Copy files to the remote server
           sshpass -p '${{ secrets.SSH_PASSWORD }}' scp -r -o StrictHostKeyChecking=no ./* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:"sudo mkdir -p /publish"
 
