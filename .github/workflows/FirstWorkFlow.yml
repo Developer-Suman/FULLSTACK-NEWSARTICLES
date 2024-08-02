@@ -47,5 +47,5 @@ jobs:
 
       - name: Deploy to server
         run: |
-          sshpass -p ${{ secrets.SSH_PASSWORD }} scp -o StrictHostKeyChecking=no -r ./publish ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/path/to/remote/directory
-          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /path/to/remote/directory/publish && dotnet MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.dll"
+          sshpass -p ${{ secrets.REMOTE_PASSWORD }} scp -o StrictHostKeyChecking=no -r ./publish ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/path/to/remote/directory
+          sshpass -p ${{ secrets.REMOTE_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "cd /path/to/remote/directory/publish && dotnet MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.dll"
