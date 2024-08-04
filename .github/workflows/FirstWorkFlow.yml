@@ -1,4 +1,4 @@
-name: Build and Deploy to Remote Server
+name: Build and Deploy
 
 on:
   push:
@@ -6,60 +6,28 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.x'
-
-      - name: Build and Publish
-        run: |
-          cd BackEnd
-          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
-          dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
-          dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
-          dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: publish
-          path: BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/
-
   deploy:
     runs-on: windows-latest
-    needs: build
 
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: publish
-
       - name: Install OpenSSH Client
         run: |
           Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
 
-      - name: Deploy to server
+      - name: Deploy to Remote Server
         run: |
           $username = "${{ secrets.REMOTE_USER }}"
           $password = "${{ secrets.SSH_PASSWORD }}"
-          $host = "${{ secrets.REMOTE_HOST }}"
+          $host = "${{ secrets.REMOTE_HOST }}" # Use the ngrok URL or public IP
 
           # Create a temporary file to store the password
           $passwordFile = [System.IO.Path]::GetTempFileName()
           Set-Content -Path $passwordFile -Value $password
 
           # SCP and SSH commands
-          # Use double quotes to allow variable interpolation
-          scp -o StrictHostKeyChecking=no -r publish/* "$username@$host:~/publish/" -o "PasswordAuthentication=yes"
-          ssh -o StrictHostKeyChecking=no "$username@$host" "ls -l ~/publish"
+          # Use ${} for variable interpolation within the double quotes
+          & scp -o StrictHostKeyChecking=no -r publish/* "${username}@${host}:~/publish/" -o "PasswordAuthentication=yes"
+          & ssh -o StrictHostKeyChecking=no "${username}@${host}" "ls -l ~/publish"
 
           # Cleanup
           Remove-Item -Path $passwordFile
