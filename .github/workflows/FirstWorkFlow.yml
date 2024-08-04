@@ -13,9 +13,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install sshpass
-        run: choco install sshpass
-
-      - name: Connect to remote server using SSH
+      - name: Download Plink
         run: |
-          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" "your-command-here"
+          Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
+
+      - name: Connect to remote server using Plink
+        run: |
+          .\plink.exe -pw "${{ secrets.SSH_PASSWORD }}" "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" "your-command-here"
