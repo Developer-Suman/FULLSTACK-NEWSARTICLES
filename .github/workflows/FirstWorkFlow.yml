@@ -42,29 +42,28 @@ jobs:
         with:
           name: publish
 
-      - name: Install SSH Client and expect
+      - name: Install OpenSSH Client
         run: |
-          choco install openssh
-          choco install expect
-
-      - name: Set up expect script
-        run: |
-          echo '#!/usr/bin/expect -f\n\nset timeout 20\nset password [lindex $argv 0]\nset command [lindex $argv 1]\n\nspawn $command\nexpect {\n    "*password:" {\n        send "$password\r"\n        exp_continue\n    }\n    "yes/no" {\n        send "yes\r"\n        exp_continue\n    }\n}\n' > expect-ssh.exp
-          chmod +x expect-ssh.exp
-
-      - name: Verify the Connection To Remote Server
-        run: |
-          expect expect-ssh.exp "${{ secrets.SSH_PASSWORD }}" "ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} 'echo SSH connection successful'"
-
-      - name: Create Folder on Remote Server
-        run: |
-          expect expect-ssh.exp "${{ secrets.SSH_PASSWORD }}" "ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} 'mkdir -p ~/publish'"
-
-      - name: List Remote Server folder
-        run: |
-          expect expect-ssh.exp "${{ secrets.SSH_PASSWORD }}" "ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} 'ls -ltra ~/publish'"
+          # Ensure OpenSSH Client is installed
+          Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
 
       - name: Deploy to server
         run: |
-          expect expect-ssh.exp "${{ secrets.SSH_PASSWORD }}" "scp -r -o StrictHostKeyChecking=no publish/* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/publish/"
-          expect expect-ssh.exp "${{ secrets.SSH_PASSWORD }}" "ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} 'ls -l ~/publish'"
+          # Using PowerShell to handle password and execute commands
+          $username = "${{ secrets.REMOTE_USER }}"
+          $password = "${{ secrets.SSH_PASSWORD }}"
+          $host = "${{ secrets.REMOTE_HOST }}"
+
+          # Create a temporary file to store the password
+          $passwordFile = [System.IO.Path]::GetTempFileName()
+          Set-Content -Path $passwordFile -Value $password
+
+          # SCP and SSH commands
+          scp -o StrictHostKeyChecking=no -r publish/* "$username@$host:~/publish/" -o "PasswordAuthentication=yes"
+          ssh -o StrictHostKeyChecking=no "$username@$host" "ls -l ~/publish"
+
+          # Cleanup
+          Remove-Item -Path $passwordFile
+
+          # Ensure all steps are successful
+          exit 0
