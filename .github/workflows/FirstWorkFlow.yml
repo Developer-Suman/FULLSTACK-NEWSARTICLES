@@ -1,4 +1,4 @@
-name: Connect to Remote Server via SSH
+name: SSH Connection Test
 
 on:
   push:
@@ -13,29 +13,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install SSH Client
+      - name: Install OpenSSH Client
         run: |
           Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
 
-      - name: Connect to Remote Server
+      - name: Test SSH Connection
         run: |
-          # Define variables
           $username = "${{ secrets.REMOTE_USER }}"
           $password = "${{ secrets.SSH_PASSWORD }}"
           $remoteHost = "${{ secrets.REMOTE_HOST }}"
 
-          # Create a temporary file to store the password
-          $passwordFile = [System.IO.Path]::GetTempFileName()
-          Set-Content -Path $passwordFile -Value $password
+          $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential ($username, $securePassword)
 
-          # Test SSH connection
-          $sshCommand = "sshpass -f $passwordFile ssh -o StrictHostKeyChecking=no $username@$remoteHost 'echo Connection successful'"
-          Write-Host "Executing SSH command: $sshCommand"
-          & $sshCommand
+          # Create a temporary script for SSH command
+          $scriptPath = [System.IO.Path]::GetTempFileName()
+          $scriptContent = @"
+          \$username = '$username'
+          \$remoteHost = '$remoteHost'
+          \$command = 'echo Connection successful'
+
+          # Use OpenSSH to run the command
+          ssh -o StrictHostKeyChecking=no \$username@\$remoteHost \$command
+"@
+
+          Set-Content -Path $scriptPath -Value $scriptContent
+
+          # Execute the script
+          & "powershell.exe" -File $scriptPath
 
           # Cleanup
-          Remove-Item -Path $passwordFile
+          Remove-Item -Path $scriptPath
 
-          # Ensure the step completes successfully
-          exit 0
-        shell: pwsh
