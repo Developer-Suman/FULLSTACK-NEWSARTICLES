@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Check SSH Connection
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  test-ssh-connection:
     runs-on: windows-latest
 
     steps:
@@ -14,23 +14,21 @@ jobs:
         run: |
           Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
 
-      - name: Deploy to Remote Server
+      - name: Test SSH Connection
         run: |
           $username = "${{ secrets.REMOTE_USER }}"
           $password = "${{ secrets.SSH_PASSWORD }}"
-          $host = "${{ secrets.REMOTE_HOST }}" # Use the ngrok URL or public IP
+          $host = "${{ secrets.REMOTE_HOST }}" # Your host or IP address
 
           # Create a temporary file to store the password
           $passwordFile = [System.IO.Path]::GetTempFileName()
           Set-Content -Path $passwordFile -Value $password
 
-          # SCP and SSH commands
-          # Use ${} for variable interpolation within the double quotes
-          & scp -o StrictHostKeyChecking=no -r publish/* "${username}@${host}:~/publish/" -o "PasswordAuthentication=yes"
-          & ssh -o StrictHostKeyChecking=no "${username}@${host}" "ls -l ~/publish"
+          # Test SSH connection
+          & ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=yes "$username@$host" "echo Connection successful"
 
           # Cleanup
           Remove-Item -Path $passwordFile
 
-          # Ensure all steps are successful
+          # Ensure the step completes successfully
           exit 0
