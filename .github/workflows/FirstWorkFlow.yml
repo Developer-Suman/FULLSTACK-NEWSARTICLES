@@ -1,47 +1,21 @@
-name: SSH Connection Test
+name: Deploy
 
 on:
   push:
     branches:
-      - main
+      - main  # Change this to the branch you want to trigger the action
 
 jobs:
-  ssh-connection:
+  deploy:
     runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install OpenSSH Client
+      - name: Install sshpass
+        run: choco install sshpass
+
+      - name: Connect to remote server using SSH
         run: |
-          Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
-
-      - name: Test SSH Connection
-        run: |
-          $username = "${{ secrets.REMOTE_USER }}"
-          $password = "${{ secrets.SSH_PASSWORD }}"
-          $remoteHost = "${{ secrets.REMOTE_HOST }}"
-
-          $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
-          $credential = New-Object System.Management.Automation.PSCredential ($username, $securePassword)
-
-          # Create a temporary script for SSH command
-          $scriptPath = [System.IO.Path]::GetTempFileName()
-          $scriptContent = @"
-          \$username = '$username'
-          \$remoteHost = '$remoteHost'
-          \$command = 'echo Connection successful'
-
-          # Use OpenSSH to run the command
-          ssh -o StrictHostKeyChecking=no \$username@\$remoteHost \$command
-"@
-
-          Set-Content -Path $scriptPath -Value $scriptContent
-
-          # Execute the script
-          & "powershell.exe" -File $scriptPath
-
-          # Cleanup
-          Remove-Item -Path $scriptPath
-
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" "your-command-here"
