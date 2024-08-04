@@ -42,24 +42,25 @@ jobs:
         with:
           name: publish
 
-      - name: Install SSH Client
+      - name: Install SSH Client and sshpass
         run: |
           choco install openssh
+          choco install sshpass
 
       - name: Verify the Connection To Remote Server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
 
       - name: Create Folder on Remote Server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ~/publish"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ~/publish"
 
       - name: List Remote Server folder
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -ltra ~/publish"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -ltra ~/publish"
 
       - name: Deploy to server
         run: |
-          scp -r -o StrictHostKeyChecking=no publish/* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/publish/
+          sshpass -p ${{ secrets.SSH_PASSWORD }} scp -r -o StrictHostKeyChecking=no publish/* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/publish/
 
-          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -l ~/publish"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -l ~/publish"
