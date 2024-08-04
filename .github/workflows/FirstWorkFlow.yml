@@ -1,4 +1,4 @@
-name: Check SSH Connection
+name: Connect to Remote Server via SSH
 
 on:
   push:
@@ -6,29 +6,36 @@ on:
       - main
 
 jobs:
-  test-ssh-connection:
+  ssh-connection:
     runs-on: windows-latest
 
     steps:
-      - name: Install OpenSSH Client
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install SSH Client
         run: |
           Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
 
-      - name: Test SSH Connection
+      - name: Connect to Remote Server
         run: |
+          # Define variables
           $username = "${{ secrets.REMOTE_USER }}"
           $password = "${{ secrets.SSH_PASSWORD }}"
-          $remoteHost = "${{ secrets.REMOTE_HOST }}" # Ensure this is a public IP or ngrok URL
+          $remoteHost = "${{ secrets.REMOTE_HOST }}"
 
           # Create a temporary file to store the password
           $passwordFile = [System.IO.Path]::GetTempFileName()
           Set-Content -Path $passwordFile -Value $password
 
           # Test SSH connection
-          & ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=yes "$username@$remoteHost" "echo Connection successful"
+          $sshCommand = "sshpass -f $passwordFile ssh -o StrictHostKeyChecking=no $username@$remoteHost 'echo Connection successful'"
+          Write-Host "Executing SSH command: $sshCommand"
+          & $sshCommand
 
           # Cleanup
           Remove-Item -Path $passwordFile
 
           # Ensure the step completes successfully
           exit 0
+        shell: pwsh
