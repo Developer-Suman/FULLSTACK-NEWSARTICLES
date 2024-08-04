@@ -44,12 +44,10 @@ jobs:
 
       - name: Install OpenSSH Client
         run: |
-          # Ensure OpenSSH Client is installed
           Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
 
       - name: Deploy to server
         run: |
-          # Using PowerShell to handle password and execute commands
           $username = "${{ secrets.REMOTE_USER }}"
           $password = "${{ secrets.SSH_PASSWORD }}"
           $host = "${{ secrets.REMOTE_HOST }}"
@@ -59,6 +57,7 @@ jobs:
           Set-Content -Path $passwordFile -Value $password
 
           # SCP and SSH commands
+          # Use double quotes to allow variable interpolation
           scp -o StrictHostKeyChecking=no -r publish/* "$username@$host:~/publish/" -o "PasswordAuthentication=yes"
           ssh -o StrictHostKeyChecking=no "$username@$host" "ls -l ~/publish"
 
