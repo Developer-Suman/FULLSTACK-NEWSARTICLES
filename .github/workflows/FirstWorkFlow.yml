@@ -18,14 +18,14 @@ jobs:
         run: |
           $username = "${{ secrets.REMOTE_USER }}"
           $password = "${{ secrets.SSH_PASSWORD }}"
-          $host = "${{ secrets.REMOTE_HOST }}" # Your host or IP address
+          $remoteHost = "${{ secrets.REMOTE_HOST }}" # Use a different variable name
 
           # Create a temporary file to store the password
           $passwordFile = [System.IO.Path]::GetTempFileName()
           Set-Content -Path $passwordFile -Value $password
 
           # Test SSH connection
-          & ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=yes "$username@$host" "echo Connection successful"
+          & ssh -o StrictHostKeyChecking=no -o PasswordAuthentication=yes "$username@$remoteHost" "echo Connection successful"
 
           # Cleanup
           Remove-Item -Path $passwordFile
