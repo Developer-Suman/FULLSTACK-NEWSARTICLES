@@ -18,7 +18,7 @@ jobs:
         run: |
           $username = "${{ secrets.REMOTE_USER }}"
           $password = "${{ secrets.SSH_PASSWORD }}"
-          $remoteHost = "${{ secrets.REMOTE_HOST }}" # Use a different variable name
+          $remoteHost = "${{ secrets.REMOTE_HOST }}" # Ensure this is a public IP or ngrok URL
 
           # Create a temporary file to store the password
           $passwordFile = [System.IO.Path]::GetTempFileName()
