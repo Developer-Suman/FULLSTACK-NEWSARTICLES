@@ -42,16 +42,17 @@ jobs:
         with:
           name: publish
 
+      - name: Install sshpass
+        run: |
+          Invoke-WebRequest -Uri https://github.com/ristom/sshpass/releases/download/1.06/sshpass.exe -OutFile sshpass.exe
+
       - name: Verify the Connection To Remote Server
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          $command = "ssh $env:REMOTE_USER@$env:REMOTE_HOST -o StrictHostKeyChecking=no 'echo SSH connection successful'"
-          $securePassword = ConvertTo-SecureString $env:SSH_PASSWORD -AsPlainText -Force
-          $credential = New-Object System.Management.Automation.PSCredential ($env:REMOTE_USER, $securePassword)
-          Start-Process -NoNewWindow -FilePath "ssh" -ArgumentList $command -Credential $credential -Wait
+          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful"
 
       - name: Create Folder in the remote server
         env:
@@ -59,10 +60,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          $command = "ssh $env:REMOTE_USER@$env:REMOTE_HOST -o StrictHostKeyChecking=no 'mkdir -p ~/publish'"
-          $securePassword = ConvertTo-SecureString $env:SSH_PASSWORD -AsPlainText -Force
-          $credential = New-Object System.Management.Automation.PSCredential ($env:REMOTE_USER, $securePassword)
-          Start-Process -NoNewWindow -FilePath "ssh" -ArgumentList $command -Credential $credential -Wait
+          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
 
       - name: List Remote Server folder
         env:
@@ -70,10 +68,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          $command = "ssh $env:REMOTE_USER@$env:REMOTE_HOST -o StrictHostKeyChecking=no 'ls -ltra ~/publish'"
-          $securePassword = ConvertTo-SecureString $env:SSH_PASSWORD -AsPlainText -Force
-          $credential = New-Object System.Management.Automation.PSCredential ($env:REMOTE_USER, $securePassword)
-          Start-Process -NoNewWindow -FilePath "ssh" -ArgumentList $command -Credential $credential -Wait
+          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra ~/publish"
 
       - name: Deploy to server
         env:
@@ -81,10 +76,6 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          $command = "scp -r -o StrictHostKeyChecking=no ./publish/* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/"
-          $securePassword = ConvertTo-SecureString $env:SSH_PASSWORD -AsPlainText -Force
-          $credential = New-Object System.Management.Automation.PSCredential ($env:REMOTE_USER, $securePassword)
-          Start-Process -NoNewWindow -FilePath "cmd.exe" -ArgumentList "/c $command" -Credential $credential -Wait
-
-          $command = "ssh $env:REMOTE_USER@$env:REMOTE_HOST -o StrictHostKeyChecking=no 'ls -l ~/publish'"
-          Start-Process -NoNewWindow -FilePath "ssh" -ArgumentList $command -Credential $credential -Wait
+          sshpass -p $env:SSH_PASSWORD scp -r -o StrictHostKeyChecking=no ./publish/* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/
+          
+          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish"
