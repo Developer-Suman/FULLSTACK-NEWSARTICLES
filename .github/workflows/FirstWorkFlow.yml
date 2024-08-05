@@ -17,7 +17,7 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
 
-      - name: Add Host Key to Known Hosts
+      - name: Setup SSH Known Hosts
         run: |
           # Ensure the .ssh directory exists
           $sshDir = "$env:USERPROFILE\.ssh"
@@ -25,12 +25,12 @@ jobs:
               New-Item -ItemType Directory -Path $sshDir
           }
 
-          # Add the host key to the known_hosts file
+          # Create the known_hosts file with the given key
           $hostKey = "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM="
           $knownHostsFile = "$sshDir\known_hosts"
-          Add-Content -Path $knownHostsFile -Value $hostKey
+          Set-Content -Path $knownHostsFile -Value $hostKey
         env:
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          USERPROFILE: ${{ secrets.USERPROFILE }}
 
       - name: Verify SSH Connection
         run: |
