@@ -3,7 +3,7 @@ name: Build and Deploy to Remote Server
 on:
   push:
     branches:
-      - main  # or the branch you want to trigger this workflow
+      - main
 
 jobs:
   deploy:
@@ -17,10 +17,27 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
 
+      - name: Add Host Key
+        run: |
+          # Ensure the .ssh directory exists
+          $sshDir = "$env:USERPROFILE\.ssh"
+          if (-not (Test-Path $sshDir)) {
+              New-Item -ItemType Directory -Path $sshDir
+          }
+          
+          # Host key format: [hostname] ssh-ed25519 AAAA... user@hostname
+          $hostKey = "$env:REMOTE_HOST ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICD3ZgBzp8w4lKXU6fZqkGvms4+2Yk... user@hostname"
+          $knownHostsFile = "$sshDir\known_hosts"
+          
+          # Add the host key to the known_hosts file
+          Add-Content -Path $knownHostsFile -Value $hostKey
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+
       - name: Verify SSH Connection
         run: |
           echo "Checking SSH connection..."
-          .\plink.exe -batch -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -o StrictHostKeyChecking=no
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
