@@ -26,6 +26,11 @@ jobs:
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
+      - name: List publish directory
+        run: |
+          cd BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
+          ls -ltra publish
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -43,7 +48,9 @@ jobs:
           name: publish
 
       - name: List downloaded publish directory
-        run: dir BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/
+        run: |
+          cd BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
+          dir publish
 
       - name: Download Plink
         run: |
