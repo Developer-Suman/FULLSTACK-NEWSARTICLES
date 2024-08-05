@@ -17,10 +17,27 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
 
+      - name: Add Host Key to Known Hosts
+        run: |
+          # Ensure the .ssh directory exists
+          $sshDir = "$env:USERPROFILE\.ssh"
+          if (-not (Test-Path $sshDir)) {
+              New-Item -ItemType Directory -Path $sshDir
+          }
+
+          # Host key format: [hostname] [key type] [key]
+          $hostKey = "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEJ8G2lHIfq2NzXlAyyA8/whB5DDQ52WUvT0J8wnTt0+EJ7wQkN9Eg5A3uVq5JxF9kDtGG5HkHgHE5eAVVpRbZzE4I58t0NZa5cZ22E7L+eMblF8El2nF8HG19r3WjxPvIuK+W3xwNh0AYeqPtA5DRLTZ40MWG63ZhFs5eMrdVo=="
+          $knownHostsFile = "$sshDir\known_hosts"
+
+          # Add the host key to the known_hosts file
+          Add-Content -Path $knownHostsFile -Value $hostKey
+        env:
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+
       - name: Verify SSH Connection
         run: |
           echo "Checking SSH connection..."
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
@@ -29,7 +46,7 @@ jobs:
       - name: Create Folder on Remote Server
         run: |
           echo "Creating folder on remote server..."
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/new_folder" -batch -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/new_folder" -batch
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
