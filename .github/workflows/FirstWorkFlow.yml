@@ -17,15 +17,16 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
 
-      - name: Debug Environment Variables
+      - name: Create known_hosts
         run: |
-          echo "REMOTE_USER=$env:REMOTE_USER"
-          echo "REMOTE_HOST=$env:REMOTE_HOST"
+          mkdir -p $env:USERPROFILE\.ssh
+          echo "$($env:REMOTE_HOST ssh-keyscan -p 22)" > $env:USERPROFILE\.ssh\known_hosts
+        shell: pwsh
 
       - name: Verify SSH Connection
         run: |
           echo "Checking SSH connection..."
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch -o StrictHostKeyChecking=no
+          .\plink.exe -batch -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -o StrictHostKeyChecking=no
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
