@@ -1,56 +1,26 @@
-name: Build and Deploy to Remote Server
+name: SSH Connection Test
 
 on:
   push:
     branches:
-      - main
+      - main  # or the branch you want to trigger this workflow
 
 jobs:
-  deploy:
+  ssh-test:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Install sshpass
+        run: choco install sshpass
 
-      - name: Download Plink
+      - name: Setup known hosts
         run: |
-          Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
+          # Create .ssh directory if it doesn't exist
+          mkdir -p %USERPROFILE%/.ssh
+          
+          # Add known host entry
+          echo "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM=" > %USERPROFILE%/.ssh/known_hosts
 
-      - name: Setup SSH Known Hosts
+      - name: Verify the Connection To Remote Server
         run: |
-          # Ensure the .ssh directory exists
-          $sshDir = "$env:USERPROFILE\.ssh"
-          if (-not (Test-Path $sshDir)) {
-              New-Item -ItemType Directory -Path $sshDir
-          }
-
-          # Create the known_hosts file with the given key
-          $hostKey = "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM="
-          $knownHostsFile = "$sshDir\known_hosts"
-          Set-Content -Path $knownHostsFile -Value $hostKey
-        env:
-          USERPROFILE: ${{ secrets.USERPROFILE }}
-
-      - name: Verify SSH Connection
-        run: |
-          echo "Checking SSH connection..."
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch
-        env:
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-
-      - name: Create Folder on Remote Server
-        run: |
-          echo "Creating folder on remote server..."
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/new_folder" -batch
-        env:
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-
-      - name: Debug Environment Variables
-        run: |
-          echo "REMOTE_USER=$env:REMOTE_USER"
-          echo "REMOTE_HOST=$env:REMOTE_HOST"
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
