@@ -49,8 +49,9 @@ jobs:
             New-Item -Path "$env:USERPROFILE\.ssh" -ItemType Directory
           }
 
-          # Append the SSH host key to known_hosts
-          ssh-keyscan -H $env:REMOTE_HOST >> $env:USERPROFILE\.ssh\known_hosts
+          # Fetch and add the SSH host key
+          $hostKey = & ssh-keyscan -H $env:REMOTE_HOST
+          Add-Content -Path "$env:USERPROFILE\.ssh\known_hosts" -Value $hostKey
 
       - name: Verify the Connection To Remote Server
         env:
