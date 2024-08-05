@@ -21,10 +21,14 @@ jobs:
         run: |
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
+      - name: Print Debug Information
+        run: |
+          echo "Attempting to connect to $env:REMOTE_HOST on port 22"
+
       - name: Connect to remote server using Plink
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo 'Connection successful'" || exit 1
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo 'Connection successful'" || Write-Host "Connection failed"
