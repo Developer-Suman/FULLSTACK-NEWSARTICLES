@@ -22,5 +22,9 @@ jobs:
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
       - name: Connect to remote server using Plink
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -pw "${{ secrets.SSH_PASSWORD }}" -P 22 "${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" "your-command-here"
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "your-command-here"
