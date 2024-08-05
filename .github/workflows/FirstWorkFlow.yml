@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -42,17 +42,9 @@ jobs:
         with:
           name: publish
 
-      - name: Install WSL and Ubuntu
+      - name: Install Plink
         run: |
-          wsl --install
-          wsl --set-default-version 2
-          wsl --list --verbose
-          wsl --install -d Ubuntu
-
-      - name: Install sshpass in WSL
-        run: |
-          wsl sudo apt-get update
-          wsl sudo apt-get install -y sshpass
+          Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
 
       - name: Verify the Connection To Remote Server
         env:
@@ -60,7 +52,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          wsl sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful"
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful"
 
       - name: Create Folder in the remote server
         env:
@@ -68,7 +60,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          wsl sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
 
       - name: List Remote Server folder
         env:
@@ -76,7 +68,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          wsl sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra ~/publish"
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra ~/publish"
 
       - name: Deploy to server
         env:
@@ -84,6 +76,8 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          wsl sshpass -p $env:SSH_PASSWORD scp -r -o StrictHostKeyChecking=no ./publish/* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/
-          
-          wsl sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish"
+          # Copy files to the remote server
+          .\pscp.exe -pw $env:SSH_PASSWORD -P 22 -r .\publish $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/
+
+          # List the contents of the ~/publish directory on the remote server to verify upload
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish"
