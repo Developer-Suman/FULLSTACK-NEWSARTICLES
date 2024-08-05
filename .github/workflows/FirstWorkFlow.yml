@@ -10,9 +10,17 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Download Plink
         run: |
           Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
+
+      - name: Debug Environment Variables
+        run: |
+          echo "REMOTE_USER=$env:REMOTE_USER"
+          echo "REMOTE_HOST=$env:REMOTE_HOST"
 
       - name: Verify SSH Connection
         run: |
@@ -23,10 +31,6 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
 
-      - name: Debug Environment Variables
+      - name: Check if Plink is downloaded
         run: |
-          echo "REMOTE_USER=$env:REMOTE_USER"
-          echo "REMOTE_HOST=$env:REMOTE_HOST"
-        env:
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          dir plink.exe
