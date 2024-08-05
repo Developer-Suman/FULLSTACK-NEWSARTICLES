@@ -42,9 +42,17 @@ jobs:
         with:
           name: publish
 
-      - name: Install sshpass
+      - name: Install WSL and Ubuntu
         run: |
-          Invoke-WebRequest -Uri https://github.com/ristom/sshpass/releases/download/1.06/sshpass.exe -OutFile sshpass.exe
+          wsl --install
+          wsl --set-default-version 2
+          wsl --list --verbose
+          wsl --install -d Ubuntu
+
+      - name: Install sshpass in WSL
+        run: |
+          wsl sudo apt-get update
+          wsl sudo apt-get install -y sshpass
 
       - name: Verify the Connection To Remote Server
         env:
@@ -52,7 +60,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful"
+          wsl sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful"
 
       - name: Create Folder in the remote server
         env:
@@ -60,7 +68,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
+          wsl sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
 
       - name: List Remote Server folder
         env:
@@ -68,7 +76,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra ~/publish"
+          wsl sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra ~/publish"
 
       - name: Deploy to server
         env:
@@ -76,6 +84,6 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          sshpass -p $env:SSH_PASSWORD scp -r -o StrictHostKeyChecking=no ./publish/* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/
+          wsl sshpass -p $env:SSH_PASSWORD scp -r -o StrictHostKeyChecking=no ./publish/* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/
           
-          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish"
+          wsl sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish"
