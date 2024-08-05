@@ -26,7 +26,7 @@ jobs:
           }
 
           # Add the host key to the known_hosts file
-          $hostKey = "47.129.30.248 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICD3ZgBzp8w4lKXU6fZqkGvms4+2Yk..."
+          $hostKey = "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM="
           $knownHostsFile = "$sshDir\known_hosts"
           Add-Content -Path $knownHostsFile -Value $hostKey
         env:
