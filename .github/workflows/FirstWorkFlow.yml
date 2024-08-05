@@ -41,13 +41,15 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: publish
-
-      - name: Install Plink
+          
+      - name: Prepare SSH Known Hosts
         run: |
-          Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
+          # Ensure the .ssh directory exists
+          if (!(Test-Path -Path "$env:USERPROFILE\.ssh")) {
+            New-Item -Path "$env:USERPROFILE\.ssh" -ItemType Directory
+          }
 
-      - name: Add SSH Host Key
-        run: |
+          # Append the SSH host key to known_hosts
           ssh-keyscan -H $env:REMOTE_HOST >> $env:USERPROFILE\.ssh\known_hosts
 
       - name: Verify the Connection To Remote Server
@@ -56,32 +58,17 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -batch -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful"
-
+          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful"
+      
       - name: Create Folder in the remote server
-        env:
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
+          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
 
       - name: List Remote Server folder
-        env:
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra ~/publish"
-
+          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra"
+      
       - name: Deploy to server
-        env:
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          # Copy files to the remote server
-          .\pscp.exe -pw $env:SSH_PASSWORD -P 22 -r .\publish $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/
-
-          # List the contents of the ~/publish directory on the remote server to verify upload
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish"
+          sshpass -p $env:SSH_PASSWORD scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts ./* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/
+          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish"
