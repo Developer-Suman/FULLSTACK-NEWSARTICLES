@@ -26,7 +26,7 @@ jobs:
           }
           
           # Host key format: [hostname] ssh-ed25519 AAAA... user@hostname
-          $hostKey = "$env:REMOTE_HOST ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICD3ZgBzp8w4lKXU6fZqkGvms4+2Yk... user@hostname"
+          $hostKey = "$env:REMOTE_HOST ssh-ed25519 255 SHA256:y7g6oPBOVOyWxomlRbYE6Tg7vQJB+int2rp7dmtDhrY $env:REMOTE_USER@$env:REMOTE_HOST"
           $knownHostsFile = "$sshDir\known_hosts"
           
           # Add the host key to the known_hosts file
@@ -37,7 +37,7 @@ jobs:
       - name: Verify SSH Connection
         run: |
           echo "Checking SSH connection..."
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch -o StrictHostKeyChecking=no
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
