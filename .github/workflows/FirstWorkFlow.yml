@@ -17,12 +17,6 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
 
-      - name: Create known_hosts
-        run: |
-          mkdir -p $env:USERPROFILE\.ssh
-          echo "$($env:REMOTE_HOST ssh-keyscan -p 22)" > $env:USERPROFILE\.ssh\known_hosts
-        shell: pwsh
-
       - name: Verify SSH Connection
         run: |
           echo "Checking SSH connection..."
@@ -32,6 +26,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
 
-      - name: Check if Plink is downloaded
+      - name: Debug Environment Variables
         run: |
-          dir plink.exe
+          echo "REMOTE_USER=$env:REMOTE_USER"
+          echo "REMOTE_HOST=$env:REMOTE_HOST"
