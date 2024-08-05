@@ -42,21 +42,16 @@ jobs:
         with:
           name: publish
 
-      - name: Download Plink
-        run: |
-          Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
-
-      - name: Set Execution Policy
-        run: |
-          Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-
       - name: Verify the Connection To Remote Server
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -batch -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful"
+          $command = "ssh $env:REMOTE_USER@$env:REMOTE_HOST -o StrictHostKeyChecking=no 'echo SSH connection successful'"
+          $securePassword = ConvertTo-SecureString $env:SSH_PASSWORD -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential ($env:REMOTE_USER, $securePassword)
+          Start-Process -NoNewWindow -FilePath "ssh" -ArgumentList $command -Credential $credential -Wait
 
       - name: Create Folder in the remote server
         env:
@@ -64,7 +59,10 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -batch -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
+          $command = "ssh $env:REMOTE_USER@$env:REMOTE_HOST -o StrictHostKeyChecking=no 'mkdir -p ~/publish'"
+          $securePassword = ConvertTo-SecureString $env:SSH_PASSWORD -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential ($env:REMOTE_USER, $securePassword)
+          Start-Process -NoNewWindow -FilePath "ssh" -ArgumentList $command -Credential $credential -Wait
 
       - name: List Remote Server folder
         env:
@@ -72,7 +70,10 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -batch -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra ~/publish"
+          $command = "ssh $env:REMOTE_USER@$env:REMOTE_HOST -o StrictHostKeyChecking=no 'ls -ltra ~/publish'"
+          $securePassword = ConvertTo-SecureString $env:SSH_PASSWORD -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential ($env:REMOTE_USER, $securePassword)
+          Start-Process -NoNewWindow -FilePath "ssh" -ArgumentList $command -Credential $credential -Wait
 
       - name: Deploy to server
         env:
@@ -80,10 +81,10 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -batch -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
-          
-          # Copy files to the remote server
-          .\plink.exe -batch -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "scp -r -o StrictHostKeyChecking=no ./publish/* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/"
+          $command = "scp -r -o StrictHostKeyChecking=no ./publish/* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/"
+          $securePassword = ConvertTo-SecureString $env:SSH_PASSWORD -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential ($env:REMOTE_USER, $securePassword)
+          Start-Process -NoNewWindow -FilePath "cmd.exe" -ArgumentList "/c $command" -Credential $credential -Wait
 
-          # List the contents of the ~/publish directory on the remote server to verify upload
-          .\plink.exe -batch -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish"
+          $command = "ssh $env:REMOTE_USER@$env:REMOTE_HOST -o StrictHostKeyChecking=no 'ls -l ~/publish'"
+          Start-Process -NoNewWindow -FilePath "ssh" -ArgumentList $command -Credential $credential -Wait
