@@ -20,7 +20,7 @@ jobs:
       - name: Verify SSH Connection
         run: |
           echo "Checking SSH connection..."
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch -o StrictHostKeyChecking=no
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
@@ -29,7 +29,7 @@ jobs:
       - name: Create Folder on Remote Server
         run: |
           echo "Creating folder on remote server..."
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/new_folder" -batch -o StrictHostKeyChecking=no
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/new_folder" -batch -o StrictHostKeyChecking=no -o UserKnownHostsFile=NUL
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
