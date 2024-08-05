@@ -46,6 +46,10 @@ jobs:
         run: |
           Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
 
+      - name: Add SSH Host Key
+        run: |
+          ssh-keyscan -H $env:REMOTE_HOST >> $env:USERPROFILE\.ssh\known_hosts
+
       - name: Verify the Connection To Remote Server
         env:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
