@@ -57,6 +57,7 @@ jobs:
         run: |
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
 
+
       - name: Verify SSH Connection
         run: |
           .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch -o StrictHostKeyChecking=no
