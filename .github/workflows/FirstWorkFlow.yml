@@ -47,10 +47,7 @@ jobs:
         with:
           name: publish
 
-      - name: List downloaded publish directory
-        run: |
-          cd BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
-          dir publish
+    
 
       - name: Download Plink
         run: |
