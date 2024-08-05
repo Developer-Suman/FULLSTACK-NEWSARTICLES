@@ -25,11 +25,9 @@ jobs:
               New-Item -ItemType Directory -Path $sshDir
           }
 
-          # Host key format: [hostname] [key type] [key]
-          $hostKey = "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEJ8G2lHIfq2NzXlAyyA8/whB5DDQ52WUvT0J8wnTt0+EJ7wQkN9Eg5A3uVq5JxF9kDtGG5HkHgHE5eAVVpRbZzE4I58t0NZa5cZ22E7L+eMblF8El2nF8HG19r3WjxPvIuK+W3xwNh0AYeqPtA5DRLTZ40MWG63ZhFs5eMrdVo=="
-          $knownHostsFile = "$sshDir\known_hosts"
-
           # Add the host key to the known_hosts file
+          $hostKey = "47.129.30.248 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICD3ZgBzp8w4lKXU6fZqkGvms4+2Yk..."
+          $knownHostsFile = "$sshDir\known_hosts"
           Add-Content -Path $knownHostsFile -Value $hostKey
         env:
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
