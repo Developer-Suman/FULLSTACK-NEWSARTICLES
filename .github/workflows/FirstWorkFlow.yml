@@ -41,35 +41,34 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: publish
-          
-      - name: Prepare SSH Known Hosts
-        run: |
-          # Ensure the .ssh directory exists
-          if (!(Test-Path -Path "$env:USERPROFILE\.ssh")) {
-            New-Item -Path "$env:USERPROFILE\.ssh" -ItemType Directory
-          }
 
-          # Fetch and add the SSH host key
-          $hostKey = & ssh-keyscan -H $env:REMOTE_HOST
-          Add-Content -Path "$env:USERPROFILE\.ssh\known_hosts" -Value $hostKey
+      - name: List downloaded publish directory
+        run: dir BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/
 
-      - name: Verify the Connection To Remote Server
-        env:
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+      - name: Download Plink
         run: |
-          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful"
-      
+          Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
+
+      - name: Set Execution Policy
+        run: |
+          Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+
+      - name: Verify SSH Connection
+        run: |
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo SSH connection successful" -batch -o StrictHostKeyChecking=no
+
       - name: Create Folder in the remote server
         run: |
-          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish"
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/publish" -batch -o StrictHostKeyChecking=no
 
       - name: List Remote Server folder
         run: |
-          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra"
-      
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "ls -ltra ~/publish" -batch -o StrictHostKeyChecking=no
+
       - name: Deploy to server
         run: |
-          sshpass -p $env:SSH_PASSWORD scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts ./* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/
-          sshpass -p $env:SSH_PASSWORD ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$env:USERPROFILE\.ssh\known_hosts $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish"
+          # Copy files to the remote server
+          .\pscp.exe -pw $env:SSH_PASSWORD -P 22 -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/ -batch -o StrictHostKeyChecking=no
+
+          # Verify upload
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "ls -l ~/publish" -batch -o StrictHostKeyChecking=no
