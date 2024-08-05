@@ -43,6 +43,15 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
 
+      - name: Create Folder on Remote Server
+        run: |
+          echo "Creating folder on remote server..."
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "mkdir -p ~/new_folder" -batch -o StrictHostKeyChecking=no
+        env:
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+
       - name: Debug Environment Variables
         run: |
           echo "REMOTE_USER=$env:REMOTE_USER"
