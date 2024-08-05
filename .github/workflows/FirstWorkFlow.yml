@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-      - main  # Change this to the branch you want to trigger the action
+      - main
 
 jobs:
   deploy:
@@ -27,4 +27,4 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         run: |
-          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "your-command-here"
+          .\plink.exe -pw $env:SSH_PASSWORD -P 22 $env:REMOTE_USER@$env:REMOTE_HOST "echo 'Connection successful'" || exit 1
