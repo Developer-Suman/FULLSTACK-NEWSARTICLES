@@ -42,9 +42,6 @@ jobs:
         with:
           name: publish
 
-      - name: List downloaded publish directory
-        run: dir BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish
-
       - name: Setup known hosts
         run: |
           # Create .ssh directory if it doesn't exist
