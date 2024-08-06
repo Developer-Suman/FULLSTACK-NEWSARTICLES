@@ -21,7 +21,8 @@ jobs:
         run: |
           $sshCommand = "ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE $env:REMOTE_USER@$env:REMOTE_HOST 'echo SSH connection successful'"
           Write-Output "Executing command: $sshCommand"
-          & $sshCommand
+          Invoke-Expression $sshCommand
         env:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
