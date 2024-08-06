@@ -17,6 +17,7 @@ jobs:
             New-Item -ItemType Directory -Path "$env:USERPROFILE\.ssh"
           }
 
+
           # Add known host entry
           $knownHostEntry = "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM="
           $knownHostsPath = "$env:USERPROFILE\.ssh\known_hosts"
