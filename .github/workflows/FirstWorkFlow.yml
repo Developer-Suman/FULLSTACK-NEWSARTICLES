@@ -3,7 +3,7 @@ name: SSH Connection Test
 on:
   push:
     branches:
-      - main  # Replace with your branch if needed
+      - main
 
 jobs:
   ssh:
@@ -20,10 +20,22 @@ jobs:
           .\plink.exe -V
           # Verify if plink is installed and its version.
 
+      - name: Debug Environment Variables
+        shell: pwsh
+        run: |
+          Write-Output "REMOTE_USER: $env:REMOTE_USER"
+          Write-Output "REMOTE_HOST: $env:REMOTE_HOST"
+          Write-Output "SSH_PASSWORD: $env:SSH_PASSWORD"
+
       - name: Verify SSH Connection with Plink
         shell: pwsh
         run: |
-          $plinkCommand = ".\plink.exe -ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE $env:REMOTE_USER@$env:REMOTE_HOST -pw $env:SSH_PASSWORD 'echo SSH connection successful'"
+          $plinkPath = ".\plink.exe"
+          $username = $env:REMOTE_USER
+          $hostname = $env:REMOTE_HOST
+          $password = $env:SSH_PASSWORD
+
+          $plinkCommand = "& `"$plinkPath`" -ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE $username@$hostname -pw $password 'echo SSH connection successful'"
           Write-Output "Executing command: $plinkCommand"
           Invoke-Expression $plinkCommand
         env:
