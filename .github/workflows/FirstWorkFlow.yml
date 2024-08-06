@@ -1,44 +1,77 @@
-name: SSH Connection Test
+name: Build and Deploy to Remote Server
 
 on:
   push:
     branches:
-      - main
+      - main  # or the branch you want to trigger this workflow
 
 jobs:
-  ssh:
-    runs-on: windows-latest
+  build:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Download PuTTY
-        run: |
-          Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Verify PuTTY Tools
-        shell: pwsh
-        run: |
-          .\plink.exe -V
-          # Verify if plink is installed and its version.
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x'
 
-      - name: Debug Environment Variables
-        shell: pwsh
+      - name: Build and Publish
         run: |
-          Write-Output "REMOTE_USER: $env:REMOTE_USER"
-          Write-Output "REMOTE_HOST: $env:REMOTE_HOST"
-          Write-Output "SSH_PASSWORD: $env:SSH_PASSWORD"
+          cd BackEnd
+          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
+          dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
+          dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
+          dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
-      - name: Verify SSH Connection with Plink
-        shell: pwsh
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: publish
+          path: BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: publish
+          
+      - name: List downloaded publish directory
+        run: ls -ltra
+
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Verify the Connection To Remote Server
         run: |
-          $plinkPath = ".\plink.exe"
-          $username = $env:REMOTE_USER
-          $hostname = $env:REMOTE_HOST
-          $password = $env:SSH_PASSWORD
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
 
-          $plinkCommand = "& `"$plinkPath`" -ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE $username@$hostname -pw $password 'echo SSH connection successful'"
-          Write-Output "Executing command: $plinkCommand"
-          Invoke-Expression $plinkCommand
-        env:
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+    
+      - name: Create Folder in the remote server
+        run: |
+          #Create the publish folder to the server
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "mkdir -p ~/publish"
+        
+      - name: List Remote Server folder
+        run: |
+          # List the contents of the /publish directory on the remote server
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -ltra"
+      
+      - name: Deploy to server
+        run: |
+          # List the contents of the /publish directory on the remote server
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -l"
+          
+          # Copy files to the remote server
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' scp -r -o StrictHostKeyChecking=no ./* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:~/publish/
+
+          # List the contents of the ~/publish directory on the remote server to verify upload
+          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "ls -l ~/publish"
+
+          
