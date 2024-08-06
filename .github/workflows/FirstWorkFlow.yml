@@ -1,98 +1,27 @@
-name: Build and Deploy to Remote Server
+name: SSH Connection Test
 
 on:
   push:
     branches:
-      - main  # or the branch you want to trigger this workflow
+      - main  # Replace with your branch if needed
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.x'
-
-      - name: Build and Publish
-        run: |
-          cd BackEnd
-          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
-          dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
-          dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
-          dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: publish
-          path: BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/
-
-  deploy:
+  ssh:
     runs-on: windows-latest
-    needs: build
 
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: publish
-
-      - name: Setup known hosts
+      - name: Verify SSH Client Installation
+        shell: pwsh
         run: |
-          # Create .ssh directory if it doesn't exist
-          if (-not (Test-Path -Path "$env:USERPROFILE\.ssh")) {
-            New-Item -ItemType Directory -Path "$env:USERPROFILE\.ssh"
-          }
-          
-          # Add known host entry
-          $knownHostEntry = "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM="
-          $knownHostsPath = "$env:USERPROFILE\.ssh\known_hosts"
-          Add-Content -Path $knownHostsPath -Value $knownHostEntry
+          ssh -V
+          # Verify if SSH client is installed and its version.
 
       - name: Verify SSH Connection
         shell: pwsh
         run: |
           $sshCommand = "ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE $env:REMOTE_USER@$env:REMOTE_HOST 'echo SSH connection successful'"
-          Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList $sshCommand -Wait
+          Write-Output "Executing command: $sshCommand"
+          & $sshCommand
         env:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-
-      - name: Create Folder on Remote Server
-        shell: pwsh
-        run: |
-          $sshCommand = "ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST 'mkdir -p ~/publish'"
-          Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList $sshCommand -Wait
-        env:
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-
-      - name: List Remote Server Folder
-        shell: pwsh
-        run: |
-          $sshCommand = "ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST 'ls -ltra ~/publish'"
-          Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList $sshCommand -Wait
-        env:
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-
-      - name: Deploy to Remote Server
-        shell: pwsh
-        run: |
-          $scpCommand = "scp -r -o StrictHostKeyChecking=no ./* $env:REMOTE_USER@$env:REMOTE_HOST:~/publish/"
-          Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList $scpCommand -Wait
-          
-          $sshCommand = "ssh -o StrictHostKeyChecking=no $env:REMOTE_USER@$env:REMOTE_HOST 'ls -l ~/publish'"
-          Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList $sshCommand -Wait
-        env:
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
