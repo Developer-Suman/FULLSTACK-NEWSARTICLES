@@ -10,18 +10,22 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Verify SSH Client Installation
-        shell: pwsh
+      - name: Download PuTTY
         run: |
-          ssh -V
-          # Verify if SSH client is installed and its version.
+          Invoke-WebRequest -Uri https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe -OutFile plink.exe
 
-      - name: Verify SSH Connection
+      - name: Verify PuTTY Tools
         shell: pwsh
         run: |
-          $sshCommand = "ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE $env:REMOTE_USER@$env:REMOTE_HOST 'echo SSH connection successful'"
-          Write-Output "Executing command: $sshCommand"
-          Invoke-Expression $sshCommand
+          .\plink.exe -V
+          # Verify if plink is installed and its version.
+
+      - name: Verify SSH Connection with Plink
+        shell: pwsh
+        run: |
+          $plinkCommand = ".\plink.exe -ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE $env:REMOTE_USER@$env:REMOTE_HOST -pw $env:SSH_PASSWORD 'echo SSH connection successful'"
+          Write-Output "Executing command: $plinkCommand"
+          Invoke-Expression $plinkCommand
         env:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
