@@ -10,23 +10,23 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Install MSYS2 and expect
-        uses: msys2/setup-msys2@v2
-        with:
-          packages: expect
-
       - name: Setup known hosts
         run: |
           # Create .ssh directory if it doesn't exist
-          mkdir -p %USERPROFILE%\.ssh
-          
+          if (-not (Test-Path -Path "$env:USERPROFILE\.ssh")) {
+            New-Item -ItemType Directory -Path "$env:USERPROFILE\.ssh"
+          }
+
           # Add known host entry
-          echo "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM=" > %USERPROFILE%\.ssh\known_hosts
+          $knownHostEntry = "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM="
+          $knownHostsPath = "$env:USERPROFILE\.ssh\known_hosts"
+          Add-Content -Path $knownHostsPath -Value $knownHostEntry
 
-      - name: Run expect script for SSH connection
+      - name: Verify the Connection To Remote Server
         run: |
-          # Create the expect script
-          echo '#!/usr/bin/expect -f\n\nset timeout 20\nset password [lindex $argv 0]\nset host [lindex $argv 1]\nset user [lindex $argv 2]\n\nspawn ssh $user@$host\nexpect "password:"\nsend "$password\r"\nexpect "$ "\nsend "echo SSH connection successful\r"\ninteract' > %USERPROFILE%\expect_script.exp
-
-          # Run the expect script
-          expect %USERPROFILE%\expect_script.exp ${{ secrets.SSH_PASSWORD }} ${{ secrets.REMOTE_HOST }} ${{ secrets.REMOTE_USER }}
+          $sshCommand = "ssh $env:REMOTE_USER@$env:REMOTE_HOST 'echo SSH connection successful'"
+          Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList $sshCommand -Wait
+        env:
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
