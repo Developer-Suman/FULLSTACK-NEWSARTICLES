@@ -10,17 +10,14 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Install sshpass
-        run: choco install sshpass
-
       - name: Setup known hosts
         run: |
           # Create .ssh directory if it doesn't exist
-          mkdir -p %USERPROFILE%/.ssh
+          mkdir -p %USERPROFILE%\.ssh
           
           # Add known host entry
-          echo "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM=" > %USERPROFILE%/.ssh/known_hosts
+          echo "47.129.30.248 ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBPY4Sa4lMnJ7EXf+wT3/nRKvT2SSLlLsHWKk46GKDink41JhLGEVx6IKtvi0vMMlNvG3LwBvHzS8yvunELQOpDM=" > %USERPROFILE%\.ssh\known_hosts
 
       - name: Verify the Connection To Remote Server
         run: |
-          sshpass -p ${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
+          ssh -o StrictHostKeyChecking=no -o LogLevel=VERBOSE ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "echo SSH connection successful"
