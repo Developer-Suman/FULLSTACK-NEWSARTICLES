@@ -6,6 +6,7 @@ using Master_DAL.Abstraction;
 using Master_DAL.DataSeed;
 using Master_DAL.Interface;
 using Master_DAL.JWT;
+using Master_DAL.Models;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -56,6 +57,9 @@ namespace Master_BLL
             services.AddScoped<IHelpherMethods, HelpherMethods>();
             services.AddScoped<ICommentsRepository, CommentsRepository>();
             services.AddScoped<IPermissionServices, PermissionServices>();
+            services.AddScoped<IModule, Module>();
+            services.AddScoped<ISubModule, SubModule>();
+            services.AddScoped<IMenu, MenuServices>();
             services.AddTransient<DataSeeder>();
 
             //builder.Services.Add(new ServiceDescriptor(
