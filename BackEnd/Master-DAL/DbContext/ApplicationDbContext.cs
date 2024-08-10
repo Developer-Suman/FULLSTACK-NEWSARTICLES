@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
@@ -214,6 +215,55 @@ namespace Master_DAL.DbContext
             #endregion
 
 
+            #region Menu and SubModule(m:1)
+            builder.Entity<Menu>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.HasOne(x => x.SubModules)
+                .WithMany(x => x.Menu)
+                .HasForeignKey(x => x.SubModuleId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+            #endregion
+
+            #region SubModule and Menu(1:m)
+            builder.Entity<SubModules>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.HasMany(x => x.Menu)
+                .WithOne(x => x.SubModules)
+                .HasForeignKey(x => x.SubModuleId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+            #endregion
+
+
+            #region Module and SubModule(1:m)
+            builder.Entity<Modules>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.HasMany(x => x.SubModules)
+                .WithOne(x => x.Modules)
+                .HasForeignKey(x => x.ModuleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            });
+
+            #endregion
+
+            #region SubModule and Module(m:1)
+            builder.Entity<SubModules>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.HasOne(x => x.Modules)
+                .WithMany(x => x.SubModules)
+                .HasForeignKey(x => x.ModuleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            });
+            #endregion
+
+
 
             base.OnModelCreating(builder);
         }
@@ -227,5 +277,13 @@ namespace Master_DAL.DbContext
         public DbSet<ControllerAction> ControllerActions { get; set; }
         public DbSet<UserPermission> UserPermissions { get; set; }
         public DbSet<PermissionControllerAction> PermissionControllerActions { get; set; }
+
+
+        #region Menu,Module,SubModule
+        public DbSet<Modules> Modules { get; set; }
+        public DbSet<SubModules> SubModules { get; set; }
+        public DbSet<Menu> Menus { get; set; }
+
+        #endregion
     }
 }

@@ -46,6 +46,16 @@ try
           .ReadFrom.Configuration(context.Configuration));
 
 
+    //AddRolePolicy
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("CanCreateArticles", policy =>
+        policy.RequireRole("Suman"));
+
+        options.AddPolicy("CanDeleteArticles", policy =>
+        policy.RequireRole("Rai"));
+    });
+
 
 
 
