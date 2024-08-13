@@ -33,15 +33,14 @@ jobs:
 
       - name: Test SSH Connection
         run: |
-          # Test SSH connection to verify setup
-          ssh -i "$env:USERPROFILE\.ssh\id_rsa" -o StrictHostKeyChecking=no suman@192.168.1.64 "echo 'SSH connection successful!'"
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no suman@192.168.1.64 "echo 'SSH connection successful!'"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy to Local Computer
         run: |
           # Deploy files using rsync
-          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/path/to/deploy/
+          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
