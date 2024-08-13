@@ -1,4 +1,4 @@
-name: Build and Deploy to Local Computer
+name: Deploy to Local Computer
 
 on:
   push:
@@ -6,37 +6,25 @@ on:
       - main  # or the branch you want to trigger this workflow
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.x'
-
-      - name: Install EF Core Tools
-        run: dotnet tool install --global dotnet-ef
-
-      - name: Build and Publish
+      - name: Write SSH key to file
         run: |
-          cd BackEnd
-          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
-          dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
-          dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
-          dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | Out-File -FilePath "C:\Users\suman\.ssh\id_rsa" -Encoding utf8
+          icacls "C:\Users\suman\.ssh\id_rsa" /inheritance:r
+          icacls "C:\Users\suman\.ssh\id_rsa" /grant:r "${env:USERNAME}:(R)"
+        shell: pwsh
 
       - name: Deploy to Local Computer
         run: |
-          echo "$SSH_PRIVATE_KEY" > C:\Users\suman\.ssh\id_rsa
-          chmod 600 C:\Users\suman\.ssh\id_rsa
-          ssh-keyscan -H 192.168.1.64 >> C:\Users\suman\.ssh\known_hosts
-          rsync -avz --delete -e "ssh -i C:\Users\suman\.ssh\id_rsa -o StrictHostKeyChecking=no" BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/Test/
+          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Notify Success
-        run: echo "Build and deployment successful! 🎉"
+        run: echo "Deployment successful! 🎉"
