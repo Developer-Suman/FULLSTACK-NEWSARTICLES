@@ -29,10 +29,18 @@ jobs:
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
-      
+      - name: Run database migrations
+        run: |
+          cd BackEnd
+          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
+          dotnet ef database update --project "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --startup-project "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
+
       - name: Deploy to Local Computer
         run: |
-          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/Test/
+          echo "$SSH_PRIVATE_KEY" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+          ssh-keyscan -H 192.168.1.64 >> ~/.ssh/known_hosts
+          rsync -avz --delete -e "ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no" BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
