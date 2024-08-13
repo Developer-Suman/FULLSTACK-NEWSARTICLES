@@ -1,4 +1,4 @@
-name: Deploy to Local Computer
+name: Build and Deploy to Local Computer
 
 on:
   push:
@@ -6,25 +6,49 @@ on:
       - main  # or the branch you want to trigger this workflow
 
 jobs:
-  deploy:
+  build:
     runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Write SSH key to file
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x'
+
+      - name: Install EF Core Tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Build and Publish
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | Out-File -FilePath "C:\Users\suman\.ssh\id_rsa" -Encoding utf8
-          icacls "C:\Users\suman\.ssh\id_rsa" /inheritance:r
-          icacls "C:\Users\suman\.ssh\id_rsa" /grant:r "${env:USERNAME}:(R)"
-        shell: pwsh
+          cd BackEnd
+          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
+          dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
+          dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
+          dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
+
+      - name: Set up SSH key for Windows
+        run: |
+          mkdir -p $env:USERPROFILE\.ssh
+          $env:SSH_PRIVATE_KEY | Out-File -FilePath "$env:USERPROFILE\.ssh\id_rsa" -Encoding ascii
+          icacls "$env:USERPROFILE\.ssh\id_rsa" /inheritance:r /grant:r "${env:USERNAME}:(R,W)"
+          ssh-keyscan -H 192.168.1.64 | Out-File -Append -FilePath "$env:USERPROFILE\.ssh\known_hosts"
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Run database migrations
+        run: |
+          cd BackEnd
+          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
+          dotnet ef database update --project "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --startup-project "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
 
       - name: Deploy to Local Computer
         run: |
-          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/Test/
+          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/path/to/deploy/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Notify Success
-        run: echo "Deployment successful! 🎉"
+        run: echo "Build and deployment successful! 🎉"
