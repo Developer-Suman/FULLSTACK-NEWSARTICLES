@@ -29,14 +29,12 @@ jobs:
           dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
           dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
 
-
-
       - name: Deploy to Local Computer
         run: |
-          echo "$SSH_PRIVATE_KEY" > /tmp/id_rsa
-          chmod 600 /tmp/id_rsa
-          ssh-keyscan -H 192.168.1.64 >> ~/.ssh/known_hosts
-          rsync -avz --delete -e "ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no" BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/Test/
+          echo "$SSH_PRIVATE_KEY" > C:\Users\suman\.ssh\id_rsa
+          chmod 600 C:\Users\suman\.ssh\id_rsa
+          ssh-keyscan -H 192.168.1.64 >> C:\Users\suman\.ssh\known_hosts
+          rsync -avz --delete -e "ssh -i C:\Users\suman\.ssh\id_rsa -o StrictHostKeyChecking=no" BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
