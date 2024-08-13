@@ -28,14 +28,21 @@ jobs:
 
           # Add the remote host to known_hosts to avoid SSH verification prompts
           ssh-keyscan -H 192.168.1.64 | Out-File -Append -FilePath "$env:USERPROFILE\.ssh\known_hosts"
+
+          # List the contents of .ssh directory for debugging
+          dir "$env:USERPROFILE\.ssh"
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Test SSH Connection
+        run: |
+          # Test SSH connection to verify setup
+          ssh -i "$env:USERPROFILE\.ssh\id_rsa" suman@192.168.1.64 "echo 'SSH connection successful!'"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy to Local Computer
         run: |
-          # Test SSH connection
-          ssh -i "$env:USERPROFILE\.ssh\id_rsa" suman@192.168.1.64 "echo 'Connected successfully!'"
-
           # Deploy files using rsync
           rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/path/to/deploy/
         env:
