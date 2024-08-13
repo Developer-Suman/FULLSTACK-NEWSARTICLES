@@ -32,7 +32,7 @@ jobs:
       
       - name: Deploy to Local Computer
         run: |
-          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@localhost:/Test/
+          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
