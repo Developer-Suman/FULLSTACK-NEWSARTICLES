@@ -33,8 +33,14 @@ jobs:
 
       - name: Test SSH Connection
         run: |
+          # Display SSH key contents for debugging
+          Get-Content "$env:USERPROFILE\.ssh\id_rsa"
+
+          # Display known_hosts contents for debugging
+          Get-Content "$env:USERPROFILE\.ssh\known_hosts"
+
           # Test SSH connection to verify setup
-          ssh -i "$env:USERPROFILE\.ssh\id_rsa" suman@192.168.1.64 "echo 'SSH connection successful!'"
+          ssh -i "$env:USERPROFILE\.ssh\id_rsa" -o StrictHostKeyChecking=no suman@192.168.1.64 "echo 'SSH connection successful!'"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
