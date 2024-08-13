@@ -18,6 +18,9 @@ jobs:
         with:
           dotnet-version: '7.x'
 
+      - name: Restore .NET tools
+        run: dotnet tool restore
+
       - name: Build and Publish
         run: |
           cd BackEnd
@@ -34,6 +37,6 @@ jobs:
 
       - name: Deploy to Local Computer
         run: |
-          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@localhost:/Test/
+          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ user@localhost:/path/to/deploy/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
