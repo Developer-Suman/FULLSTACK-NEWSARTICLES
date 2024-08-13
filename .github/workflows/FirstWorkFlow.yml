@@ -1,4 +1,4 @@
-name: Build and Deploy to Local Computer
+name: Deploy to Local Computer
 
 on:
   push:
@@ -6,49 +6,40 @@ on:
       - main  # or the branch you want to trigger this workflow
 
 jobs:
-  build:
+  deploy:
     runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.x'
-
-      - name: Install EF Core Tools
-        run: dotnet tool install --global dotnet-ef
-
-      - name: Build and Publish
-        run: |
-          cd BackEnd
-          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
-          dotnet restore "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
-          dotnet build "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release
-          dotnet publish "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --configuration Release --output ./publish
-
       - name: Set up SSH key for Windows
         run: |
-          mkdir -p $env:USERPROFILE\.ssh
+          # Create the .ssh directory if it doesn't exist
+          if (-not (Test-Path -Path "$env:USERPROFILE\.ssh")) {
+            New-Item -Path "$env:USERPROFILE\.ssh" -ItemType Directory
+          }
+
+          # Write the SSH private key to id_rsa
           $env:SSH_PRIVATE_KEY | Out-File -FilePath "$env:USERPROFILE\.ssh\id_rsa" -Encoding ascii
+
+          # Set permissions for the SSH private key
           icacls "$env:USERPROFILE\.ssh\id_rsa" /inheritance:r /grant:r "${env:USERNAME}:(R,W)"
+
+          # Add the remote host to known_hosts to avoid SSH verification prompts
           ssh-keyscan -H 192.168.1.64 | Out-File -Append -FilePath "$env:USERPROFILE\.ssh\known_hosts"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Run database migrations
-        run: |
-          cd BackEnd
-          cd MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY
-          dotnet ef database update --project "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj" --startup-project "MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY.csproj"
-
       - name: Deploy to Local Computer
         run: |
+          # Test SSH connection
+          ssh -i "$env:USERPROFILE\.ssh\id_rsa" suman@192.168.1.64 "echo 'Connected successfully!'"
+
+          # Deploy files using rsync
           rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@192.168.1.64:/path/to/deploy/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Notify Success
-        run: echo "Build and deployment successful! 🎉"
+        run: echo "Deployment to local computer successful! 🎉"
