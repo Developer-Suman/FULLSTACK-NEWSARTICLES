@@ -18,8 +18,8 @@ jobs:
         with:
           dotnet-version: '7.x'
 
-      - name: Restore .NET tools
-        run: dotnet tool restore
+      - name: Install EF Core Tools
+        run: dotnet tool install --global dotnet-ef
 
       - name: Build and Publish
         run: |
@@ -37,6 +37,9 @@ jobs:
 
       - name: Deploy to Local Computer
         run: |
-          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ user@localhost:/path/to/deploy/
+          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ suman@localhost:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Notify Success
+        run: echo "Build and deployment successful! 🎉"
