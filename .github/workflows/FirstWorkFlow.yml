@@ -33,7 +33,7 @@ jobs:
 
       - name: Test SSH Connection
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no suman@192.168.1.64 "echo 'SSH connection successful!'"
+          ssh -i ~/.ssh/id_rsa suman@192.168.1.64 "echo 'SSH connection successful!'"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
