@@ -27,7 +27,9 @@ jobs:
           icacls "$env:USERPROFILE\.ssh\id_rsa" /inheritance:r /grant:r "${env:USERNAME}:(R,W)"
 
           # Add the remote host to known_hosts to avoid SSH verification prompts
-          ssh-keyscan -H 192.168.1.64 | Out-File -Append -FilePath "$env:USERPROFILE\.ssh\known_hosts"
+          @"
+          192.168.1.64 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC/EMHalLpABdpLjaS3lpQ8PqJM6fqcrZOgUnyIHvp5XbAQE0+W1iwuwyoQp1g0xV+x2JJSkNB7Z5bJfxL2tZc/7YULVElyDVGHlidvSZtKehV3luiHeUbPjqnrALisY+g/IhHOrV1U5t1Kf61uJ65WqoxChXbxuugn+CC1qyYQjhXv8SdskWr9erDRBvy9TbgmueihzfB6DMFaqCDh2C7gUNuIjXLnYuzB96GThUPJyUgPp8Ju+H+Z6cKRYnjlp1Ge1rUQz2+X2j9HlF4HzeT1ASCUa0FtM0993l4CnLq2y33/ghJG8gcRyyk5zCFtkSShrlwgeAV3CypftZErpjkLApYxSEw20+ERMFKYVCBEMclwnZvm7lnFCNWLuc1LBe8YVQv7dJh+eyXqPAEPEAAouCjSL55CDxlsWWOAyE/6doUHuYkcMrS1crtyMQrSwsPCf5r2tR9ZOttIYeGb3R5mGkqrft/CvhuEHItKYpYnj326YQZJEkEPSDk68fbB9qU=
+          "@ | Out-File -FilePath "$env:USERPROFILE\.ssh\known_hosts"
 
           # List the contents of .ssh directory for debugging
           dir "$env:USERPROFILE\.ssh"
