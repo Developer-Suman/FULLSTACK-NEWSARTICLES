@@ -1,4 +1,4 @@
-name: Deploy to Local Computer
+name: Deploy to Remote Server
 
 on:
   push:
@@ -43,12 +43,12 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to Local Computer
+      - name: Deploy to Remote Server
         run: |
-          # Deploy files using rsync or scp if rsync is unavailable
+          # Deploy files using rsync (ensure rsync is available on the runner)
           rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ administrator@54.255.235.189:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Notify Success
-        run: echo "Deployment to local computer successful! 🎉"
+        run: echo "Deployment to remote server successful! 🎉"
