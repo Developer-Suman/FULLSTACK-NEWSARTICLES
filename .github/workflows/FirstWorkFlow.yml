@@ -1,4 +1,4 @@
-name: Deploy to Remote Server
+name: Deploy to Remote Windows Server
 
 on:
   push:
@@ -43,12 +43,12 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to Remote Server
+      - name: Deploy to Remote Windows Server
         run: |
-          # Deploy files using rsync (ensure rsync is available on the runner)
+          # Deploy files using rsync (ensure rsync is installed on the runner)
           rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ administrator@54.255.235.189:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Notify Success
-        run: echo "Deployment to remote server successful! 🎉"
+        run: echo "Deployment to remote Windows server successful! 🎉"
