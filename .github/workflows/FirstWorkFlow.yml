@@ -20,7 +20,6 @@ jobs:
             New-Item -Path "$env:USERPROFILE\.ssh" -ItemType Directory -Force
           }
 
-
           # Write the SSH private key to id_rsa
           $env:SSH_PRIVATE_KEY | Out-File -FilePath "$env:USERPROFILE\.ssh\id_rsa" -Encoding ascii
 
@@ -46,7 +45,7 @@ jobs:
 
       - name: Deploy to Local Computer
         run: |
-          # Deploy files using rsync
+          # Deploy files using rsync or scp if rsync is unavailable
           rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ administrator@54.255.235.189:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
