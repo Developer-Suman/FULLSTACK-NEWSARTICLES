@@ -17,7 +17,7 @@ jobs:
         run: |
           # Create the .ssh directory if it doesn't exist
           if (-not (Test-Path -Path "$env:USERPROFILE\.ssh")) {
-            New-Item -Path "$env:USERPROFILE\.ssh" -ItemType Directory
+            New-Item -Path "$env:USERPROFILE\.ssh" -ItemType Directory -Force
           }
 
           # Write the SSH private key to id_rsa
@@ -29,7 +29,7 @@ jobs:
           # Ensure the known_hosts file exists and append the host key
           $known_hosts_path = "$env:USERPROFILE\.ssh\known_hosts"
           if (-not (Test-Path -Path $known_hosts_path)) {
-            New-Item -Path $known_hosts_path -ItemType File
+            New-Item -Path $known_hosts_path -ItemType File -Force
           }
 
           # Append the host key to known_hosts
