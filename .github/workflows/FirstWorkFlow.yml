@@ -20,6 +20,7 @@ jobs:
             New-Item -Path "$env:USERPROFILE\.ssh" -ItemType Directory -Force
           }
 
+
           # Write the SSH private key to id_rsa
           $env:SSH_PRIVATE_KEY | Out-File -FilePath "$env:USERPROFILE\.ssh\id_rsa" -Encoding ascii
 
