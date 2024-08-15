@@ -1,4 +1,4 @@
-name: Deploy to Remote Server
+name: Deploy to Local Computer
 
 on:
   push:
@@ -26,16 +26,25 @@ jobs:
           # Set permissions for the SSH private key
           icacls "$env:USERPROFILE\.ssh\id_rsa" /inheritance:r /grant:r "${env:USERNAME}:(R,W)"
 
-          # Ensure the known_hosts file exists and append the host key
+      - name: Remove Old Host Key
+        run: |
+          # Remove the old host key if it exists
           $known_hosts_path = "$env:USERPROFILE\.ssh\known_hosts"
+          if (Test-Path -Path $known_hosts_path) {
+            $host_key = "54.255.235.189"
+            $lines = Get-Content -Path $known_hosts_path | Where-Object { $_ -notmatch $host_key }
+            Set-Content -Path $known_hosts_path -Value $lines
+          }
+
+      - name: Add Correct Host Key
+        run: |
+          # Add the correct host key to known_hosts
+          $known_hosts_path = "$env:USERPROFILE\.ssh\known_hosts"
+          $host_key = "54.255.235.189 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC/EMHalLpABdpLjaS3lpQ8PqJM6fqcrZOgUnyIHvp5XbAQE0+W1iwuwyoQp1g0xV+x2JJSkNB7Z5bJfxL2tZc/7YULVElyDVGHlidvSZtKehV3luiHeUbPjqnrALisY+g/IhHOrV1U5t1Kf61uJ65WqoxChXbxuugn+CC1qyYQjhXv8SdskWr9erDRBvy9TbgmueihzfB6DMFaqCDh2C7gUNuIjXLnYuzB96GThUPJyUgPp8Ju+H+Z6cKRYnjlp1Ge1rUQz2+X2j9HlF4HzeT1ASCUa0FtM0993l4CnLq2y33/ghJG8gcRyyk5zCFtkSShrlwgeAV3CypftZErpjkLApYxSEw20+ERMFKYVCBEMclwnZvm7lnFCNWLuc1LBe8YVQv7dJh+eyXqPAEPEAAouCjSL55CDxlsWWOAyE/6doUHuYkcMrS1crtyMQrSwsPCf5r2tR9ZOttIYeGb3R5mGkqrft/CvhuEHItKYpYnj326YQZJEkEPSDk68fbB9qU="
           if (-not (Test-Path -Path $known_hosts_path)) {
             New-Item -Path $known_hosts_path -ItemType File -Force
           }
-
-          # Append the host key to known_hosts
-          @"
-          54.255.235.189 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC/EMHalLpABdpLjaS3lpQ8PqJM6fqcrZOgUnyIHvp5XbAQE0+W1iwuwyoQp1g0xV+x2JJSkNB7Z5bJfxL2tZc/7YULVElyDVGHlidvSZtKehV3luiHeUbPjqnrALisY+g/IhHOrV1U5t1Kf61uJ65WqoxChXbxuugn+CC1qyYQjhXv8SdskWr9erDRBvy9TbgmueihzfB6DMFaqCDh2C7gUNuIjXLnYuzB96GThUPJyUgPp8Ju+H+Z6cKRYnjlp1Ge1rUQz2+X2j9HlF4HzeT1ASCUa0FtM0993l4CnLq2y33/ghJG8gcRyyk5zCFtkSShrlwgeAV3CypftZErpjkLApYxSEw20+ERMFKYVCBEMclwnZvm7lnFCNWLuc1LBe8YVQv7dJh+eyXqPAEPEAAouCjSL55CDxlsWWOAyE/6doUHuYkcMrS1crtyMQrSwsPCf5r2tR9ZOttIYeGb3R5mGkqrft/CvhuEHItKYpYnj326YQZJEkEPSDk68fbB9qU=
-          "@ | Out-File -Append -FilePath $known_hosts_path -Encoding ascii
+          Add-Content -Path $known_hosts_path -Value $host_key
 
       - name: Test SSH Connection
         run: |
@@ -43,12 +52,11 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to Remote Server
+      - name: Deploy to Remote Windows Server
         run: |
-          # Deploy files using rsync (ensure rsync is available on the runner)
-          rsync -avz --delete BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ administrator@54.255.235.189:/Test/
+          scp -i $env:USERPROFILE/.ssh/id_rsa -r BackEnd/MASTER-PROJECT-IN-LAYERED-ARCHITECTURE-GENERIC-REPOSITORY/publish/ administrator@54.255.235.189:/Test/
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Notify Success
-        run: echo "Deployment to remote server successful! 🎉"
+        run: echo "Deployment to remote Windows server successful! 🎉"
