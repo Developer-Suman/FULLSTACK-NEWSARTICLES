@@ -11,6 +11,9 @@ namespace Master_BLL.Services.Interface
     public interface IModule
     {
         Task<Result<ModulesGetDTOs>> Add(ModulesCreateDTOs modulesCreateDTOs);
-        Task<Result<ModulesGetDTOs>> GetModuleWithDetailsAsync(string ModuleId);
+        Task<Result<ModulesGetDTOs>> GetModuleWithDetails(string ModuleId);
+        Task<Result<GetModulesRoles>> AssignModulesToRole(string roleId, IEnumerable<string> moduleIds);
+        Task<Result<GetModulesRoles>> RemoveModulesFromRole(string roleId, IEnumerable<string> moduleIds);
+        Task<Result<List<ModulesGetDTOs>>> GetNavigationMenuByUser(string userId);
     }
 }
