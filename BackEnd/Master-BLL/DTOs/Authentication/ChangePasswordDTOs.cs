@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Master_BLL.DTOs.Authentication
 {
-    public record TokenDTOs(
-        string Token,
-        string RefreshToken
+    public record ChangePasswordDTOs
+    (
+        string? CurrentPassword,
+        string? NewPassword
         );
 }

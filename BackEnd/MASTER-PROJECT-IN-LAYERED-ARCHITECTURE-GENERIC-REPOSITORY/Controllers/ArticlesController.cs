@@ -26,7 +26,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         private readonly ILogger<IArticlesRepository> _logger;
 
 
-        public ArticlesController(IArticlesRepository articlesRepository, ILogger<IArticlesRepository> logger, IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper) : base(userManager, mapper)
+        public ArticlesController(IArticlesRepository articlesRepository, ILogger<IArticlesRepository> logger, IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager) : base(mapper,userManager, roleManager)
         {
             _articlesRepository = articlesRepository;
             _logger = logger;
