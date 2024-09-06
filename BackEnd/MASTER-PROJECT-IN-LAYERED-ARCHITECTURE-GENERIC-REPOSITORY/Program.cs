@@ -3,6 +3,8 @@ using Master_DAL;
 using Master_DAL.DataSeed;
 using Master_DAL.DbContext;
 using Master_DAL.Extensions;
+using Master_DAL.Models;
+using Microsoft.Extensions.Hosting;
 using MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs;
 using Serilog;
 
@@ -41,6 +43,7 @@ try
     //Alternatives
 
 
+
     builder.Host.UseSerilog((context, config) =>
     config.Enrich.FromLogContext()
           .ReadFrom.Configuration(context.Configuration));
@@ -55,6 +58,17 @@ try
         options.AddPolicy("CanDeleteArticles", policy =>
         policy.RequireRole("Rai"));
     });
+
+
+
+    // Load configuration files
+    builder.Configuration
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+        .AddEnvironmentVariables();
+
+    // Bind configuration to POCO
+    builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
 
 
@@ -99,7 +113,12 @@ try
     //}
 
     ApplicationConfiguration.Configure(app);
-
+    // Configure the HTTP request pipeline
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
 
 
     // Apply migrations during application startup

@@ -1,4 +1,5 @@
-﻿using Master_BLL.DTOs.SubModules;
+﻿using Master_BLL.DTOs.Menu;
+using Master_BLL.DTOs.SubModules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +8,22 @@ using System.Threading.Tasks;
 
 namespace Master_BLL.DTOs.Modules
 {
+    //public record ModulesGetDTOs(
+    //    string Id,
+    //    string Name,
+    //    string? Role,
+    //    string? TargetUrl,
+    //    List<SubModulesGetDTOs> SubModulesGetDTOs
+    //    );
+
     public record ModulesGetDTOs(
-        string Id,
-        string Name,
-        string? Role,
-        string? TargetUrl,
-        List<SubModulesGetDTOs> SubModulesGetDTOs
-        );
-   
+      string Id,
+      string Name,
+      string? Role,
+      string? TargetUrl,
+      List<SubModulesGetDTOs> SubModulesGetDTOs,
+      List<MenuGetDTOs> MenuGetDTOs
+      );
+
+
 }
