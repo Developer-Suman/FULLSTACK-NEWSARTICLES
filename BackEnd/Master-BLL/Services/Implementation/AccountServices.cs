@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Master_BLL.DTOs.Authentication;
+using Master_BLL.DTOs.Pagination;
 using Master_BLL.DTOs.RegistrationDTOs;
 using Master_BLL.Services.Interface;
+using Master_BLL.Static.Cache;
 using Master_DAL.Abstraction;
 using Master_DAL.JWT;
 using Master_DAL.Models;
@@ -88,6 +90,38 @@ namespace Master_BLL.Services.Implementation
             {
                 throw new Exception("Failed to create Role");
             }
+        }
+
+        public Task<Result<PagedResult<RoleDTOs>>> GetAllRoles(PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<Result<PagedResult<UserDTOs>>> GetAllUsers(PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
+        {
+            var cacheKey = CacheKeys.User;
+            var cacheData = await _memoryCacheRepository.GetCahceKey<PagedResult<UserDTOs>>(cacheKey);
+
+            if (cacheData is not null)
+            {
+                return Result<PagedResult<UserDTOs>>.Success(cacheData);
+            }
+
+            var allUser = await _authenticationRepository.GetAllUsersAsync(paginationDTOs, cancellationToken);
+            var userDataDTOs = _mapper.Map<PagedResult<UserDTOs>>(allUser.Data);
+
+            if (allUser is null)
+            {
+                return Result<PagedResult<UserDTOs>>.Failure("NotFound", "Users are Not Found");
+            }
+
+            await _memoryCacheRepository.SetAsync(cacheKey, allUser, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30)
+            }, cancellationToken);
+
+            return Result<PagedResult<UserDTOs>>.Success(userDataDTOs);
+
         }
 
         public async Task<Result<UserDTOs>> GetByUserId(string userId, CancellationToken cancellationToken)

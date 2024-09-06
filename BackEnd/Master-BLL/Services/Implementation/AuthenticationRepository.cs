@@ -1,7 +1,11 @@
 ﻿using AutoMapper;
+using ExtensionMethods.Pagination;
 using Master_BLL.DTOs.Authentication;
+using Master_BLL.DTOs.Pagination;
 using Master_BLL.Services.Interface;
 using Master_BLL.Static.Cache;
+using Master_DAL.Abstraction;
+using Master_DAL.Interface;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,9 +24,11 @@ namespace Master_BLL.Services.Implementation
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IMemoryCacheRepository _memoryCacheRepository;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AuthenticationRepository(UserManager<ApplicationUser> userManager,IMapper mapper, RoleManager<IdentityRole> roleManager, IMemoryCacheRepository memoryCacheRepository)
+        public AuthenticationRepository(UserManager<ApplicationUser> userManager,IMapper mapper, RoleManager<IdentityRole> roleManager, IMemoryCacheRepository memoryCacheRepository,IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork;
             _userManager = userManager;
             _roleManager = roleManager;
             _mapper = mapper;
@@ -88,6 +94,16 @@ namespace Master_BLL.Services.Implementation
             return user;
         }
 
+        public async Task<Result<PagedResult<RoleDTOs>>> GetAllRolesAsync(PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
+        {
+            var roles = await _unitOfWork.Repository<IdentityRole>().GetAllAsyncWithPagination();
+            var rolesPagedResult = await roles.AsNoTracking().ToPagedResultAsync(paginationDTOs.pageIndex, paginationDTOs.pageSize, paginationDTOs.IsPagination);
+
+            var rolesDTOs = _mapper.Map<PagedResult<RoleDTOs>>(rolesPagedResult.Data);
+
+            return Result<PagedResult<RoleDTOs>>.Success(rolesDTOs);
+        }
+
         public async Task<List<UserDTOs>?> GetAllUsers(int page, int pageSize, CancellationToken cancellationToken)
         {
             var cacheKeys = CacheKeys.User;
@@ -108,6 +124,16 @@ namespace Master_BLL.Services.Implementation
             var userDTO = _mapper.Map<List<UserDTOs>>(users);
 
             return userDTO;
+        }
+
+        public async Task<Result<PagedResult<UserDTOs>>> GetAllUsersAsync(PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
+        {
+            var users = await _unitOfWork.Repository<ApplicationUser>().GetAllAsyncWithPagination();
+            var usersPagedResult = await users.AsNoTracking().ToPagedResultAsync(paginationDTOs.pageIndex, paginationDTOs.pageSize, paginationDTOs.IsPagination);
+
+            var userDTOs = _mapper.Map<PagedResult<UserDTOs>>(usersPagedResult.Data);
+
+            return Result<PagedResult<UserDTOs>>.Success(userDTOs);
         }
 
         #region usingIQueryable

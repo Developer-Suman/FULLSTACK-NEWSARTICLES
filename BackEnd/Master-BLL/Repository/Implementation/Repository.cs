@@ -70,5 +70,35 @@ namespace Master_BLL.Repository.Implementation
         {
             _dbSet.RemoveRange(entity);
         }
+
+        public async Task<TEntity> GetById(int id) => await _dbSet.FindAsync(id);
+
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate = null, params Expression<Func<TEntity, object>>[] includes)
+        {
+            IQueryable<TEntity> query = _dbSet;
+
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
+
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.ToListAsync();
+        }
+
+        public Task<IQueryable<TEntity>> GetAllDataAsync()
+        {
+            return Task.FromResult(_dbSet.AsQueryable());
+        }
+
+        public Task<IQueryable<TEntity>> GetAllAsyncWithPagination()
+        {
+            return Task.FromResult(_dbSet.AsNoTracking().AsQueryable());
+        }
     }
 }

@@ -29,6 +29,7 @@ namespace Master_DAL.DbContext
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+
             #region Articles and ArticlesImages(1:m)
             builder.Entity<Articles>(entity =>
             {
@@ -286,7 +287,6 @@ namespace Master_DAL.DbContext
 
             base.OnModelCreating(builder);
         }
-
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Articles> Articles { get; set; }
         public DbSet<Comments> Comments { get; set; }

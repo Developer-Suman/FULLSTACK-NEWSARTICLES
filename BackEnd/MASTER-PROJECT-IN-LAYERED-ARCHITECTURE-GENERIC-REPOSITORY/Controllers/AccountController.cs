@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Master_BLL.DTOs.Authentication;
+using Master_BLL.DTOs.Pagination;
 using Master_BLL.DTOs.RegistrationDTOs;
 using Master_BLL.Services.Interface;
 using Master_DAL.Abstraction;
@@ -135,22 +136,22 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         #endregion
 
         #region AllUsers
-        //[HttpGet("AllUsers")]
-        //public async Task<IActionResult> GetAllUsers(int page, int pageSize, CancellationToken cancellationToken)
-        //{
-        //    var getAllUserResult = await _accountServices.GetAllUsers(paginationDTOs, cancellationToken);
-        //    #region Switch Statement
-        //    return getAllUserResult switch
-        //    {
-        //        { IsSuccess: true, Data: not null } => new JsonResult(getAllUserResult.Data, new JsonSerializerOptions
-        //        {
-        //            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-        //        }),
-        //        { IsSuccess: false, Errors: not null } => HandleFailureResult(getAllUserResult.Errors),
-        //        _ => BadRequest("Invalid page and pageSize Fields ")
-        //    };
-        //    #endregion
-        //}
+        [HttpGet("AllUsers")]
+        public async Task<IActionResult> GetAllUsers([FromQuery] PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
+        {
+            var getAllUserResult = await _accountServices.GetAllUsers(paginationDTOs, cancellationToken);
+            #region Switch Statement
+            return getAllUserResult switch
+            {
+                { IsSuccess: true, Data: not null } => new JsonResult(getAllUserResult.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                }),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(getAllUserResult.Errors),
+                _ => BadRequest("Invalid page and pageSize Fields ")
+            };
+            #endregion
+        }
 
         #endregion
 
@@ -179,23 +180,23 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         #endregion
 
         #region GetAllRoles
-        //[HttpGet("GetAllRoles")]
-        //public async Task<IActionResult> GetAllUserRoles([FromQuery] PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
-        //{
-        //    var getAllUserRolesResult = await _accountServices.GetAllRoles(paginationDTOs, cancellationToken);
-        //    #region Switch Statement
-        //    return getAllUserRolesResult switch
-        //    {
-        //        { IsSuccess: true, Data: not null } => new JsonResult(getAllUserRolesResult.Data, new JsonSerializerOptions
-        //        {
-        //            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-        //        }),
-        //        { IsSuccess: false, Errors: not null } => HandleFailureResult(getAllUserRolesResult.Errors),
-        //        _ => BadRequest("Invalid page and pageSize Fields ")
-        //    };
-        //    #endregion
+        [HttpGet("GetAllRoles")]
+        public async Task<IActionResult> GetAllUserRoles([FromQuery] PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
+        {
+            var getAllUserRolesResult = await _accountServices.GetAllRoles(paginationDTOs, cancellationToken);
+            #region Switch Statement
+            return getAllUserRolesResult switch
+            {
+                { IsSuccess: true, Data: not null } => new JsonResult(getAllUserRolesResult.Data, new JsonSerializerOptions
+                {
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                }),
+                { IsSuccess: false, Errors: not null } => HandleFailureResult(getAllUserRolesResult.Errors),
+                _ => BadRequest("Invalid page and pageSize Fields ")
+            };
+            #endregion
 
-        //}
+        }
         #endregion
 
         #region LogOutUser
