@@ -24,7 +24,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         private readonly IMenu _menu;
    
 
-        public SystemManagementController(IModule module,ISubModule subModule, IMenu menu,IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper) : base(userManager, mapper)
+        public SystemManagementController(IModule module,ISubModule subModule, IMenu menu,IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager) : base(userManager, mapper, roleManager)
         {
             _module = module;
             _subModule = subModule;

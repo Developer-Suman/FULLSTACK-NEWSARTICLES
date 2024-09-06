@@ -34,6 +34,11 @@ namespace Master_BLL.Services.Implementation
             return await _userManager.AddToRoleAsync(user, rolename);
         }
 
+        public Task<IdentityResult> ChangePassword(ApplicationUser user, string currentPassword, string newPassword)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<bool> CheckPasswordAsync(ApplicationUser username, string password)
         {
             return await _userManager.CheckPasswordAsync(username, password);
@@ -43,6 +48,8 @@ namespace Master_BLL.Services.Implementation
         {
             return await _roleManager.RoleExistsAsync(role);
         }
+
+      
 
         public async Task<IdentityResult> CreateRoles(string role)
         {
