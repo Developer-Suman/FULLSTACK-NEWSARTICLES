@@ -14,10 +14,12 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
     {
         public UserDTOs? _currentUser;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IMapper _mapper;
-        public MasterProjectControllerBase(UserManager<ApplicationUser> userManager, IMapper mapper ) 
+        public MasterProjectControllerBase(IMapper mapper, UserManager<ApplicationUser> userManager,  RoleManager<IdentityRole> roleManager) 
         {
             _userManager = userManager;
+            _roleManager = roleManager;
             _mapper = mapper;
 
         }

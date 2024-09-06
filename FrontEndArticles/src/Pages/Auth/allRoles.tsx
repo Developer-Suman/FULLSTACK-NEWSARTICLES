@@ -4,7 +4,11 @@ import React, { useEffect, useState } from 'react'
 import { IRoles } from '../../types/IRoles'
 import { UserServices } from '../../api/User/UserServices';
 
+<<<<<<< HEAD
 const allRoles = () => {
+=======
+const GetAllRoles = () => {
+>>>>>>> 4c852fbf6b71355783841faf3f4a307909e347af
 
     const[roles, setRoles] = useState<IRoles[]>([]);
     const[currentPage, setCurrentPage] = useState<number>(1);
@@ -55,4 +59,8 @@ const allRoles = () => {
   )
 }
 
+<<<<<<< HEAD
 export default allRoles
+=======
+export default GetAllRoles;
+>>>>>>> 4c852fbf6b71355783841faf3f4a307909e347af
