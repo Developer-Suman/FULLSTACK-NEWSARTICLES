@@ -6,6 +6,9 @@ import { UserServices } from '../../api/User/UserServices';
 
 const allRoles = () => {
 
+const GetAllRoles = () => {
+
+
     const[roles, setRoles] = useState<IRoles[]>([]);
     const[currentPage, setCurrentPage] = useState<number>(1);
     const[pageSize, setPageSize] = useState<number>(1);
@@ -55,4 +58,8 @@ const allRoles = () => {
   )
 }
 
+
 export default allRoles
+
+export default GetAllRoles;
+

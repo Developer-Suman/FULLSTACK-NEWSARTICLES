@@ -1,33 +1,17 @@
-version: '3.8'
+version: '3.4'
 
 services:
-  db:
-    image: developersumaney/fullstack-database:v1
-    container_name: my_sqlserver
-    environment:
-      SA_PASSWORD: "YourStrong!Passw0rd"   # Set the SA password for SQL Server
-      ACCEPT_EULA: "Y"                    # Accept the EULA for SQL Server
+  redis:
+    image: redis
     ports:
-      - "1433:1433"                       # Map port 1433 from container to host
-    volumes:
-      - sqlserver_data:/var/opt/mssql     # Persist SQL Server data
+      - "6379:6379"
 
-  app:
-    #build:
-      #context: .
-      #dockerfile: Dockerfile
-    image: developersumaney/fullstack:v1
-    container_name: my_app
-    environment:
-      DB_HOST: db                         # Hostname for the SQL Server service
-      DB_USER: sa                         # SQL Server user (SA user)
-      DB_PASSWORD: YourStrong!Passw0rd    # SQL Server user password
-      DB_NAME: your_database_name         # Name of the database
-      ConnectionStrings__DefaultConnection: "Server=db;Database=your_database_name;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;Encrypt=False;"
+  master-project-in-layered-architecture-generic-repository:
+    build:
+      context: . # This points to the root directory where the Dockerfile is located
+      dockerfile: Dockerfile
+    image: masterprojectinlayeredarchitecturegenericrepository
+    ports:
+      - "8080:80" # Map the container port 80 to host port 8080
     depends_on:
-      - db                                # Ensure that SQL Server starts before the app
-    ports:
-      - "8080:80"                         # Map port 80 from container to host
-
-volumes:
-  sqlserver_data:
+      - redis

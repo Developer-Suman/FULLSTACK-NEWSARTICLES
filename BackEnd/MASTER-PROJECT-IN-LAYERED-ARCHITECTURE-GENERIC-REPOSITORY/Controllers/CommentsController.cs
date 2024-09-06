@@ -24,7 +24,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
     {
         private readonly ICommentsRepository _commentsRepository;
 
-        public CommentsController(ICommentsRepository commentsRepository, IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper) : base(userManager,mapper)
+        public CommentsController(ICommentsRepository commentsRepository, IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager) : base(mapper, userManager, roleManager)
         {
             _commentsRepository = commentsRepository;
             

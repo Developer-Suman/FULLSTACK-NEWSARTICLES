@@ -34,6 +34,11 @@ namespace Master_BLL.Services.Implementation
             return await _userManager.AddToRoleAsync(user, rolename);
         }
 
+        public async Task<IdentityResult> ChangePassword(ApplicationUser user, string currentPassword, string newPassword)
+        {
+            return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        }
+
         public async Task<bool> CheckPasswordAsync(ApplicationUser username, string password)
         {
             return await _userManager.CheckPasswordAsync(username, password);
