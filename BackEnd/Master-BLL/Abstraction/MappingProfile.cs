@@ -3,9 +3,11 @@ using Master_BLL.DTOs.Articles;
 using Master_BLL.DTOs.Authentication;
 using Master_BLL.DTOs.Comment;
 using Master_BLL.DTOs.Likes;
+using Master_BLL.DTOs.Pagination;
 using Master_BLL.DTOs.Permission;
 using Master_BLL.DTOs.RegistrationDTOs;
 using Master_DAL.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
 {
@@ -39,6 +41,12 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
 
             #region Likes and LikesArticlesGetDTOs
             CreateMap<Likes, LikesArticlesGetDTOs>().ReverseMap();
+            #endregion
+
+
+            #region Users Mapping and RoleMapping
+            CreateMap<PagedResult<ApplicationUser>, PagedResult<UserDTOs>>().ReverseMap();
+            CreateMap<PagedResult<IdentityRole>, PagedResult<RoleDTOs>>().ReverseMap();
             #endregion
 
 

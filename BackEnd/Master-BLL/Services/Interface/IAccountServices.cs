@@ -1,4 +1,5 @@
 ﻿using Master_BLL.DTOs.Authentication;
+using Master_BLL.DTOs.Pagination;
 using Master_BLL.DTOs.RegistrationDTOs;
 using Master_DAL.Abstraction;
 using System;
@@ -18,8 +19,8 @@ namespace Master_BLL.Services.Interface
         Task<Result<string>> CreateRoles(string rolename);
         Task<Result<AssignRolesDTOs>> AssignRoles(AssignRolesDTOs assignRolesDTOs);
         Task<Result<TokenDTOs>> GetNewToken(TokenDTOs tokenDTOs);
-        //Task<Result<PagedResult<RoleDTOs>>> GetAllRoles(PaginationDTOs paginationDTOs, CancellationToken cancellationToken);
-        //Task<Result<PagedResult<UserDTOs>>> GetAllUsers(PaginationDTOs paginationDTOs, CancellationToken cancellationToken);
+        Task<Result<PagedResult<RoleDTOs>>> GetAllRoles(PaginationDTOs paginationDTOs, CancellationToken cancellationToken);
+        Task<Result<PagedResult<UserDTOs>>> GetAllUsers(PaginationDTOs paginationDTOs, CancellationToken cancellationToken);
         Task<Result<UserDTOs>> GetByUserId(string userId, CancellationToken cancellationToken);
 
     }

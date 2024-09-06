@@ -1,4 +1,6 @@
 ﻿using Master_BLL.DTOs.Authentication;
+using Master_BLL.DTOs.Pagination;
+using Master_DAL.Abstraction;
 using Master_DAL.Models;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -24,5 +26,7 @@ namespace Master_BLL.Services.Interface
         Task<IdentityResult> ChangePassword(ApplicationUser user, string currentPassword, string newPassword);
         Task<List<UserDTOs>?> GetAllUsers(int page, int pageSize, CancellationToken cancellationToken);
         Task<UserDTOs> GetById(string id,CancellationToken cancellationToken);
+        Task<Result<PagedResult<RoleDTOs>>> GetAllRolesAsync(PaginationDTOs paginationDTOs, CancellationToken cancellationToken);
+        Task<Result<PagedResult<UserDTOs>>> GetAllUsersAsync(PaginationDTOs paginationDTOs, CancellationToken cancellationToken);
     }
 }
