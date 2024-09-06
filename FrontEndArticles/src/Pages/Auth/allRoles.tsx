@@ -4,7 +4,10 @@ import React, { useEffect, useState } from 'react'
 import { IRoles } from '../../types/IRoles'
 import { UserServices } from '../../api/User/UserServices';
 
+
 const allRoles = () => {
+
+const GetAllRoles = () => {
 
 const GetAllRoles = () => {
 
@@ -62,4 +65,10 @@ const GetAllRoles = () => {
 export default allRoles
 
 export default GetAllRoles;
+
+
+export default allRoles
+
+export default GetAllRoles;
+
 
