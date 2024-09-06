@@ -264,6 +264,25 @@ namespace Master_DAL.DbContext
             #endregion
 
 
+            #region Modules and Roles(m:m)
+
+            // Configure many-to-many relationship between roles and modules
+            builder.Entity<RoleModule>()
+                .HasKey(rm => new { rm.RoleId, rm.ModuleId });
+
+            builder.Entity<RoleModule>()
+                .HasOne(rm => rm.Role)
+                .WithMany()
+                .HasForeignKey(rm => rm.RoleId);
+
+            builder.Entity<RoleModule>()
+                .HasOne(rm => rm.Modules)
+                .WithMany(m => m.RoleModules)
+                .HasForeignKey(rm => rm.ModuleId);
+
+            #endregion
+
+
 
             base.OnModelCreating(builder);
         }
@@ -273,16 +292,21 @@ namespace Master_DAL.DbContext
         public DbSet<Comments> Comments { get; set; }
         public DbSet<ArticlesImage> ArticlesImages { get; set; }
 
+        #region Permission, ControllerAction, PermissionControllerAction
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<ControllerAction> ControllerActions { get; set; }
         public DbSet<UserPermission> UserPermissions { get; set; }
         public DbSet<PermissionControllerAction> PermissionControllerActions { get; set; }
+
+        #endregion
 
 
         #region Menu,Module,SubModule
         public DbSet<Modules> Modules { get; set; }
         public DbSet<SubModules> SubModules { get; set; }
         public DbSet<Menu> Menus { get; set; }
+
+        public DbSet<RoleModule> RoleModules { get; set; }
 
         #endregion
     }

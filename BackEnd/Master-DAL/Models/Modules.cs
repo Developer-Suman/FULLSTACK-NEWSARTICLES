@@ -23,7 +23,9 @@ namespace Master_DAL.Models
             Role = role;
             TargetUrl = targetUrl;
             SubModules = new List<SubModules>();
-            
+            RoleModules = new List<RoleModule>();
+
+
         }
 
         public string Name { get;set; }
@@ -31,5 +33,6 @@ namespace Master_DAL.Models
         public string? TargetUrl { get;set; }
 
         public ICollection<SubModules> SubModules { get; set; }
+        public ICollection<RoleModule> RoleModules { get; set; }
     }
 }

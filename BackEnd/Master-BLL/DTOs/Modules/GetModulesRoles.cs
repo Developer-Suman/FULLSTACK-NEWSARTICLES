@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace Master_BLL.DTOs.Modules
 {
-    internal class GetModulesRoles
-    {
-    }
+    public record GetModulesRoles
+    (
+         string roleId,
+        List<string> moduleId
+    );
 }

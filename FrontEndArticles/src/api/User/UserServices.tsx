@@ -15,5 +15,5 @@ export class UserServices{
     {
         return api.get<IPaginationResponse<IRoles>>(`${this.BASE_URL}/GetAllRoles?PageSize=${pageSize}&PageIndex=${pageIndex}`)
     }
-    
+
 }
