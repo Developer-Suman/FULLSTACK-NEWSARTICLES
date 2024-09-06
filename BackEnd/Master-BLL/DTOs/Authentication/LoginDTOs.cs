@@ -7,13 +7,8 @@ using System.Threading.Tasks;
 
 namespace Master_BLL.DTOs.Authentication
 {
-    public class LoginDTOs
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-        [Required]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-    }
+    public record LogInDTOs(
+       string Email,
+       string Password
+       );
 }
