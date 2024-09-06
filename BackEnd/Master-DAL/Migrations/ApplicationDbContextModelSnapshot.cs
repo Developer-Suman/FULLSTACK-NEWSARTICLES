@@ -315,6 +315,24 @@ namespace Master_DAL.Migrations
                     b.ToTable("PermissionControllerActions");
                 });
 
+            modelBuilder.Entity("Master_DAL.Models.RoleModule", b =>
+                {
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ModuleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RoleId", "ModuleId");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("RoleModules");
+                });
+
             modelBuilder.Entity("Master_DAL.Models.SubModules", b =>
                 {
                     b.Property<string>("Id")
@@ -591,6 +609,25 @@ namespace Master_DAL.Migrations
                     b.Navigation("Permission");
                 });
 
+            modelBuilder.Entity("Master_DAL.Models.RoleModule", b =>
+                {
+                    b.HasOne("Master_DAL.Models.Modules", "Modules")
+                        .WithMany("RoleModules")
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Modules");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("Master_DAL.Models.SubModules", b =>
                 {
                     b.HasOne("Master_DAL.Models.Modules", "Modules")
@@ -704,6 +741,8 @@ namespace Master_DAL.Migrations
 
             modelBuilder.Entity("Master_DAL.Models.Modules", b =>
                 {
+                    b.Navigation("RoleModules");
+
                     b.Navigation("SubModules");
                 });
 

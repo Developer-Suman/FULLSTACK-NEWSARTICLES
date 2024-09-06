@@ -7,14 +7,24 @@ using System.Threading.Tasks;
 
 namespace Master_BLL.DTOs.SubModules
 {
+    //public record SubModulesGetDTOs(
+    //    string Id,
+    //    string name,
+    //    string? IconUrl,
+    //    string? TargetUrl,
+    //    string? Role,
+    //    string? Rank,
+    //    List<MenuGetDTOs> MenuGetDTOs
+    //    );
+
     public record SubModulesGetDTOs(
-        string Id,
-        string name,
-        string? IconUrl,
-        string? TargetUrl,
-        string? Role,
-        string? Rank,
-        List<MenuGetDTOs> MenuGetDTOs
-        );
-   
+      string Id,
+      string name,
+      string? IconUrl,
+      string? TargetUrl,
+      string? Role,
+      string? Rank
+      //List<MenuGetDTOs> MenuGetDTOs
+      );
+
 }
