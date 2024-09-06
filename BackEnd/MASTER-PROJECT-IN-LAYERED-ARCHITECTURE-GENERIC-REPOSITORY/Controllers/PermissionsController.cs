@@ -19,7 +19,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         private readonly IPermissionServices _permissionServices;
 
 
-        public PermissionsController(IPermissionServices permissionServices, IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper) : base(userManager, mapper)
+        public PermissionsController(IPermissionServices permissionServices, IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager) : base(mapper, userManager, roleManager)
         {
             _permissionServices = permissionServices;
 
