@@ -48,11 +48,12 @@ const GetAllUsers = ()=>{
 
     const { loading, users, errorMsg } = state;
     return(
-<<<<<<< HEAD
-        
-=======
+
         <div>
->>>>>>> 4c852fbf6b71355783841faf3f4a307909e347af
+
+
+        <div>
+
         <div style={{ margin: '20px', overflowX: 'auto' }}>
             <h2>User Details</h2>
             {errorMsg && (<p>{errorMsg}</p>)}
