@@ -113,47 +113,47 @@ namespace Master_DAL.DbContext
             #endregion
 
             #region Comments and ApplicationUser(m:1)
-            builder.Entity<Comments>(entity =>
-            {
-                entity.HasOne(x => x.ApplicationUsers)
-                .WithMany(x => x.Comments)
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
-            });
+            //builder.Entity<Comments>(entity =>
+            //{
+            //    entity.HasOne(x => x.ApplicationUsers)
+            //    .WithMany(x => x.Comments)
+            //    .HasForeignKey(x => x.UserId)
+            //    .OnDelete(DeleteBehavior.NoAction);
+            //});
 
             #endregion
 
             #region ApplicationUSer and Comments(1:m)
-            builder.Entity<ApplicationUser>(entity =>
-            {
-                entity.HasMany(x=>x.Comments)
-                .WithOne(x=>x.ApplicationUsers)
-                .HasForeignKey(x=>x.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
-            });
+            //builder.Entity<ApplicationUser>(entity =>
+            //{
+            //    entity.HasMany(x=>x.Comments)
+            //    .WithOne(x=>x.ApplicationUsers)
+            //    .HasForeignKey(x=>x.UserId)
+            //    .OnDelete(DeleteBehavior.NoAction);
+            //});
 
             #endregion
 
             #region Like and ApplicationUser(m:1)
-            builder.Entity<Likes>(entity =>
-            {
-                entity.HasKey(x => x.Id);
-                entity.HasOne(x=>x.User)
-                .WithMany(x=>x.Likes)
-                .HasForeignKey(x=>x.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //builder.Entity<Likes>(entity =>
+            //{
+            //    entity.HasKey(x => x.Id);
+            //    entity.HasOne(x=>x.User)
+            //    .WithMany(x=>x.Likes)
+            //    .HasForeignKey(x=>x.UserId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-            });
+            //});
             #endregion
 
             #region ApplicationUser and Like(1:m)
-            builder.Entity<ApplicationUser>(entity =>
-            {
-                entity.HasMany(x=>x.Likes)
-                .WithOne(x=>x.User)
-                .HasForeignKey(x=>x.UserId)
-                .OnDelete(DeleteBehavior.NoAction);
-            });
+            //builder.Entity<ApplicationUser>(entity =>
+            //{
+            //    entity.HasMany(x=>x.Likes)
+            //    .WithOne(x=>x.User)
+            //    .HasForeignKey(x=>x.UserId)
+            //    .OnDelete(DeleteBehavior.NoAction);
+            //});
 
             #endregion
 

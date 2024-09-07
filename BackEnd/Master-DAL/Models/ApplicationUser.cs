@@ -18,8 +18,8 @@ namespace Master_DAL.Models
 
         //Navigation Property
         public ICollection<Articles> Articles { get; set; }
-        public ICollection<Comments> Comments { get; set; }
-        public ICollection<Likes> Likes { get; set; }
+        //public ICollection<Comments> Comments { get; set; }
+        //public ICollection<Likes> Likes { get; set; }
 
         public ICollection<UserPermission> UserPermissions { get; set; }
     }

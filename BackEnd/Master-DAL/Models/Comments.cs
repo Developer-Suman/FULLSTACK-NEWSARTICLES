@@ -30,7 +30,7 @@ namespace Master_DAL.Models
 
         //Navigation Property
         public Articles Articles { get; set; }
-        public ApplicationUser ApplicationUsers { get; set; }
+        //public ApplicationUser ApplicationUsers { get; set; }
         //This is due to the Polymorphic Association(ie without Pk in Like table it take relationship with Comments)
         public ICollection<Likes> Likes { get; set; }
 

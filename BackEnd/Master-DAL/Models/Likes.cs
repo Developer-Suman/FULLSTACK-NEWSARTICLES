@@ -21,18 +21,18 @@ namespace Master_DAL.Models
 
             ) : base(id)
         {
-            UserId = userId;
+            //UserId = userId;
             LikelableId = likeableId;
             LikeableTypes = likeableType;
         }
         public string LikelableId { get; set; }
         public  LikeableType LikeableTypes { get; set; }
         public DateTime LikedDate{get;set;} = DateTime.Now;
-        public string UserId { get; set; }
+        //public string UserId { get; set; }
 
 
-        //NavigationProperty
-        public ApplicationUser User { get; set; }
+        ////NavigationProperty
+        //public ApplicationUser User { get; set; }
 
 
     }
