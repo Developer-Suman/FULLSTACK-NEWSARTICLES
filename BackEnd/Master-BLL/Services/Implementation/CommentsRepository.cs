@@ -182,9 +182,32 @@ namespace Master_BLL.Services.Implementation
             }
         }
 
-        public Task<Result<CommentsGetDTOs>> SaveComments(CommentsCreateDTOs commentsCreateDTOs, string Id)
+        public async Task<Result<CommentsGetDTOs>> SaveComments(CommentsCreateDTOs commentsCreateDTOs, string Id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _memoryCacheRepository.RemoveAsync(CacheKeys.Comments);
+
+                var validationError = CommentsCreateValidator.Validate(commentsCreateDTOs);
+                if (validationError.Any())
+                {
+                    return Result<CommentsGetDTOs>.Failure(validationError.ToArray());
+                }
+
+                var comments = _mapper.Map<Comments>(commentsCreateDTOs);
+                comments.Id = Guid.NewGuid().ToString();
+                comments.UserId = Id.ToString();
+                await _unitOfWork.Repository<Comments>().AddAsync(comments);
+                await _unitOfWork.SaveChangesAsync();
+
+                var commentsGetDTOs = _mapper.Map<CommentsGetDTOs>(comments);
+                return Result<CommentsGetDTOs>.Success(commentsGetDTOs);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occured while Saving Comments");
+            }
         }
 
         public async Task<Result<CommentsGetDTOs>> UpdateComments(CommentsUpdateDTOs commentsUpdateDTOs)

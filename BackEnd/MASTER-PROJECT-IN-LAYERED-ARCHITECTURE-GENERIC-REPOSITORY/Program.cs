@@ -96,11 +96,11 @@ try
    
     var app = builder.Build();
 
-    using (var scope = app.Services.CreateScope())
-    {
-        var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
-        await dataSeeder.Seed();
-    }
+    //using (var scope = app.Services.CreateScope())
+    //{
+    //    var dataSeeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
+    //    await dataSeeder.Seed();
+    //}
 
 
 

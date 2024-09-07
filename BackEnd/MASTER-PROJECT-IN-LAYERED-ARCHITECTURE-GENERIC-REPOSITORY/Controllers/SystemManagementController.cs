@@ -22,13 +22,13 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         private readonly IModule _module;
         private readonly ISubModule _subModule;
         private readonly IMenu _menu;
-   
 
-        public SystemManagementController(IModule module,ISubModule subModule, IMenu menu,IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager) : base(userManager, mapper, roleManager)
+
+        public SystemManagementController(IModule module, ISubModule subModule, IMenu menu, IMemoryCacheRepository memoryCacheRepository, UserManager<ApplicationUser> userManager, IMapper mapper, RoleManager<IdentityRole> roleManager) : base(userManager, mapper, roleManager)
         {
             _module = module;
             _subModule = subModule;
-            _menu = menu;     
+            _menu = menu;
 
         }
 
@@ -93,7 +93,7 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
 
         [HttpPost("AssignModuleToRole/{roleId}")]
-        public async Task<IActionResult> AssignModuleToRole([FromRoute] string roleId,[FromBody] IEnumerable<string> moduleIds)
+        public async Task<IActionResult> AssignModuleToRole([FromRoute] string roleId, [FromBody] IEnumerable<string> moduleIds)
         {
             var saveassignModelResult = await _module.AssignModulesToRole(roleId, moduleIds);
             #region switch

@@ -13,12 +13,13 @@ using Serilog;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json.Serialization;
+using Master_BLL.DTOs.Pagination;
 
 namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 {
-    [Authorize]
-    [Authorize(AuthenticationSchemes = "Bearer")]
-    [Route("api/[controller]"), EnableCors("AllowAllOrigins")]
+    //[Authorize]
+    //[Authorize(AuthenticationSchemes = "Bearer")]
+    //[Route("api/[controller]"), EnableCors("AllowAllOrigins")]
     [ApiController]
     public class ArticlesController : MasterProjectControllerBase
     {
@@ -82,9 +83,9 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] int pageIndex, [FromQuery] int PageSize, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAll([FromQuery] PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
         {
-            var getAllArticlesData = await _articlesRepository.GetAll(pageIndex, PageSize, cancellationToken);
+            var getAllArticlesData = await _articlesRepository.GetAll(paginationDTOs, cancellationToken);
 
 
             #region switch
@@ -119,10 +120,10 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
             #endregion
         }
 
-        [HttpGet("{id}/details-with-comments")]
-        public async Task<IActionResult> GetArticlesWithComments([FromQuery] int pageIndex, [FromQuery] int PageSize, CancellationToken cancellationToken)
+        [HttpGet("details-with-comments")]
+        public async Task<IActionResult> GetArticlesWithComments([FromQuery] PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
         {
-            var getArticlesWithCommentstData = _articlesRepository.GetArticlesWithComments(pageIndex, PageSize, cancellationToken);
+            var getArticlesWithCommentstData = await _articlesRepository.GetArticlesWithComments(paginationDTOs, cancellationToken);
 
             #region switch
             return getArticlesWithCommentstData switch
@@ -157,10 +158,10 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Controllers
         }
 
 
-        [HttpGet("{id}/comments")]
-        public async Task<IActionResult> GetMoreComments([FromRoute] string Id, int page, int pageSize, CancellationToken cancellationToken)
+        [HttpGet("GetMoreComments/{id}")]
+        public async Task<IActionResult> GetMoreComments([FromQuery] PaginationDTOs paginationDTOs, string id, CancellationToken cancellationToken)
         {
-            var getmoreCommentstData = await _articlesRepository.GetMoreComments(Id, page, pageSize,cancellationToken);
+            var getmoreCommentstData = await _articlesRepository.GetMoreComments(paginationDTOs, id, cancellationToken);
 
             #region switch
             return getmoreCommentstData switch

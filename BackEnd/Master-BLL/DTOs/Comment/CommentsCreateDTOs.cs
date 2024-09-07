@@ -9,7 +9,7 @@ namespace Master_BLL.DTOs.Comment
 {
     public class CommentsCreateDTOs
     {
-        public string CommentDescription { get; set; }
+        public string content { get; set; }
       
         public Guid ArticlesId { get; set; }
     }

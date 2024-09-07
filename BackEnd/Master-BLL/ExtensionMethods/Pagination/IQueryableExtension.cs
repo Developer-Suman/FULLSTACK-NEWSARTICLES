@@ -62,7 +62,7 @@ namespace ExtensionMethods.Pagination
             }
             catch (Exception ex)
             {
-                return Result<PagedResult<T>>.Failure("NotFound", "Getting proble while fetching data");
+                return Result<PagedResult<T>>.Failure("NotFound", "Getting problem while fetching data");
             }
         }
 
