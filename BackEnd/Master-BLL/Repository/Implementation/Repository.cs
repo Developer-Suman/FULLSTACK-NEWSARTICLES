@@ -100,5 +100,19 @@ namespace Master_BLL.Repository.Implementation
         {
             return Task.FromResult(_dbSet.AsNoTracking().AsQueryable());
         }
+
+      
+
+        public IQueryable<TEntity> GetAllAsQueryable(Expression<Func<TEntity, bool>> filter = null)
+        {
+            IQueryable<TEntity> query = _context.Set<TEntity>();
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            return query;
+        }
     }
 }

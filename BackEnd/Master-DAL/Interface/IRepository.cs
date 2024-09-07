@@ -17,6 +17,7 @@ namespace Master_DAL.Interface
         Task<TEntity> GetSingleAsync(Expression<Func<TEntity, bool>> predicate);
         Task<IEnumerable<TEntity>> GetConditionalAsync(Expression<Func<TEntity, bool>> predicate);
         Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate = null, params Expression<Func<TEntity, object>>[] includes);
+        IQueryable<TEntity> GetAllAsQueryable(Expression<Func<TEntity, bool>> filter = null);
         Task<IQueryable<TEntity>> GetAllDataAsync();
         Task<IQueryable<TEntity>> GetAllAsyncWithPagination();
         Task AddAsync(TEntity entity);

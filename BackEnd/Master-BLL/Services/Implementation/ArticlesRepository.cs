@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
+using ExtensionMethods.Pagination;
 using Master_BLL.DTOs.Articles;
+using Master_BLL.DTOs.Authentication;
 using Master_BLL.DTOs.Comment;
 using Master_BLL.DTOs.Likes;
+using Master_BLL.DTOs.Pagination;
 using Master_BLL.DTOs.RegistrationDTOs;
 using Master_BLL.Services.Interface;
 using Master_BLL.Static.Cache;
@@ -69,40 +72,31 @@ namespace Master_BLL.Services.Implementation
 
         }
             
-        public async Task<Result<List<ArticlesGetDTOs>>> GetAll(int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<Result<PagedResult<ArticlesGetDTOs>>> GetAll(PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
         {
 
             try
             {
                 var cacheKey = CacheKeys.Articles;
-                var cacheData = await _memoryCacheRepository.GetCahceKey<List<ArticlesGetDTOs>>(cacheKey);
+                var cacheData = await _memoryCacheRepository.GetCahceKey<PagedResult<ArticlesGetDTOs>>(cacheKey);
 
-                if (cacheData is not null && cacheData.Count > 0)
+                if (cacheData is not null)
                 {
-                    return Result<List<ArticlesGetDTOs>>.Success(cacheData);
+                    return Result<PagedResult<ArticlesGetDTOs>>.Success(cacheData);
                 }
 
-                List<Articles> artices = await _context.Articles.AsNoTracking().OrderByDescending(x => x.PublishedDate)
-                    .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
-                if (artices.Count < 0)
-                {
-                    return Result<List<ArticlesGetDTOs>>.Failure("Not Found");
-                }
+                var articlesData = await _unitofwork.Repository<Articles>().GetAllAsyncWithPagination();
+                var articlesPaginatedResult = await articlesData.AsNoTracking().ToPagedResultAsync(paginationDTOs.pageIndex, paginationDTOs.pageSize, paginationDTOs.IsPagination);
 
-                //throw new MappingException("An error occurred while mapping");
-                List<ArticlesGetDTOs> articlesGetDTOs = artices.Select(x => _mapper.Map<ArticlesGetDTOs>(x)).ToList();
 
-                if (articlesGetDTOs is null)
-                {
-                    return Result<List<ArticlesGetDTOs>>.Failure("Not Found");
-                }
+                var articlesDTOs = _mapper.Map<PagedResult<ArticlesGetDTOs>>(articlesPaginatedResult.Data);
 
-                await _memoryCacheRepository.SetAsync(cacheKey, articlesGetDTOs, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
+                await _memoryCacheRepository.SetAsync(cacheKey, articlesDTOs, new Microsoft.Extensions.Caching.Memory.MemoryCacheEntryOptions
                 {
                     AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(30)
                 }, cancellationToken);
 
-                return Result<List<ArticlesGetDTOs>>.Success(articlesGetDTOs);
+                return Result<PagedResult<ArticlesGetDTOs>>.Success(articlesDTOs);
 
             }
             catch (ConflictException ex)
@@ -145,26 +139,42 @@ namespace Master_BLL.Services.Implementation
 
         }
 
-        public Result<IQueryable<ArticlesWithCommentsDTOs>> GetArticlesWithComments(int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<Result<PagedResult<ArticlesWithCommentsDTOs>>> GetArticlesWithComments(PaginationDTOs paginationDTOs, CancellationToken cancellationToken)
         {
 
-            var articlesQuery = _context.Articles
-                .Include(articles => articles.Comments)
-                .OrderBy(article => article.Id)
-                .AsSingleQuery()
-                .AsNoTracking()
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize);
+            var articlesQuery = await _unitofwork.Repository<Articles>().GetAllAsyncWithPagination();
+            var articlesPagedResult = await articlesQuery.
+                AsNoTracking()
+                .Include(x=>x.Comments)
+                .Select(x=>new ArticlesWithCommentsDTOs(
+                    x.Id,
+                    x.Title,
+                    x.Content,
+                    x.PublishedDate,
+                    x.IsActive ?? true,
+                    x.Comments.Select(a => _mapper.Map<CommentsGetDTOs>(a)).ToList())
+                    )
+                .ToPagedResultAsync(paginationDTOs.pageIndex, paginationDTOs.pageSize, paginationDTOs.IsPagination);
 
-            var articlesWithCommentsDTOs = articlesQuery
-                .Select(articles => new ArticlesWithCommentsDTOs(
-                articles.Id,
-                articles.Title,
-                articles.Content,
-                articles.PublishedDate,
-                true,
-                articles.Comments.Select(a => _mapper.Map<CommentsGetDTOs>(a)).ToList()
-                )).ToList();
+            var articlesDTOs = _mapper.Map<PagedResult<ArticlesWithCommentsDTOs>>(articlesPagedResult.Data);
+
+            //var articlesQuery = _context.Articles
+            //    .Include(articles => articles.Comments)
+            //    .OrderBy(article => article.Id)
+            //    .AsSingleQuery()
+            //    .AsNoTracking()
+            //    .Skip((page - 1) * pageSize)
+            //    .Take(pageSize);
+
+            //var articlesWithCommentsDTOs = articlesQuery
+            //    .Select(articles => new ArticlesWithCommentsDTOs(
+            //    articles.Id,
+            //    articles.Title,
+            //    articles.Content,
+            //    articles.PublishedDate,
+            //    true,
+            //    articles.Comments.Select(a => _mapper.Map<CommentsGetDTOs>(a)).ToList()
+            //    )).ToList();
 
             #region Less Optimized
             //IQueryable<ArticlesWithCommentsDTOs> articleswithComments = _context.Articles
@@ -183,12 +193,12 @@ namespace Master_BLL.Services.Implementation
             //.Skip((page - 1) * pageSize)
             //.Take(pageSize);
             #endregion
-            if (!articlesWithCommentsDTOs.Any())
+            if (!articlesQuery.Any())
             {
-                return Result<IQueryable<ArticlesWithCommentsDTOs>>.Failure("Could not Found Articles with Comments");
+                return Result<PagedResult<ArticlesWithCommentsDTOs>>.Failure("NotFound","Could not Found Articles with Comments");
             }
 
-            return Result<IQueryable<ArticlesWithCommentsDTOs>>.Success(articlesWithCommentsDTOs.AsQueryable());
+            return Result<PagedResult<ArticlesWithCommentsDTOs>>.Success(articlesDTOs);
 
 
         }
@@ -256,40 +266,76 @@ namespace Master_BLL.Services.Implementation
         }
 
 
-        public async Task<Result<List<CommentsGetDTOs>>> GetMoreComments(string ArticlesId, int skip, int take, CancellationToken cancellationToken)
+        public async Task<Result<PagedResult<CommentsGetDTOs>>> GetMoreComments(PaginationDTOs paginationDTOs, string ArticlesId, CancellationToken cancellationToken)
         {
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 try
                 {
-                    var articles = _context.Articles
-                                     .Include(p => p.Comments) 
-                                     .FirstOrDefault(p => p.Id == ArticlesId);
+                    var articesData = _unitofwork.Repository<Articles>()
+                        .GetAllAsQueryable(
+                        articles => ArticlesId.Contains(articles.Id)
+                        ).Include(a=>a.Comments);
+                    var articesDataTest = articesData.AsQueryable();
 
-                    if (articles is null)
-                    {
-                        return Result<List<CommentsGetDTOs>>.Failure("NotFound", "Articles are not Found");
-                    }
 
-                    // Explicitly load more Comments
-                    var moreComments = _context.Comments
-                                             .Where(r => r.ArticlesId == ArticlesId)
-                                             .OrderByDescending(r => r.Id)  
-                                             .Skip(skip)
-                                             .Take(take)
-                                             .ToList();
+                    // Select required fields from the Comments and map to DTO
+                    var commentsQuery = articesData
+                        .SelectMany(article => article.Comments.Select(comment => new CommentsGetDTOs
+                        (
+                            comment.Id,
+                            comment.Content,
+                            comment.ArticlesId
 
-                    // Add the additional Comments to the existing collection
-                    articles.Comments = articles.Comments.Concat(moreComments).ToList();
+                        )));
 
-                    var reviewModels = articles.Comments.Select(r => new CommentsGetDTOs
-                    (
-                        r.Id,
-                        r.Content,
-                        r.ArticlesId
-                        )).ToList();
 
-                    return Result<List<CommentsGetDTOs>>.Success(reviewModels);
+                    var articlesPaginatedResult = await commentsQuery
+                        .AsQueryable()
+                        .ToPagedResultAsync(paginationDTOs.pageIndex, paginationDTOs.pageSize, paginationDTOs.IsPagination);
+
+                    //var articlesPaginatedResults = await articesDataTest
+                    //    .AsNoTracking()
+                    //    .Include(c => c.Comments)
+                    //    .Select(x => new CommentsGetDTOs(
+                    //        x.Id,
+                    //        x.Comments.FirstOrDefault().Content,
+                    //        x.Comments.FirstOrDefault().ArticlesId
+                    //        )).
+                    //    ToPagedResultAsync(paginationDTOs.pageIndex, paginationDTOs.pageSize, paginationDTOs.IsPagination);
+
+
+                    var commentsDTOs = _mapper.Map<PagedResult<CommentsGetDTOs>>(articlesPaginatedResult.Data);
+
+
+                    //var articles = _context.Articles
+                    //                 .Include(p => p.Comments) 
+                    //                 .FirstOrDefault(p => p.Id == ArticlesId);
+
+                    //if (articles is null)
+                    //{
+                    //    return Result<List<CommentsGetDTOs>>.Failure("NotFound", "Articles are not Found");
+                    //}
+
+                    //// Explicitly load more Comments
+                    //var moreComments = _context.Comments
+                    //                         .Where(r => r.ArticlesId == ArticlesId)
+                    //                         .OrderByDescending(r => r.Id)  
+                    //                         .Skip(skip)
+                    //                         .Take(take)
+                    //                         .ToList();
+
+                    //// Add the additional Comments to the existing collection
+                    //articles.Comments = articles.Comments.Concat(moreComments).ToList();
+
+                    //var reviewModels = articles.Comments.Select(r => new CommentsGetDTOs
+                    //(
+                    //    r.Id,
+                    //    r.Content,
+                    //    r.ArticlesId
+                    //    )).ToList();
+
+                    return Result<PagedResult<CommentsGetDTOs>>.Success(commentsDTOs);
 
                 }
                 catch (Exception ex)

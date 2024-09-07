@@ -44,9 +44,17 @@ namespace MASTER_PROJECT_IN_LAYERED_ARCHITECTURE_GENERIC_REPOSITORY.Configs
             #endregion
 
 
+
+
             #region Users Mapping and RoleMapping
             CreateMap<PagedResult<ApplicationUser>, PagedResult<UserDTOs>>().ReverseMap();
             CreateMap<PagedResult<IdentityRole>, PagedResult<RoleDTOs>>().ReverseMap();
+            #endregion
+
+            #region Articles Pagination
+            CreateMap<PagedResult<Articles>, PagedResult<ArticlesWithCommentsDTOs>>().ReverseMap();
+            CreateMap<PagedResult<Articles>, PagedResult<CommentsGetDTOs>>().ReverseMap();
+            CreateMap<PagedResult<Articles>, PagedResult<ArticlesGetDTOs>>().ReverseMap();
             #endregion
 
 
